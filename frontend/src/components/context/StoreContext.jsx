@@ -1,44 +1,93 @@
+// Importações necessárias
 import { createContext, useEffect, useState } from "react";
-import axios from 'axios'
+import axios from 'axios';
 
-export const StoreContext = createContext(null)
+// Criação do contexto da loja
+export const StoreContext = createContext(null);
 
+/**
+ * Provider do contexto da loja - gerencia estado global da aplicação
+ * @param {Object} props - Propriedades do componente
+ */
 const StoreContextProvider = (props) => {
+    // Estados do contexto
+    const [cartItems, setCartItems] = useState({}); // Itens do carrinho
+    const url = "http://localhost:4000"; // URL da API
+    const [token, setToken] = useState(""); // Token de autenticação
+    const [food_list, setFoodList] = useState([]); // Lista de comidas disponíveis
 
-    const [cartItems, setCartItems] = useState({});
-    const url = "https://full-stack-food-delivery-web-application.onrender.com";
-    const [token,setToken] = useState("");
-
-    const [food_list, setFoodList] = useState([]);
-
-    const addToCart = async (itemId) => {
-        if (!cartItems[itemId]) {
-            setCartItems((prev) => ({ ...prev, [itemId]: 1 }))
+    /**
+     * Função para adicionar item ao carrinho
+     * @param {String} itemId - ID do item
+     * @param {Array} extras - Lista de extras selecionados
+     */
+    const addToCart = async (itemId, extras = []) => {
+        // Cria uma chave única para o item com seus extras
+        const extrasKey = extras.length > 0 ? JSON.stringify(extras.sort((a, b) => a.name.localeCompare(b.name))) : '';
+        const cartKey = extrasKey ? `${itemId}_${btoa(extrasKey)}` : itemId;
+        
+        if (!cartItems[cartKey]) {
+            setCartItems((prev) => ({ 
+                ...prev, 
+                [cartKey]: { 
+                    quantity: 1, 
+                    itemId: itemId, 
+                    extras: extras 
+                } 
+            }))
         } else {
-            setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }))
+            setCartItems((prev) => ({ 
+                ...prev, 
+                [cartKey]: { 
+                    ...prev[cartKey], 
+                    quantity: prev[cartKey].quantity + 1 
+                } 
+            }))
         }
         if(token){
-            await axios.post(url+'/api/cart/add',{itemId},{headers:{token}})
+            await axios.post(url+'/api/cart/add',{itemId, extras},{headers:{token}})
         }
     }
 
-    const removeFromCart = async (itemId) => {
-        setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
+    const removeFromCart = async (cartKey) => {
+        setCartItems((prev) => {
+            const newCart = { ...prev };
+            if (newCart[cartKey] && newCart[cartKey].quantity > 1) {
+                newCart[cartKey] = {
+                    ...newCart[cartKey],
+                    quantity: newCart[cartKey].quantity - 1
+                };
+            } else {
+                delete newCart[cartKey];
+            }
+            return newCart;
+        });
         if(token){
-            await axios.post(url+'/api/cart/remove',{itemId},{headers:{token}})
+            const itemData = cartItems[cartKey];
+            if (itemData) {
+                await axios.post(url+'/api/cart/remove',{itemId: itemData.itemId, extras: itemData.extras},{headers:{token}})
+            }
         }
     }
 
     const getTotalCartAmount = () => {
         let totalAmount = 0;
-        for (const item in cartItems) {
-            if (cartItems[item] > 0) {
-                let itemInfo = food_list.find((product) => product._id === item);
-                totalAmount += itemInfo.price * cartItems[item];
+        for (const cartKey in cartItems) {
+            const cartItem = cartItems[cartKey];
+            if (cartItem && cartItem.quantity > 0) {
+                let itemInfo = food_list.find((product) => product._id === cartItem.itemId);
+                if (itemInfo) {
+                    let itemPrice = itemInfo.price;
+                    // Add extras price
+                    if (cartItem.extras && cartItem.extras.length > 0) {
+                        cartItem.extras.forEach(extra => {
+                            itemPrice += extra.price;
+                        });
+                    }
+                    totalAmount += itemPrice * cartItem.quantity;
+                }
             }
-
         }
-
         return totalAmount;
     }
 

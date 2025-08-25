@@ -40,3 +40,122 @@
     color: white;
     cursor: pointer;
 }
+
+/* Extras Section Styles */
+.add-extras-section {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.add-extras-section p {
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.extras-list {
+    margin-bottom: 20px;
+}
+
+.extras-list h4 {
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 14px;
+}
+
+.extra-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.extra-item span {
+    flex: 1;
+    font-size: 14px;
+}
+
+.remove-extra-btn {
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.remove-extra-btn:hover {
+    background-color: #cc0000;
+}
+
+.add-extra-form {
+    margin-top: 15px;
+}
+
+.extra-inputs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.extra-inputs input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.extra-inputs input:first-child {
+    flex: 2;
+    min-width: 150px;
+}
+
+.extra-inputs input:nth-child(2) {
+    flex: 1;
+    min-width: 80px;
+}
+
+.extra-inputs input:nth-child(3) {
+    flex: 2;
+    min-width: 120px;
+}
+
+.add-extra-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.add-extra-btn:hover {
+    background-color: #218838;
+}
+
+@media (max-width: 768px) {
+    .extra-inputs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .extra-inputs input {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .add-extra-btn {
+        width: 100%;
+    }
+}

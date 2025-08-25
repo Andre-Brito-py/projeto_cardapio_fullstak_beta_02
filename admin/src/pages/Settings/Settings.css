@@ -1,0 +1,198 @@
+.settings {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.settings h2 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.settings-section {
+    background: #fff;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.settings-section h3 {
+    color: #444;
+    margin-bottom: 10px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.section-description {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.settings-form {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    font-size: 16px;
+}
+
+.settings-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.settings-input:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.settings-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.settings-textarea:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.current-image {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.current-image p {
+    margin: 0 0 10px 0;
+    font-weight: 500;
+    color: #666;
+}
+
+.current-image img {
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.settings-btn {
+    background-color: #ff6347;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.settings-btn:hover:not(:disabled) {
+    background-color: #e5533d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 99, 71, 0.3);
+}
+
+.settings-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.current-setting {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #ff6347;
+    font-size: 14px;
+    color: #555;
+}
+
+.current-setting strong {
+    color: #333;
+}
+
+.loading {
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .settings {
+        padding: 15px;
+    }
+    
+    .settings h2 {
+        font-size: 24px;
+    }
+    
+    .settings-section {
+        padding: 20px;
+    }
+    
+    .settings-section h3 {
+        font-size: 20px;
+    }
+    
+    .settings-input {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+    
+    .settings-btn {
+        width: 100%;
+        padding: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .settings {
+        padding: 10px;
+    }
+    
+    .settings-section {
+        padding: 15px;
+    }
+    
+    .settings h2 {
+        font-size: 22px;
+    }
+    
+    .settings-section h3 {
+        font-size: 18px;
+    }
+}

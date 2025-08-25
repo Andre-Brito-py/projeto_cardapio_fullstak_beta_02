@@ -72,3 +72,190 @@
 .food-item-counter img{
     width: 30px;
 }
+
+/* Extras available indicator */
+.food-item-extras-available {
+    color: #28a745;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+/* Extras Modal Styles */
+.extras-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.extras-modal {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.extras-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.extras-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-modal:hover {
+    color: #000;
+}
+
+.extras-modal-body {
+    padding: 20px;
+}
+
+.base-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.extras-section h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.extra-option {
+    margin-bottom: 12px;
+}
+
+.extra-option label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.extra-option label:hover {
+    background-color: #f8f9fa;
+}
+
+.extra-option input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2);
+}
+
+.extra-name {
+    font-weight: 500;
+    flex: 1;
+}
+
+.extra-desc {
+    color: #666;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.extra-price {
+    color: #28a745;
+    font-weight: 500;
+    margin-left: auto;
+}
+
+.modal-total {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    text-align: right;
+    font-size: 18px;
+    color: tomato;
+}
+
+.extras-modal-footer {
+    display: flex;
+    gap: 10px;
+    padding: 20px;
+    border-top: 1px solid #eee;
+}
+
+.cancel-btn, .confirm-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-btn {
+    background-color: #f8f9fa;
+    color: #666;
+}
+
+.cancel-btn:hover {
+    background-color: #e9ecef;
+}
+
+.confirm-btn {
+    background-color: tomato;
+    color: white;
+}
+
+.confirm-btn:hover {
+    background-color: #e55a4f;
+}
+
+@media (max-width: 768px) {
+    .extras-modal {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .extras-modal-header {
+        padding: 15px;
+    }
+    
+    .extras-modal-body {
+        padding: 15px;
+    }
+    
+    .extras-modal-footer {
+        padding: 15px;
+    }
+}

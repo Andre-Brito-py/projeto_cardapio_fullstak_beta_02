@@ -9,6 +9,27 @@
     width: max(10%,80px);
 }
 
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .navbar .profile{
     width: 40px;
+}
+
+.logout-btn {
+    background-color: #ff6347;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #e55347;
 }

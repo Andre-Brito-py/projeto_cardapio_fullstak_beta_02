@@ -40,3 +40,160 @@
     margin-top: 30px;
 }
 
+/* Payment Section Styles */
+.payment-section {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.payment-section .title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.payment-section .subtitle {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 15px 0 10px 0;
+    color: #555;
+}
+
+.payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.payment-option:hover {
+    background-color: #f0f0f0;
+    border-color: #tomato;
+}
+
+.payment-option input[type="radio"] {
+    margin: 0;
+    width: auto;
+    cursor: pointer;
+}
+
+.payment-option label {
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #333;
+}
+
+.card-type-section {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.card-type-options {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.pix-section {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: white;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.pix-key-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.pix-key-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #c5c5c5;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.copy-pix-btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.copy-pix-btn:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+.copy-pix-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.copy-pix-btn.copied {
+    background-color: #007bff;
+}
+
+.pix-error {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .place-order {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .payment-section {
+        padding: 15px;
+    }
+    
+    .card-type-options {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .pix-key-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .copy-pix-btn {
+        width: 100%;
+    }
+}
+

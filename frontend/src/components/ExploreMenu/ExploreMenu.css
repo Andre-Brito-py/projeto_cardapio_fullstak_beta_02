@@ -14,23 +14,60 @@
     color: #808080;
 }
 
+.explore-menu-container{
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .explore-menu-list{
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 30px;
     text-align: center;
     margin: 20px 0px;
-    overflow: scroll;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    padding: 10px 0;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
 }
 
 .explore-menu-list::-webkit-scrollbar{
-    display: none;
+    height: 6px;
+}
+
+.explore-menu-list::-webkit-scrollbar-track{
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.explore-menu-list::-webkit-scrollbar-thumb{
+    background: #c1c1c1;
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.explore-menu-list::-webkit-scrollbar-thumb:hover{
+    background: #a8a8a8;
+}
+
+.explore-menu-list-item{
+    flex-shrink: 0;
+    min-width: 80px;
+    transition: transform 0.2s ease;
+}
+
+.explore-menu-list-item:hover{
+    transform: scale(1.05);
 }
 
 .explore-menu-list-item img{
     width: 7.5vw;
     min-width: 80px;
+    max-width: 120px;
     cursor: pointer;
     border-radius: 50%;
     transition: 0.2s;
@@ -55,9 +92,79 @@
     padding: 2px;
 }
 
+.scroll-button{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #e2e2e2;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    color: #666;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.scroll-button:hover{
+    background: white;
+    color: tomato;
+    border-color: tomato;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.scroll-left{
+    left: -20px;
+}
+
+.scroll-right{
+    right: -20px;
+}
+
 @media (max-width:1050px){
     .explore-menu-text{
         max-width: 100%;
         font-size: 14px;
+    }
+    
+    .scroll-button{
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+    
+    .scroll-left{
+        left: -15px;
+    }
+    
+    .scroll-right{
+        right: -15px;
+    }
+}
+
+@media (max-width: 768px){
+    .scroll-button{
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+    
+    .scroll-left{
+        left: -10px;
+    }
+    
+    .scroll-right{
+        right: -10px;
+    }
+    
+    .explore-menu-list{
+        gap: 20px;
     }
 }

@@ -6,67 +6,99 @@ import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
 
-  const {cartItems, food_list, removeFromCart, getTotalCartAmount, url} = useContext(StoreContext);
+  const {cartItems, food_list, removeFromCart, getTotalCartAmount, url, token} = useContext(StoreContext);
 
   const navigate = useNavigate();
+
+  const handleProceedToCheckout = () => {
+    if (!token) {
+      alert('Por favor, faça login para continuar com o pedido.');
+      return;
+    }
+    if (getTotalCartAmount() === 0) {
+      alert('Seu carrinho está vazio. Adicione itens antes de finalizar o pedido.');
+      return;
+    }
+    navigate('/order');
+  };
   return (
     <div className='cart'>
       <div className="cart-items">
         <div className="cart-items-title">
-          <p>Itmes</p>
-          <p>Title</p>
-          <p>Price</p>
-          <p>Quantity</p>
+          <p>Itens</p>
+          <p>Título</p>
+          <p>Preço</p>
+          <p>Quantidade</p>
           <p>Total</p>
-          <p>Remove</p>
+          <p>Remover</p>
         </div>
         <br />
         <hr />
-        {food_list.map((item,index)=>{
-          if(cartItems[item._id]>0){
-            return <div>
-              <div className="cart-items-title cart-items-item">
-              <img src={url+'/images/'+item.image} alt="" />
-              <p>{item.name}</p>
-              <p>₹{item.price}</p>
-              <p>{cartItems[item._id]}</p>
-              <p>₹{item.price*cartItems[item._id]}</p>
-              <p onClick={()=>removeFromCart(item._id)} className='cross'>x</p>
-            </div>
-            <hr />
-            </div>
-
-            
+        {Object.keys(cartItems).map((cartKey, index) => {
+          const cartItem = cartItems[cartKey];
+          if (cartItem && cartItem.quantity > 0) {
+            const item = food_list.find(product => product._id === cartItem.itemId);
+            if (item) {
+              let itemPrice = item.price;
+              if (cartItem.extras && cartItem.extras.length > 0) {
+                cartItem.extras.forEach(extra => {
+                  itemPrice += extra.price;
+                });
+              }
+              return (
+                <div key={cartKey}>
+                  <div className="cart-items-title cart-items-item">
+                    <img src={url + '/images/' + item.image} alt="" />
+                    <div>
+                      <p>{item.name}</p>
+                      {cartItem.extras && cartItem.extras.length > 0 && (
+                        <div style={{fontSize: '12px', color: '#666', marginTop: '4px'}}>
+                          {cartItem.extras.map((extra, idx) => (
+                            <span key={idx}>+ {extra.name} (${extra.price}){idx < cartItem.extras.length - 1 ? ', ' : ''}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <p>${itemPrice}</p>
+                    <p>{cartItem.quantity}</p>
+                    <p>${itemPrice * cartItem.quantity}</p>
+                    <p onClick={() => removeFromCart(cartKey)} className='cross'>x</p>
+                  </div>
+                  <hr />
+                </div>
+              );
+            }
           }
+          return null;
         })}
       </div>
       <div className="cart-bottom">
         <div className="cart-total">
-          <h2>Cart Total</h2>
+          <h2>Total do Carrinho</h2>
           <div>
             <div className="cart-total-detail">
               <p>Subtotal</p>
-              <p>₹{getTotalCartAmount()}</p>
+              <p>₹{getTotalCartAmount().toFixed(2)}</p>
             </div>
             <hr />
             <div className="cart-total-detail">
-              <p>Delivery Fee</p>
+              <p>Taxa de Entrega</p>
               <p>₹{getTotalCartAmount()===0?0:2}</p>
             </div>
             <hr />
             <div className="cart-total-detail">
               <b>Total</b>
-              <b>₹{getTotalCartAmount()===0?0:getTotalCartAmount()+2}</b>
+              <b>₹{getTotalCartAmount()===0?0:(getTotalCartAmount()+2).toFixed(2)}</b>
             </div> 
           </div>
-          <button onClick={()=> navigate('/order')}>PROCEED TO CHECKOUT</button>
+          <button onClick={handleProceedToCheckout}>FINALIZAR PEDIDO</button>
         </div>
         <div className="cart-promocode">
           <div>
-            <p>If you have a promo code, enter it here</p>
+            <p>Se você tem um código promocional, digite aqui</p>
             <div className='cart-promocode-input'>
-              <input type="text" placeholder='Promo Code'/>
-              <button>Submit</button>
+              <input type="text" placeholder='Código Promocional'/>
+              <button>Aplicar</button>
             </div>
           </div>
         </div>

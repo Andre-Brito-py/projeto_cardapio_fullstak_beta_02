@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React, { useContext, useEffect } from 'react'
 import './Verify.css'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -7,8 +6,7 @@ import axios from 'axios';
 
 const Verify = () => {
 
-    // eslint-disable-next-line no-unused-vars
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const success = searchParams.get("success")
     const orderId = searchParams.get("orderId")
     const {url} = useContext(StoreContext);
@@ -26,7 +24,6 @@ const Verify = () => {
 
     useEffect(()=>{
         verifyPayment();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     },[])
    
   return (
