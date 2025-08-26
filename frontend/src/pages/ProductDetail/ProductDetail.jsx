@@ -15,6 +15,8 @@ const ProductDetail = () => {
     const [loading, setLoading] = useState(true);
     const [totalPrice, setTotalPrice] = useState(0);
     const [error, setError] = useState(null);
+    const [observations, setObservations] = useState('');
+    const [includeDisposables, setIncludeDisposables] = useState(false);
     
 
 
@@ -82,16 +84,9 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        // Create a custom product object with selected extras
-        const productWithExtras = {
-            ...product,
-            selectedExtras: selectedExtras,
-            customPrice: totalPrice / quantity // Price per unit including extras
-        };
-        
-        // Add to cart with the specified quantity
+        // Add to cart with the specified quantity, extras, observations and disposables
         for (let i = 0; i < quantity; i++) {
-            addToCart(product._id);
+            addToCart(product._id, selectedExtras, observations, includeDisposables);
         }
         
         // Show success message or redirect
@@ -204,6 +199,30 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                         )}
+                        
+                        <div className="observations-section">
+                            <h3>Observações:</h3>
+                            <textarea
+                                value={observations}
+                                onChange={(e) => setObservations(e.target.value)}
+                                placeholder="Adicione observações especiais para este item..."
+                                className="observations-textarea"
+                                rows="3"
+                            />
+                        </div>
+                        
+                        <div className="disposables-section">
+                            <h3>Descartáveis:</h3>
+                            <label className="disposables-label">
+                                <input
+                                    type="checkbox"
+                                    checked={includeDisposables}
+                                    onChange={(e) => setIncludeDisposables(e.target.checked)}
+                                    className="disposables-checkbox"
+                                />
+                                <span>Incluir descartáveis (garfo, faca, guardanapo)</span>
+                            </label>
+                        </div>
                         
                         <div className="total-price-section">
                             <h2 className="total-price">Total: R$ {(parseFloat(totalPrice) || 0).toFixed(2)}</h2>

@@ -23,11 +23,68 @@
     margin-bottom: 10px;
 }
 
+.order-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+}
+
 .order-item select{
     background-color: #ffe8e4;
     border: 1px solid tomato;
     width: max(10vw, 120px);
     outline: none;
+}
+
+.print-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.print-btn:hover:not(:disabled) {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.print-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.print-btn.printing {
+    animation: printing 1.5s infinite;
+}
+
+@keyframes printing {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@media (max-width: 768px) {
+    .order-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .print-btn {
+        font-size: 11px;
+        padding: 6px 10px;
+        min-width: 90px;
+    }
 }
 
 @media (max-width:1000px){

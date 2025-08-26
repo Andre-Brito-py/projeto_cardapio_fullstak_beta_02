@@ -15,6 +15,7 @@ const Header = () => {
     }
   ]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [intervalId, setIntervalId] = useState(null);
 
   const fetchBanners = async () => {
     try {
@@ -28,30 +29,51 @@ const Header = () => {
     }
   };
 
-  // Auto-rotação dos banners a cada 7 segundos
-  useEffect(() => {
+  // Função para iniciar/reiniciar o timer
+  const startTimer = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+    }
+    
     if (banners.length > 1) {
-      const interval = setInterval(() => {
+      const newIntervalId = setInterval(() => {
         setCurrentBannerIndex((prevIndex) => 
           prevIndex === banners.length - 1 ? 0 : prevIndex + 1
         );
       }, 7000);
-
-      return () => clearInterval(interval);
+      setIntervalId(newIntervalId);
     }
+  };
+
+  // Auto-rotação dos banners a cada 7 segundos
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, [banners.length]);
 
-  // Navegação manual
+  // Navegação manual com reinício do timer
   const goToPrevious = () => {
     setCurrentBannerIndex(
       currentBannerIndex === 0 ? banners.length - 1 : currentBannerIndex - 1
     );
+    startTimer(); // Reinicia o timer
   };
 
   const goToNext = () => {
     setCurrentBannerIndex(
       currentBannerIndex === banners.length - 1 ? 0 : currentBannerIndex + 1
     );
+    startTimer(); // Reinicia o timer
+  };
+
+  // Navegação por indicador com reinício do timer
+  const goToSlide = (index) => {
+    setCurrentBannerIndex(index);
+    startTimer(); // Reinicia o timer
   };
 
   const handleViewProduct = (productId) => {
@@ -86,9 +108,35 @@ const Header = () => {
   return (
     <div className='header' style={{ backgroundImage: `url(${backgroundImage})` }}>
         <div className="header-contents">
-            <h2>{currentBanner.title}</h2>
-            <p>{currentBanner.description}</p>
-            <button onClick={() => handleViewProduct(currentBanner.productId)}>Ver no Cardápio</button>
+            <h2 key={`title-${currentBannerIndex}`} className="animated-title">
+              {currentBanner.title.split('').map((char, index) => (
+                <span 
+                  key={index} 
+                  className="letter" 
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </h2>
+            <p key={`desc-${currentBannerIndex}`} className="animated-description">
+              {currentBanner.description.split('').map((char, index) => (
+                <span 
+                  key={index} 
+                  className="letter-desc" 
+                  style={{ animationDelay: `${0.5 + index * 0.01}s` }}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </p>
+            <button 
+              key={`btn-${currentBannerIndex}`}
+              className="animated-button"
+              onClick={() => handleViewProduct(currentBanner.productId)}
+            >
+              Peça Já!
+            </button>
         </div>
         
         {banners.length > 1 && (
@@ -105,7 +153,7 @@ const Header = () => {
                 <span 
                   key={index}
                   className={`indicator ${index === currentBannerIndex ? 'active' : ''}`}
-                  onClick={() => setCurrentBannerIndex(index)}
+                  onClick={() => goToSlide(index)}
                 ></span>
               ))}
             </div>

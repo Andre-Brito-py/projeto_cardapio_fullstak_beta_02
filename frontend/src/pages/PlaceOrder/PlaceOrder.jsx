@@ -222,17 +222,17 @@ const PlaceOrder = () => {
           <div>
           <div className="cart-total-detail">
               <p>Subtotal</p>
-              <p>₹{getTotalCartAmount().toFixed(2)}</p>
+              <p>R$ {getTotalCartAmount().toFixed(2)}</p>
             </div>
             <hr />
             <div className="cart-total-detail">
               <p>Taxa de Entrega</p>
-              <p>₹{getTotalCartAmount()===0?0:2}</p>
+              <p>R$ {getTotalCartAmount()===0?0:2}</p>
             </div>
             <hr />
             <div className="cart-total-detail">
               <b>Total</b>
-              <b>₹{getTotalCartAmount()===0?0:(getTotalCartAmount()+2).toFixed(2)}</b>
+              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+2).toFixed(2)}</b>
             </div> 
           </div>
           <button type='submit'>PROSSEGUIR PARA PAGAMENTO</button>

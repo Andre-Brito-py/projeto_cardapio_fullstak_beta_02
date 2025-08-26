@@ -186,12 +186,79 @@
     font-weight: 600;
 }
 
+.observations-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+}
+
+.observations-section h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.observations-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 80px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.observations-textarea:focus {
+    outline: none;
+    border-color: #ff6347;
+    box-shadow: 0 0 0 2px rgba(255, 99, 71, 0.2);
+}
+
+.disposables-section {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+}
+
+.disposables-section h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.disposables-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #333;
+}
+
+.disposables-checkbox {
+    margin-right: 12px;
+    transform: scale(1.3);
+    accent-color: #ff6347;
+}
+
+.disposables-label span {
+    user-select: none;
+    font-weight: 500;
+}
+
 .total-price-section {
     background-color: #ff6347;
     color: white;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
+    margin-top: 20px;
 }
 
 .total-price {

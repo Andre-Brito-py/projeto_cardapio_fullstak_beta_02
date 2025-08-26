@@ -11,6 +11,7 @@ import orderRouter from './routes/orderRoute.js';
 import categoryRouter from './routes/categoryRoute.js';
 import settingsRouter from './routes/settingsRoute.js';
 import bannerRouter from './routes/bannerRoute.js';
+import printRouter from './routes/printRoute.js';
 
 // Utilitários
 import { populateInitialCategories } from './populateCategories.js';
@@ -36,6 +37,7 @@ app.use('/api/order', orderRouter); // Rotas para pedidos
 app.use('/api/category', categoryRouter); // Rotas para categorias
 app.use('/api/settings', settingsRouter); // Rotas para configurações do sistema
 app.use('/api/banner', bannerRouter); // Rotas para banners
+app.use('/api/print', printRouter); // Rotas para impressão Bluetooth
 
 // Rota de teste da API
 app.get('/', (req, res) => {

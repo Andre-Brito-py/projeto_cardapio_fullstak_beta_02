@@ -1,7 +1,7 @@
-import React, { useContext, useState} from 'react'
+import React, { useContext, useState } from 'react'
 import './FoodItem.css'
 import { assets } from '../../assets/assets'
-import { StoreContext } from '../context/StoreContext';
+import { StoreContext } from '../context/StoreContext'
 import { useNavigate } from 'react-router-dom';
 
 const FoodItem = ({id,name,price,description,image,extras}) => {
@@ -11,6 +11,8 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
     const [showExtrasModal, setShowExtrasModal] = useState(false);
     const [selectedExtras, setSelectedExtras] = useState([]);
     const [totalPrice, setTotalPrice] = useState(price);
+    const [observations, setObservations] = useState('');
+    const [includeDisposables, setIncludeDisposables] = useState(false);
     
     // Helper function to get total quantity of this item in cart (all variations)
     const getItemQuantityInCart = () => {
@@ -40,25 +42,27 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
         }
     };
     
-    const handleAddToCart = () => {
-        if (extras && extras.length > 0) {
-            setShowExtrasModal(true);
-        } else {
-            addToCart(id);
-        }
+    const handleAddToCart = (e) => {
+        e?.stopPropagation();
+        setShowExtrasModal(true);
     };
     
     const confirmAddToCart = () => {
-        addToCart(id, selectedExtras);
-        setShowExtrasModal(false);
+        addToCart(id, selectedExtras, observations, includeDisposables);
+        // Reset all states
         setSelectedExtras([]);
         setTotalPrice(price);
+        setObservations('');
+        setIncludeDisposables(false);
+        setShowExtrasModal(false);
     };
     
     const cancelModal = () => {
         setShowExtrasModal(false);
         setSelectedExtras([]);
         setTotalPrice(price);
+        setObservations('');
+        setIncludeDisposables(false);
     };
     
     const handleProductClick = () => {
@@ -81,13 +85,13 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
         <div className="food-item-info">
             <div className="food-item-name-rating" onClick={handleProductClick} style={{cursor: 'pointer'}}>
                 <p>{name}</p>
-                <img src={assets.rating_starts} alt="" />
             </div>
             <p className="food-item-desc">{description}</p>
-            <p className='food-item-price'>${price}</p>
+            <p className='food-item-price'>R$ {price}</p>
             {extras && extras.length > 0 && (
                 <p className='food-item-extras-available'>✨ Adicionais disponíveis ({extras.length})</p>
             )}
+
         </div>
         
         {/* Extras Modal */}
@@ -102,7 +106,7 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
                     <div className="extras-modal-body">
                         <div className="base-item">
                             <span>{name}</span>
-                            <span>₹{price}</span>
+                            <span>R$ {price}</span>
                         </div>
                         
                         {extras && extras.length > 0 && (
@@ -118,15 +122,38 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
                                             />
                                             <span className="extra-name">{extra.name}</span>
                                             {extra.description && <span className="extra-desc"> - {extra.description}</span>}
-                                            <span className="extra-price">+₹{extra.price}</span>
+                                            <span className="extra-price">+R$ {extra.price}</span>
                                         </label>
                                     </div>
                                 ))}
                             </div>
                         )}
                         
+                        <div className="observations-section">
+                            <h4>Observações:</h4>
+                            <textarea
+                                value={observations}
+                                onChange={(e) => setObservations(e.target.value)}
+                                placeholder="Adicione observações especiais para este item..."
+                                className="observations-textarea"
+                                rows="3"
+                            />
+                        </div>
+                        
+                        <div className="disposables-section">
+                            <label className="disposables-label">
+                                <input
+                                    type="checkbox"
+                                    checked={includeDisposables}
+                                    onChange={(e) => setIncludeDisposables(e.target.checked)}
+                                    className="disposables-checkbox"
+                                />
+                                <span>Incluir descartáveis (garfo, faca, guardanapo)</span>
+                            </label>
+                        </div>
+                        
                         <div className="modal-total">
-                            <strong>Total: ₹{totalPrice}</strong>
+                            <strong>Total: R$ {totalPrice}</strong>
                         </div>
                     </div>
                     
@@ -137,6 +164,9 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
                 </div>
             </div>
         )}
+        
+
+
     </div>
   )
 }

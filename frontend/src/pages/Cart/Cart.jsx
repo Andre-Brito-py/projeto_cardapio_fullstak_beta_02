@@ -53,15 +53,25 @@ const Cart = () => {
                       <p>{item.name}</p>
                       {cartItem.extras && cartItem.extras.length > 0 && (
                         <div style={{fontSize: '12px', color: '#666', marginTop: '4px'}}>
-                          {cartItem.extras.map((extra, idx) => (
-                            <span key={idx}>+ {extra.name} (${extra.price}){idx < cartItem.extras.length - 1 ? ', ' : ''}</span>
+                          <strong>Extras:</strong> {cartItem.extras.map((extra, idx) => (
+                            <span key={idx}>+ {extra.name} (R$ {extra.price}){idx < cartItem.extras.length - 1 ? ', ' : ''}</span>
                           ))}
                         </div>
                       )}
+                      {cartItem.observations && (
+                        <div style={{fontSize: '12px', color: '#ff6b35', marginTop: '4px', fontStyle: 'italic'}}>
+                          <strong>Obs:</strong> {cartItem.observations}
+                        </div>
+                      )}
+                      {cartItem.includeDisposables && (
+                        <div style={{fontSize: '12px', color: '#28a745', marginTop: '4px', fontWeight: 'bold'}}>
+                          ✓ Inclui descartáveis
+                        </div>
+                      )}
                     </div>
-                    <p>${itemPrice}</p>
+                    <p>R$ {itemPrice}</p>
                     <p>{cartItem.quantity}</p>
-                    <p>${itemPrice * cartItem.quantity}</p>
+                    <p>R$ {itemPrice * cartItem.quantity}</p>
                     <p onClick={() => removeFromCart(cartKey)} className='cross'>x</p>
                   </div>
                   <hr />
@@ -78,17 +88,17 @@ const Cart = () => {
           <div>
             <div className="cart-total-detail">
               <p>Subtotal</p>
-              <p>₹{getTotalCartAmount().toFixed(2)}</p>
+              <p>R$ {getTotalCartAmount().toFixed(2)}</p>
             </div>
             <hr />
             <div className="cart-total-detail">
               <p>Taxa de Entrega</p>
-              <p>₹{getTotalCartAmount()===0?0:2}</p>
+              <p>R$ {getTotalCartAmount()===0?0:2}</p>
             </div>
             <hr />
             <div className="cart-total-detail">
               <b>Total</b>
-              <b>₹{getTotalCartAmount()===0?0:(getTotalCartAmount()+2).toFixed(2)}</b>
+              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+2).toFixed(2)}</b>
             </div> 
           </div>
           <button onClick={handleProceedToCheckout}>FINALIZAR PEDIDO</button>

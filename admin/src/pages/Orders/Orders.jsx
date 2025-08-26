@@ -6,9 +6,10 @@ import { toast } from 'react-toastify';
 import { useEffect } from 'react';
 import { assets } from './../../../../frontend/src/assets/assets';
 
-const Orders = ({url}) => {
+const Orders = ({url, token}) => {
 
   const [orders, setOrders] = useState([])
+  const [printingOrder, setPrintingOrder] = useState(null)
 
   const fetchAllOrders = async () =>{
     const response = await axios.get(url+"/api/order/list");
@@ -27,6 +28,28 @@ const Orders = ({url}) => {
     })
     if(response.data.success){
       await fetchAllOrders();
+    }
+  }
+
+  const printOrder = async (orderId) => {
+    setPrintingOrder(orderId);
+    try {
+      const response = await axios.post(
+        url + "/api/print/print",
+        { orderId },
+        { headers: { token } }
+      );
+      
+      if (response.data.success) {
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error('Erro ao imprimir pedido:', error);
+      toast.error('Erro ao imprimir pedido. Verifique se a impressora está conectada.');
+    } finally {
+      setPrintingOrder(null);
     }
   }
 
@@ -59,11 +82,21 @@ const Orders = ({url}) => {
             </div>
             <p>Itmes: {order.items.length}</p>
             <p>₹{order.amount}</p>
-            <select onChange={(event)=> statusHandler(event,order._id)} value={order.status} >
-              <option value="Food Processing">Food Processing</option>
-              <option value="Out for delivery">Out for delivery</option>
-              <option value="Delivered">Delivered</option>
-            </select>
+            <div className="order-actions">
+              <select onChange={(event)=> statusHandler(event,order._id)} value={order.status} >
+                <option value="Food Processing">Food Processing</option>
+                <option value="Out for delivery">Out for delivery</option>
+                <option value="Delivered">Delivered</option>
+              </select>
+              <button 
+                className={`print-btn ${printingOrder === order._id ? 'printing' : ''}`}
+                onClick={() => printOrder(order._id)}
+                disabled={printingOrder === order._id}
+                title="Imprimir Pedido"
+              >
+                {printingOrder === order._id ? '🖨️ Imprimindo...' : '🖨️ Imprimir'}
+              </button>
+            </div>
           </div>
         ))}
       </div>

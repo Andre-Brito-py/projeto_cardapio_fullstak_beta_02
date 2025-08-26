@@ -20,8 +20,10 @@ const StoreContextProvider = (props) => {
      * Função para adicionar item ao carrinho
      * @param {String} itemId - ID do item
      * @param {Array} extras - Lista de extras selecionados
+     * @param {String} observations - Observações do cliente
+     * @param {Boolean} includeDisposables - Se deve incluir descartáveis
      */
-    const addToCart = async (itemId, extras = []) => {
+    const addToCart = async (itemId, extras = [], observations = '', includeDisposables = false) => {
         // Cria uma chave única para o item com seus extras
         const extrasKey = extras.length > 0 ? JSON.stringify(extras.sort((a, b) => a.name.localeCompare(b.name))) : '';
         const cartKey = extrasKey ? `${itemId}_${btoa(extrasKey)}` : itemId;
@@ -32,7 +34,9 @@ const StoreContextProvider = (props) => {
                 [cartKey]: { 
                     quantity: 1, 
                     itemId: itemId, 
-                    extras: extras 
+                    extras: extras,
+                    observations: observations,
+                    includeDisposables: includeDisposables
                 } 
             }))
         } else {
@@ -40,12 +44,14 @@ const StoreContextProvider = (props) => {
                 ...prev, 
                 [cartKey]: { 
                     ...prev[cartKey], 
-                    quantity: prev[cartKey].quantity + 1 
+                    quantity: prev[cartKey].quantity + 1,
+                    observations: observations || prev[cartKey].observations,
+                    includeDisposables: includeDisposables !== undefined ? includeDisposables : prev[cartKey].includeDisposables
                 } 
             }))
         }
         if(token){
-            await axios.post(url+'/api/cart/add',{itemId, extras},{headers:{token}})
+            await axios.post(url+'/api/cart/add',{itemId, extras, observations, includeDisposables},{headers:{token}})
         }
     }
 

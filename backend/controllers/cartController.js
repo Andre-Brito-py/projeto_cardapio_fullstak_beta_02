@@ -5,11 +5,31 @@ const addToCart = async (req,res) =>{
     try {
         let userData = await userModel.findById(req.body.userId)
         let cartData = await userData.cartData;
-        if(!cartData[req.body.itemId]){
-            cartData[req.body.itemId] = 1 
+        
+        // Create cart key with extras and observations
+        const { itemId, extras = [], observations = '', includeDisposables = false } = req.body;
+        const extrasKey = extras.length > 0 ? JSON.stringify(extras.sort((a, b) => a.name.localeCompare(b.name))) : '';
+        const cartKey = extrasKey ? `${itemId}_${Buffer.from(extrasKey).toString('base64')}` : itemId;
+        
+        if(!cartData[cartKey]){
+            cartData[cartKey] = {
+                quantity: 1,
+                itemId: itemId,
+                extras: extras,
+                observations: observations,
+                includeDisposables: includeDisposables
+            };
         }
         else{
-            cartData[req.body.itemId] += 1;
+            cartData[cartKey].quantity += 1;
+            // Update observations if provided
+            if(observations) {
+                cartData[cartKey].observations = observations;
+            }
+            // Update includeDisposables if provided
+            if(includeDisposables !== undefined) {
+                cartData[cartKey].includeDisposables = includeDisposables;
+            }
         }
 
         await userModel.findByIdAndUpdate(req.body.userId,{cartData})
@@ -25,8 +45,17 @@ const removeFromCart = async (req, res) =>{
         let userData = await userModel.findById(req.body.userId)
         let cartData = await userData.cartData;
 
-        if(cartData[req.body.itemId]>0){
-            cartData[req.body.itemId] -=1;
+        // Create cart key with extras
+        const { itemId, extras = [] } = req.body;
+        const extrasKey = extras.length > 0 ? JSON.stringify(extras.sort((a, b) => a.name.localeCompare(b.name))) : '';
+        const cartKey = extrasKey ? `${itemId}_${Buffer.from(extrasKey).toString('base64')}` : itemId;
+
+        if(cartData[cartKey] && cartData[cartKey].quantity > 0){
+            if(cartData[cartKey].quantity === 1) {
+                delete cartData[cartKey];
+            } else {
+                cartData[cartKey].quantity -= 1;
+            }
         }
 
         await userModel.findByIdAndUpdate(req.body.userId,{cartData});

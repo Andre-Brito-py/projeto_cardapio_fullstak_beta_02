@@ -31,6 +31,10 @@ const Sidebar = () => {
           <img src={assets.add_icon} alt="" />
           <p>Settings</p>
         </NavLink>
+        <NavLink to='/bluetooth-print' className="sidebar-option">
+          <img src={assets.order_icon} alt="" />
+          <p>Impressora BT</p>
+        </NavLink>
       </div>
     </div>
   )

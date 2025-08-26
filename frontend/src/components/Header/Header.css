@@ -15,7 +15,6 @@
     max-width: 50%;
     bottom: 10%;
     left: 6vw;
-    animation: fadeIn 3s;
 }
 
 .header-contents h2{
@@ -24,9 +23,51 @@
     font-size:max(4.5vw, 22px);
 }
 
+/* Animações para as letras do título */
+.animated-title .letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(30px) rotateX(90deg);
+    animation: letterSlideIn 0.6s ease-out forwards;
+}
+
+@keyframes letterSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) rotateX(90deg);
+    }
+    50% {
+        opacity: 0.7;
+        transform: translateY(-5px) rotateX(45deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg);
+    }
+}
+
 .header-contents p {
     color: white;
     font-size: 1vw;
+}
+
+/* Animações para as letras da descrição */
+.animated-description .letter-desc {
+    display: inline-block;
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: letterFadeIn 0.4s ease-out forwards;
+}
+
+@keyframes letterFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .header-contents button{
@@ -37,6 +78,35 @@
     background-color: white;
     font-size: max(1vw,13px);
     border-radius: 50px;
+    transition: all 0.3s ease;
+}
+
+/* Animação para o botão */
+.animated-button {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    animation: buttonBounceIn 0.8s ease-out 1.5s forwards;
+}
+
+@keyframes buttonBounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1) translateY(-5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.animated-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    background-color: #f0f0f0;
 }
 
 @media (max-width:1050px){
