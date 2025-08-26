@@ -1,6 +1,6 @@
-# 🍕 Sistema de Delivery de Comida - Full Stack
+# 🍕 Sistema de Delivery de Comida - Multi-Tenant Full Stack
 
-Um sistema completo de delivery de comida desenvolvido com tecnologias modernas, oferecendo uma experiência completa para clientes e administradores.
+Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvolvido com tecnologias modernas. Permite que múltiplas lojas operem de forma independente em uma única plataforma, com gestão centralizada através de um Super Admin.
 
 ## ✨ Funcionalidades Principais
 
@@ -15,14 +15,24 @@ Um sistema completo de delivery de comida desenvolvido com tecnologias modernas,
 - **Banners Interativos**: Banners que direcionam para produtos específicos
 - **Páginas de Produto**: Visualização detalhada com extras personalizáveis
 
-### 🔧 Para Administradores
-- **Painel Administrativo**: Interface dedicada para gestão
+### 🔧 Para Administradores de Loja
+- **Painel Administrativo**: Interface dedicada para gestão da loja
 - **Gerenciamento de Produtos**: CRUD completo de pratos e categorias
 - **Gestão de Banners**: Sistema completo de banners com direcionamento para produtos
 - **Controle de Pedidos**: Visualização e atualização de status
 - **Gestão de Usuários**: Controle de clientes cadastrados
 - **Upload de Imagens**: Sistema integrado para imagens de produtos e banners
 - **Categorias Dinâmicas**: Sistema completo de categorias com status ativo/inativo
+- **Configurações da Loja**: Personalização específica por loja
+
+### 👑 Para Super Administradores
+- **Gestão Multi-Tenant**: Controle centralizado de múltiplas lojas
+- **Criação de Lojas**: Sistema completo para adicionar novas lojas
+- **Gerenciamento de Store Admins**: Criação e gestão de administradores por loja
+- **Configurações Globais**: Definições que afetam todo o sistema
+- **Estatísticas Centralizadas**: Visão geral de todas as lojas
+- **Controle de Status**: Ativar/suspender lojas individualmente
+- **Planos de Assinatura**: Gestão de diferentes planos para as lojas
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -42,12 +52,16 @@ Um sistema completo de delivery de comida desenvolvido com tecnologias modernas,
 - **Bcrypt** - Criptografia de senhas
 - **Multer** - Upload de arquivos
 - **Stripe** - Gateway de pagamento
+- **Multi-Tenancy Middleware** - Isolamento de dados por loja
+- **Role-Based Access Control** - Sistema de permissões por função
 
 ### Admin Panel
 - **React 18** - Interface administrativa
 - **Vite** - Build tool
 - **Axios** - Comunicação com API
 - **CSS3** - Estilização dedicada
+- **Super Admin Dashboard** - Painel para gestão multi-tenant
+- **Store Management** - Interface para gerenciar lojas individuais
 
 ## 📦 Instalação e Configuração
 
@@ -71,10 +85,12 @@ npm install
 
 **Crie um arquivo `.env` na pasta backend:**
 ```env
-MONGODB_URI=mongodb://localhost:27017/food-delivery
+MONGODB_URI=mongodb://localhost:27017/food-delivery-multitenant
 JWT_SECRET=seu_jwt_secret_super_seguro_aqui
 STRIPE_SECRET_KEY=sua_chave_stripe_aqui
 PORT=4000
+SUPER_ADMIN_EMAIL=superadmin@fooddelivery.com
+SUPER_ADMIN_PASSWORD=superadmin123
 ```
 
 **Inicie o servidor backend:**
@@ -98,12 +114,19 @@ npm install
 npm run dev
 ```
 
-### 5. Criar Usuário Administrador
-**Em um novo terminal:**
+### 5. Configurar Super Administrador
+**Primeira execução - O Super Admin será criado automaticamente na primeira inicialização do sistema.**
+
+**Ou crie manualmente:**
 ```bash
 cd backend
 node createAdmin.js
 ```
+
+**Credenciais padrão do Super Admin:**
+- **Email**: superadmin@fooddelivery.com
+- **Senha**: superadmin123
+- **URL**: http://localhost:5175
 
 ## 🚀 Como Executar o Projeto
 
@@ -130,21 +153,27 @@ npm run dev
 ### Verificação de Funcionamento
 1. **Backend**: Deve mostrar "Server started on http://localhost:4000" e "DB Connected Successfully"
 2. **Frontend**: Deve estar disponível em http://localhost:5173
-3. **Admin**: Deve estar disponível em http://localhost:5174
+3. **Admin Panel**: Deve estar disponível em http://localhost:5175
 
 ## 🔑 Credenciais de Acesso
 
-### Painel Administrativo
-- **Email**: admin@fooddelivery.com
-- **Senha**: admin123
-- **URL**: http://localhost:5174
+### Super Administrador (Gestão Multi-Tenant)
+- **Email**: superadmin@fooddelivery.com
+- **Senha**: superadmin123
+- **URL**: http://localhost:5175
 
-*⚠️ **IMPORTANTE**: Altere essas credenciais após o primeiro login!*
+### Administrador de Loja
+*Criado pelo Super Admin através do painel de gestão de lojas*
+- **URL**: http://localhost:5175
+- **Credenciais**: Definidas durante a criação da loja
+
+*⚠️ **IMPORTANTE**: Altere as credenciais padrão após o primeiro login!*
 
 ## 🌐 URLs de Acesso
 
 - **🛒 Frontend (Clientes)**: http://localhost:5173
-- **⚙️ Admin Panel**: http://localhost:5174
+- **👑 Super Admin Panel**: http://localhost:5175
+- **🔧 Store Admin Panel**: http://localhost:5175 (mesmo painel, diferentes permissões)
 - **🔌 Backend API**: http://localhost:4000
 
 ## 📱 Guia de Uso
@@ -157,41 +186,60 @@ npm run dev
 5. **Checkout**: Finalize com Stripe ou pagamento na entrega
 6. **Acompanhamento**: Monitore pedidos em "Meus Pedidos"
 
-### 🔧 Para Administradores
-1. **Login**: Acesse http://localhost:5174 com as credenciais
+### 👑 Para Super Administradores
+1. **Login**: Acesse http://localhost:5175 com as credenciais do Super Admin
+2. **Criar Loja**: Use "Store Management" para adicionar novas lojas
+3. **Gerenciar Lojas**: Visualize, edite e controle status das lojas
+4. **Configurações Globais**: Defina configurações que afetam todo o sistema
+5. **Estatísticas**: Monitore performance geral de todas as lojas
+
+### 🔧 Para Administradores de Loja
+1. **Login**: Acesse http://localhost:5175 com as credenciais da loja
 2. **Produtos**: Gerencie cardápio na seção "Add Items"
 3. **Categorias**: Controle categorias em "Categories"
 4. **Banners**: Configure banners promocionais em "Banners"
 5. **Pedidos**: Monitore e atualize status em "Orders"
 6. **Usuários**: Visualize clientes em "Users"
+7. **Configurações**: Personalize configurações específicas da loja
 
 ## 🏗️ Estrutura Detalhada do Projeto
 
 ```
-📁 projeto_cardapio_fullstak_beta_02/
-├── 📁 backend/                    # API Node.js/Express
+📁 Full-Stack-Food-Delivery-Web-Application/
+├── 📁 backend/                    # API Node.js/Express Multi-Tenant
 │   ├── 📁 config/
 │   │   └── db.js                  # Configuração MongoDB
 │   ├── 📁 controllers/
-│   │   ├── foodController.js      # Gestão de produtos
-│   │   ├── categoryController.js  # Gestão de categorias
-│   │   ├── bannerController.js    # Gestão de banners
-│   │   ├── userController.js      # Autenticação
-│   │   └── orderController.js     # Gestão de pedidos
+│   │   ├── foodController.js      # Gestão de produtos (multi-tenant)
+│   │   ├── categoryController.js  # Gestão de categorias (multi-tenant)
+│   │   ├── bannerController.js    # Gestão de banners (multi-tenant)
+│   │   ├── userController.js      # Autenticação (multi-tenant)
+│   │   ├── orderController.js     # Gestão de pedidos (multi-tenant)
+│   │   ├── storeController.js     # Gestão de lojas individuais
+│   │   ├── systemController.js    # Gestão do Super Admin
+│   │   └── deliveryController.js  # Cálculo de entrega
 │   ├── 📁 middleware/
-│   │   └── auth.js               # Middleware de autenticação
+│   │   ├── auth.js               # Middleware de autenticação
+│   │   └── multiTenancy.js       # Middleware multi-tenant
 │   ├── 📁 models/
 │   │   ├── foodModel.js          # Modelo de produtos
 │   │   ├── categoryModel.js      # Modelo de categorias
 │   │   ├── bannerModel.js        # Modelo de banners
-│   │   ├── userModel.js          # Modelo de usuários
-│   │   └── orderModel.js         # Modelo de pedidos
+│   │   ├── userModel.js          # Modelo de usuários (com roles)
+│   │   ├── orderModel.js         # Modelo de pedidos
+│   │   ├── storeModel.js         # Modelo de lojas
+│   │   └── systemSettingsModel.js # Configurações globais
 │   ├── 📁 routes/
 │   │   ├── foodRoute.js          # Rotas de produtos
 │   │   ├── categoryRoute.js      # Rotas de categorias
 │   │   ├── bannerRoute.js        # Rotas de banners
 │   │   ├── userRoute.js          # Rotas de usuários
-│   │   └── orderRoute.js         # Rotas de pedidos
+│   │   ├── orderRoute.js         # Rotas de pedidos
+│   │   ├── storeRoute.js         # Rotas de lojas
+│   │   ├── systemRoute.js        # Rotas do Super Admin
+│   │   └── deliveryRoute.js      # Rotas de entrega
+│   ├── 📁 services/
+│   │   └── distanceService.js    # Serviço de cálculo de distância
 │   ├── 📁 uploads/               # Imagens enviadas
 │   ├── server.js                 # Servidor principal
 │   ├── createAdmin.js            # Script para criar admin
@@ -214,18 +262,23 @@ npm run dev
 │   │   │   └── StoreContext.jsx  # Context API
 │   │   └── App.jsx               # Componente principal
 │   └── package.json              # Dependências frontend
-└── 📁 admin/                      # Painel Administrativo
+└── 📁 admin/                      # Painel Administrativo Multi-Tenant
     ├── 📁 src/
     │   ├── 📁 components/
     │   │   ├── Navbar/           # Navegação admin
-    │   │   └── Sidebar/          # Menu lateral
+    │   │   ├── Sidebar/          # Menu lateral (Store Admin)
+    │   │   ├── SuperAdminLogin/  # Login Super Admin
+    │   │   └── SuperAdminSidebar/ # Menu lateral Super Admin
     │   ├── 📁 pages/
     │   │   ├── Add/              # Adicionar produtos
     │   │   ├── List/             # Listar produtos
     │   │   ├── Orders/           # Gerenciar pedidos
     │   │   ├── Categories/       # Gerenciar categorias
     │   │   ├── Banners/          # Gerenciar banners
-    │   │   └── Users/            # Visualizar usuários
+    │   │   ├── Users/            # Visualizar usuários
+    │   │   └── SuperAdmin/       # Páginas Super Admin
+    │   │       ├── StoreManagement/ # Gestão de lojas
+    │   │       └── SystemSettings/  # Configurações globais
     │   └── App.jsx               # App administrativo
     └── package.json              # Dependências admin
 ```
@@ -245,6 +298,43 @@ npm run dev        # Desenvolvimento
 npm run build      # Build produção
 npm run preview    # Preview build
 ```
+
+## 🏢 Arquitetura Multi-Tenant
+
+### Conceito
+O sistema utiliza uma arquitetura multi-tenant que permite que múltiplas lojas operem de forma independente em uma única instância da aplicação. Cada loja possui:
+
+- **Isolamento de Dados**: Cada loja acessa apenas seus próprios dados
+- **Configurações Independentes**: Cada loja pode ter suas próprias configurações
+- **Administração Separada**: Cada loja tem seus próprios administradores
+- **Gestão Centralizada**: Super Admin controla todas as lojas
+
+### Roles e Permissões
+
+#### Super Admin
+- **Acesso Total**: Controle completo sobre todas as lojas
+- **Gestão de Lojas**: Criar, editar, ativar/suspender lojas
+- **Configurações Globais**: Definir configurações que afetam todo o sistema
+- **Estatísticas Centralizadas**: Visão geral de performance
+
+#### Store Admin
+- **Acesso Restrito**: Apenas dados da própria loja
+- **Gestão da Loja**: Produtos, categorias, pedidos, usuários
+- **Configurações Locais**: Personalizar configurações específicas
+- **Relatórios**: Estatísticas apenas da própria loja
+
+#### Customer
+- **Acesso por Loja**: Visualiza apenas produtos da loja selecionada
+- **Pedidos**: Histórico específico por loja
+- **Perfil**: Dados compartilhados entre lojas
+
+### Middleware Multi-Tenancy
+O sistema utiliza um middleware especializado que:
+
+- **Identifica a Loja**: Através de headers ou contexto
+- **Filtra Dados**: Garante isolamento entre lojas
+- **Valida Permissões**: Controla acesso baseado em roles
+- **Injeta Contexto**: Adiciona informações da loja nas requisições
 
 ## 🔍 Funcionalidades Detalhadas
 

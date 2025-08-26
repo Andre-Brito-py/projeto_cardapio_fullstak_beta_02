@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 
 const SystemSettings = ({ url, token }) => {
   const [settings, setSettings] = useState({
+    googleMapsApiKey: '',
     systemName: '',
     systemEmail: '',
     systemPhone: '',
@@ -126,6 +127,21 @@ const SystemSettings = ({ url, token }) => {
       </div>
 
       <form onSubmit={handleSubmit} className='settings-form'>
+        <div className='settings-section'>
+          <h3>Configurações de API</h3>
+          <div className='form-group'>
+            <label>Chave da API do Google Maps</label>
+            <input
+              type='text'
+              name='googleMapsApiKey'
+              value={settings.googleMapsApiKey}
+              onChange={handleInputChange}
+              placeholder='Insira sua chave da API do Google Maps'
+            />
+            <small className='form-help'>Esta chave é usada para calcular distâncias de entrega e exibir mapas no sistema.</small>
+          </div>
+        </div>
+
         <div className='settings-section'>
           <h3>Informações Gerais</h3>
           <div className='form-row'>
