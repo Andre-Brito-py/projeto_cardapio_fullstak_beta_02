@@ -64,6 +64,7 @@ const addFood = async (req,res) =>{
     console.log('=== ADD FOOD REQUEST RECEIVED ===');
     console.log('Request body:', req.body);
     console.log('Request file:', req.file);
+    console.log('Store context:', req.store);
 
     let image_filename = req.file ? req.file.filename : req.body.image || 'default.jpg';
 
@@ -83,12 +84,13 @@ const addFood = async (req,res) =>{
         price: req.body.price,
         category: req.body.category,
         image: image_filename,
+        storeId: req.store._id, // Adicionar storeId do contexto
         extras: extras
     });
 
     try {
         await food.save();
-        console.log('Food added to database:', food.name);
+        console.log('Food added to database:', food.name, 'for store:', req.store.name);
         res.json({success:true,message:'Food Added'})
     } catch (error) {
         console.log(error);
@@ -100,7 +102,9 @@ const addFood = async (req,res) =>{
 
 const listFood = async (req,res) =>{
     try {
-        const foods = await foodModel.find({});
+        // Se há contexto de loja, filtrar por loja, senão listar todos
+        const query = req.store ? { storeId: req.store._id, isActive: true } : { isActive: true };
+        const foods = await foodModel.find(query).populate('storeId', 'name slug');
         res.json({success:true,data:foods})
     } catch (error) {
         console.log(error)
@@ -112,13 +116,15 @@ const listFood = async (req,res) =>{
 
 const removeFood = async (req,res)=>{
     try {
-        const food = await foodModel.findById(req.body.id);
+        // Verificar se o produto pertence à loja
+        const query = req.store ? { _id: req.body.id, storeId: req.store._id } : { _id: req.body.id };
+        const food = await foodModel.findOne(query);
         if (food) {
             fs.unlink(`uploads/${food.image}`,()=>{})
             await foodModel.findByIdAndDelete(req.body.id);
             res.json({success:true,message:'Food Removed'})
         } else {
-            res.json({success:false, message:'Food not found'})
+            res.json({success:false, message:'Food not found or access denied'})
         }
     } catch (error) {
         console.log(error)
@@ -131,11 +137,12 @@ const updateFood = async (req, res) => {
     try {
         const { id, name, description, price, category, extras } = req.body;
         
-        // Find food in database
-        const food = await foodModel.findById(id);
+        // Find food in database with store context
+        const query = req.store ? { _id: id, storeId: req.store._id } : { _id: id };
+        const food = await foodModel.findOne(query);
         
         if (!food) {
-            return res.json({ success: false, message: 'Food item not found' });
+            return res.json({ success: false, message: 'Food item not found or access denied' });
         }
         
         // Prepare update data

@@ -67,3 +67,125 @@
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+.store-selection {
+  width: 100%;
+}
+
+.store-selection h3 {
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.stores-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+}
+
+.store-option {
+  padding: 15px;
+  border-bottom: 1px solid #e1e5e9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.store-option:last-child {
+  border-bottom: none;
+}
+
+.store-option:hover {
+  background: #f8f9fa;
+  transform: translateX(5px);
+}
+
+.store-option.selected {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transform: translateX(10px);
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+.store-option h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.store-option p {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.store-option small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.store-selection-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.back-btn {
+  flex: 1;
+  padding: 12px;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.login-btn {
+  flex: 2;
+  padding: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 480px) {
+  .store-selection-actions {
+    flex-direction: column;
+  }
+  
+  .stores-list {
+    max-height: 200px;
+  }
+  
+  .store-option {
+    padding: 12px;
+  }
+}

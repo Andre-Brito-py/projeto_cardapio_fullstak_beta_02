@@ -2,6 +2,7 @@ import express from "express";
 import { addBanner, listBanners, listAllBanners, removeBanner, updateBanner, toggleBannerStatus } from "../controllers/bannerController.js";
 import multer from "multer";
 import authMiddleware from "../middleware/auth.js";
+import { identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext } from "../middleware/multiTenancy.js";
 
 const bannerRouter = express.Router();
 
@@ -20,14 +21,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Rotas públicas
-bannerRouter.get("/list", listBanners);
+// Rotas públicas com contexto de loja
+bannerRouter.get("/list", identifyStore, addStoreContext, listBanners);
 
-// Rotas protegidas (admin)
-bannerRouter.post("/add", authMiddleware, upload.single("image"), addBanner);
-bannerRouter.get("/listall", authMiddleware, listAllBanners);
-bannerRouter.post("/remove", authMiddleware, removeBanner);
-bannerRouter.post("/update", authMiddleware, upload.single("image"), updateBanner);
-bannerRouter.post("/toggle", authMiddleware, toggleBannerStatus);
+// Rotas protegidas para administradores de loja
+bannerRouter.post("/add", identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, upload.single("image"), addBanner);
+bannerRouter.get("/listall", identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, listAllBanners);
+bannerRouter.post("/remove", identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, removeBanner);
+bannerRouter.post("/update", identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, upload.single("image"), updateBanner);
+bannerRouter.post("/toggle", identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, toggleBannerStatus);
 
 export default bannerRouter;

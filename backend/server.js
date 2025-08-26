@@ -12,6 +12,9 @@ import categoryRouter from './routes/categoryRoute.js';
 import settingsRouter from './routes/settingsRoute.js';
 import bannerRouter from './routes/bannerRoute.js';
 import printRouter from './routes/printRoute.js';
+import deliveryRouter from './routes/deliveryRoute.js';
+import systemRouter from './routes/systemRoute.js';
+import storeRouter from './routes/storeRoute.js';
 
 // Utilitários
 import { populateInitialCategories } from './populateCategories.js';
@@ -29,6 +32,11 @@ app.use(cors()); // Habilita CORS para requisições cross-origin
 connectDB();
 
 // Configuração das rotas da API
+// Rotas do sistema multi-tenant
+app.use('/api/system', systemRouter); // Rotas para Super Admin
+app.use('/api/store', storeRouter); // Rotas para gerenciamento de lojas
+
+// Rotas existentes (mantidas para compatibilidade)
 app.use('/api/food', foodRouter); // Rotas para gerenciamento de comidas
 app.use('/images', express.static('uploads')); // Servir imagens estáticas
 app.use('/api/user', userRouter); // Rotas para autenticação e usuários
@@ -38,6 +46,7 @@ app.use('/api/category', categoryRouter); // Rotas para categorias
 app.use('/api/settings', settingsRouter); // Rotas para configurações do sistema
 app.use('/api/banner', bannerRouter); // Rotas para banners
 app.use('/api/print', printRouter); // Rotas para impressão Bluetooth
+app.use('/api/delivery', deliveryRouter); // Rotas para cálculo de entrega
 
 // Rota de teste da API
 app.get('/', (req, res) => {

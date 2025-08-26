@@ -1,0 +1,145 @@
+.super-admin-sidebar {
+  width: 18%;
+  min-height: 100vh;
+  border: 1.5px solid #a9a9a9;
+  border-top: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+}
+
+.super-admin-sidebar-options {
+  padding-top: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.super-admin-sidebar-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: 0;
+  padding: 10px 10px 10px 20px;
+  border-radius: 0px 0px 0px 10px;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s ease;
+  margin-right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.super-admin-sidebar-option:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.super-admin-sidebar-option.active {
+  border-color: #ff6347;
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(10px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.super-admin-sidebar-option img {
+  width: 20px;
+  filter: brightness(0) invert(1);
+  transition: transform 0.3s ease;
+}
+
+.super-admin-sidebar-option:hover img {
+  transform: scale(1.1);
+}
+
+.super-admin-sidebar-option p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Efeito de brilho no hover */
+.super-admin-sidebar-option::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.super-admin-sidebar-option:hover::before {
+  left: 100%;
+}
+
+/* Responsividade */
+@media (max-width: 1000px) {
+  .super-admin-sidebar {
+    width: 25%;
+  }
+  
+  .super-admin-sidebar-option p {
+    font-size: 12px;
+  }
+  
+  .super-admin-sidebar-option img {
+    width: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .super-admin-sidebar {
+    width: 100%;
+    min-height: auto;
+    border-bottom: 1.5px solid #a9a9a9;
+    border-right: 1.5px solid #a9a9a9;
+  }
+  
+  .super-admin-sidebar-options {
+    padding: 20px 0;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 10px;
+  }
+  
+  .super-admin-sidebar-option {
+    min-width: 120px;
+    margin-right: 0;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+    gap: 5px;
+    padding: 15px 10px;
+  }
+  
+  .super-admin-sidebar-option:hover,
+  .super-admin-sidebar-option.active {
+    transform: translateY(-2px);
+  }
+  
+  .super-admin-sidebar-option p {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .super-admin-sidebar-option {
+    min-width: 100px;
+    padding: 12px 8px;
+  }
+  
+  .super-admin-sidebar-option img {
+    width: 16px;
+  }
+  
+  .super-admin-sidebar-option p {
+    font-size: 10px;
+  }
+}

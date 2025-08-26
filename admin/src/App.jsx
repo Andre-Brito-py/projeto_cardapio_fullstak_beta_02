@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from './components/Navbar/Navbar'
 import Sidebar from './components/Sidebar/Sidebar'
+import SuperAdminSidebar from './components/SuperAdminSidebar/SuperAdminSidebar'
 import Login from './components/Login/Login'
+import SuperAdminLogin from './components/SuperAdminLogin/SuperAdminLogin'
 import { Routes, Route } from 'react-router-dom';
 import Add from './pages/Add/Add';
 import List from './pages/List/List';
@@ -11,30 +13,75 @@ import Edit from './pages/Edit/Edit';
 import Settings from './pages/Settings/Settings';
 import Banners from './pages/Banners/Banners';
 import BluetoothPrint from './components/BluetoothPrint/BluetoothPrint';
+import StoreManagement from './pages/SuperAdmin/StoreManagement/StoreManagement';
+import SystemSettings from './pages/SuperAdmin/SystemSettings/SystemSettings';
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
   const [token, setToken] = useState('');
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [showSuperAdminLogin, setShowSuperAdminLogin] = useState(false);
   const url = 'http://localhost:4000';
 
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
     if (savedToken) {
       setToken(savedToken);
+      setIsSuperAdmin(userRole === 'super_admin');
     }
   }, []);
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
     setToken('');
+    setIsSuperAdmin(false);
+    setShowSuperAdminLogin(false);
   };
 
   if (!token) {
     return (
       <div>
         <ToastContainer/>
-        <Login url={url} setToken={setToken} />
+        {showSuperAdminLogin ? (
+          <div>
+            <SuperAdminLogin url={url} setToken={setToken} setSuperAdmin={setIsSuperAdmin} />
+            <div style={{textAlign: 'center', marginTop: '20px'}}>
+              <button 
+                onClick={() => setShowSuperAdminLogin(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#667eea',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Voltar para Login Normal
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <Login url={url} setToken={setToken} />
+            <div style={{textAlign: 'center', marginTop: '20px'}}>
+              <button 
+                onClick={() => setShowSuperAdminLogin(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#667eea',
+                  cursor: 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                Acesso Super Admin
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -42,11 +89,16 @@ const App = () => {
   return (
     <div>
       <ToastContainer/>
-      <Navbar logout={logout}/>
+      <Navbar logout={logout} isSuperAdmin={isSuperAdmin}/>
       <hr/>
       <div className="app-content">
-        <Sidebar/>
+        {isSuperAdmin ? <SuperAdminSidebar/> : <Sidebar/>}
         <Routes>
+          {/* Rotas do Super Admin */}
+          <Route path='/super-admin/stores' element={<StoreManagement url={url} token={token}/>} />
+          <Route path='/super-admin/system-settings' element={<SystemSettings url={url} token={token}/>} />
+          
+          {/* Rotas normais do admin */}
           <Route path='/add' element={<Add url={url} />} />
           <Route path='/list' element={<List url={url}/>} />
           <Route path='/categories' element={<Categories url={url}/>} />
@@ -55,6 +107,9 @@ const App = () => {
           <Route path='/settings' element={<Settings url={url}/>} />
           <Route path='/banners' element={<Banners url={url}/>} />
           <Route path='/bluetooth-print' element={<BluetoothPrint url={url} token={token}/>} />
+          
+          {/* Rota padrão */}
+          <Route path='/' element={isSuperAdmin ? <StoreManagement url={url} token={token}/> : <Add url={url} />} />
         </Routes>
       </div>
     </div>

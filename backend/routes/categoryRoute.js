@@ -1,6 +1,7 @@
 import express from "express";
 import { addCategory, listCategory, listActiveCategories, removeCategory, updateCategory } from "../controllers/categoryController.js";
 import multer from "multer";
+import { identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext } from "../middleware/multiTenancy.js";
 
 const categoryRouter = express.Router();
 
@@ -14,11 +15,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Rotas para categorias
-categoryRouter.post("/add", upload.single("image"), addCategory);
-categoryRouter.get("/list", listCategory);
-categoryRouter.get("/active", listActiveCategories);
-categoryRouter.post("/remove", removeCategory);
-categoryRouter.post("/update", upload.single("image"), updateCategory);
+// Rotas públicas
+categoryRouter.get("/list", identifyStore, addStoreContext, listCategory);
+categoryRouter.get("/active", identifyStore, addStoreContext, listActiveCategories);
+
+// Rotas protegidas para administradores de loja
+categoryRouter.post("/add", identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, upload.single("image"), addCategory);
+categoryRouter.post("/remove", identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, removeCategory);
+categoryRouter.post("/update", identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, upload.single("image"), updateCategory);
 
 export default categoryRouter;

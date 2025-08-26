@@ -1,14 +1,47 @@
 /* eslint-disable react/jsx-key */
-import React, { useContext } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import './Cart.css'
 import { StoreContext } from '../../components/context/StoreContext'
 import { useNavigate } from 'react-router-dom';
+import useDeliveryCalculation from '../../hooks/useDeliveryCalculation';
 
 const Cart = () => {
 
   const {cartItems, food_list, removeFromCart, getTotalCartAmount, url, token} = useContext(StoreContext);
+  const [deliveryType, setDeliveryType] = useState('delivery'); // 'delivery' or 'pickup'
+  const [deliveryAddress, setDeliveryAddress] = useState({
+    street: '',
+    city: '',
+    state: '',
+    zipCode: ''
+  });
 
   const navigate = useNavigate();
+  const { 
+    fee: deliveryFee, 
+    distance, 
+    duration, 
+    isCalculating: loading, 
+    error, 
+    warning,
+    calculateDeliveryFee, 
+    resetCalculation 
+  } = useDeliveryCalculation(url);
+
+  // Calculate delivery fee when address changes
+  useEffect(() => {
+    if (deliveryType === 'delivery' && deliveryAddress.street && deliveryAddress.city && deliveryAddress.state && deliveryAddress.zipCode) {
+      const fullAddress = `${deliveryAddress.street}, ${deliveryAddress.city}, ${deliveryAddress.state}, ${deliveryAddress.zipCode}`;
+      calculateDeliveryFee(fullAddress);
+    }
+  }, [deliveryAddress, deliveryType]);
+
+  const handleAddressChange = (field, value) => {
+    setDeliveryAddress(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleProceedToCheckout = () => {
     if (!token) {
@@ -17,6 +50,10 @@ const Cart = () => {
     }
     if (getTotalCartAmount() === 0) {
       alert('Seu carrinho está vazio. Adicione itens antes de finalizar o pedido.');
+      return;
+    }
+    if (deliveryType === 'delivery' && (!deliveryAddress.street || !deliveryAddress.city || !deliveryAddress.state || !deliveryAddress.zipCode)) {
+      alert('Por favor, preencha o endereço de entrega completo.');
       return;
     }
     navigate('/order');
@@ -85,6 +122,75 @@ const Cart = () => {
       <div className="cart-bottom">
         <div className="cart-total">
           <h2>Total do Carrinho</h2>
+          
+          {/* Delivery Type Selection */}
+          <div className="delivery-type-section">
+            <h3>Tipo de Pedido:</h3>
+            <div className="delivery-options">
+              <label className={`delivery-option ${deliveryType === 'delivery' ? 'active' : ''}`}>
+                <input 
+                  type="radio" 
+                  name="deliveryType" 
+                  value="delivery" 
+                  checked={deliveryType === 'delivery'}
+                  onChange={(e) => setDeliveryType(e.target.value)}
+                />
+                <span className="delivery-icon">🚚</span>
+                <span>Entrega</span>
+              </label>
+              <label className={`delivery-option ${deliveryType === 'pickup' ? 'active' : ''}`}>
+                <input 
+                  type="radio" 
+                  name="deliveryType" 
+                  value="pickup" 
+                  checked={deliveryType === 'pickup'}
+                  onChange={(e) => setDeliveryType(e.target.value)}
+                />
+                <span className="delivery-icon">🏪</span>
+                <span>Retirar no Local</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Delivery Address Section */}
+          {deliveryType === 'delivery' && (
+            <div className="delivery-address-section" style={{marginBottom: '20px', padding: '15px', border: '1px solid #e2e2e2', borderRadius: '8px', backgroundColor: '#f9f9f9'}}>
+              <h3 style={{margin: '0 0 15px 0', color: '#333', fontSize: '1.1rem'}}>Endereço de Entrega:</h3>
+              <div style={{display: 'grid', gap: '10px'}}>
+                <input
+                  type="text"
+                  placeholder="Rua e número"
+                  value={deliveryAddress.street}
+                  onChange={(e) => handleAddressChange('street', e.target.value)}
+                  style={{padding: '10px', border: '1px solid #c5c5c5', borderRadius: '4px', outline: 'none'}}
+                />
+                <div style={{display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '10px'}}>
+                  <input
+                    type="text"
+                    placeholder="Cidade"
+                    value={deliveryAddress.city}
+                    onChange={(e) => handleAddressChange('city', e.target.value)}
+                    style={{padding: '10px', border: '1px solid #c5c5c5', borderRadius: '4px', outline: 'none'}}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Estado"
+                    value={deliveryAddress.state}
+                    onChange={(e) => handleAddressChange('state', e.target.value)}
+                    style={{padding: '10px', border: '1px solid #c5c5c5', borderRadius: '4px', outline: 'none'}}
+                  />
+                  <input
+                    type="text"
+                    placeholder="CEP"
+                    value={deliveryAddress.zipCode}
+                    onChange={(e) => handleAddressChange('zipCode', e.target.value)}
+                    style={{padding: '10px', border: '1px solid #c5c5c5', borderRadius: '4px', outline: 'none'}}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div>
             <div className="cart-total-detail">
               <p>Subtotal</p>
@@ -92,13 +198,34 @@ const Cart = () => {
             </div>
             <hr />
             <div className="cart-total-detail">
-              <p>Taxa de Entrega</p>
-              <p>R$ {getTotalCartAmount()===0?0:2}</p>
+              <p>{deliveryType === 'delivery' ? 'Taxa de Entrega' : 'Taxa de Serviço'}</p>
+              <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <p>R$ {getTotalCartAmount()===0?0:(deliveryType === 'delivery' ? deliveryFee : 0).toFixed(2)}</p>
+                {deliveryType === 'delivery' && loading && (
+                  <span style={{fontSize: '12px', color: '#666'}}>Calculando...</span>
+                )}
+              </div>
             </div>
+            {deliveryType === 'delivery' && distance && (
+              <div className="delivery-info" style={{fontSize: '12px', color: '#666', margin: '8px 0'}}>
+                <p>📍 Distância: {distance.text}</p>
+                <p>⏱️ Tempo estimado: {duration.text}</p>
+              </div>
+            )}
+            {deliveryType === 'delivery' && error && (
+              <div className="delivery-error" style={{fontSize: '12px', color: '#ff6b35', margin: '8px 0'}}>
+                <p>⚠️ {error}</p>
+              </div>
+            )}
+            {deliveryType === 'delivery' && warning && (
+              <div className="delivery-warning" style={{fontSize: '12px', color: '#ff9500', margin: '8px 0'}}>
+                <p>⚠️ {warning}</p>
+              </div>
+            )}
             <hr />
             <div className="cart-total-detail">
               <b>Total</b>
-              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+2).toFixed(2)}</b>
+              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+(deliveryType === 'delivery' ? deliveryFee : 0)).toFixed(2)}</b>
             </div> 
           </div>
           <button onClick={handleProceedToCheckout}>FINALIZAR PEDIDO</button>

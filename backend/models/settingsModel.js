@@ -5,9 +5,46 @@ const settingsSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
-    deliveryFee: {
+
+    googleMapsApiKey: {
+        type: String,
+        default: ""
+    },
+    restaurantAddress: {
+        street: {
+            type: String,
+            default: ""
+        },
+        city: {
+            type: String,
+            default: ""
+        },
+        state: {
+            type: String,
+            default: ""
+        },
+        zipCode: {
+            type: String,
+            default: ""
+        },
+        country: {
+            type: String,
+            default: "Brasil"
+        }
+    },
+    deliveryZones: [{
+        maxDistance: {
+            type: Number, // em km
+            required: true
+        },
+        fee: {
+            type: Number, // taxa em reais
+            required: true
+        }
+    }],
+    maxDeliveryDistance: {
         type: Number,
-        default: 2
+        default: 10 // km
     },
     banner: {
         title: {

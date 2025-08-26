@@ -8,28 +8,16 @@ import {
     testPrint 
 } from '../controllers/printController.js';
 import authMiddleware from '../middleware/auth.js';
+import { identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext } from '../middleware/multiTenancy.js';
 
 const printRouter = express.Router();
 
-// Todas as rotas de impressão requerem autenticação
-printRouter.use(authMiddleware);
-
-// Buscar impressoras Bluetooth disponíveis
-printRouter.post('/scan', scanPrinters);
-
-// Conectar a uma impressora específica
-printRouter.post('/connect', connectPrinter);
-
-// Imprimir pedido via Bluetooth
-printRouter.post('/print', printOrder);
-
-// Imprimir pedido via porta serial
-printRouter.post('/print-serial', printOrderSerial);
-
-// Desconectar impressora
-printRouter.post('/disconnect', disconnectPrinter);
-
-// Teste de impressão
-printRouter.post('/test', testPrint);
+// Todas as rotas de impressão requerem autenticação e permissão de admin da loja
+printRouter.post('/scan', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, scanPrinters);
+printRouter.post('/connect', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, connectPrinter);
+printRouter.post('/print', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, printOrder);
+printRouter.post('/print-serial', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, printOrderSerial);
+printRouter.post('/disconnect', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, disconnectPrinter);
+printRouter.post('/test', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, testPrint);
 
 export default printRouter;

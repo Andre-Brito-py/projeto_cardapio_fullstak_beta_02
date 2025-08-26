@@ -1,8 +1,17 @@
 import express from 'express'
 import { addFood, listFood, removeFood, updateFood } from '../controllers/foodController.js'
 import multer from 'multer'
+import {
+    identifyStore,
+    authMultiTenant,
+    requireStoreAdmin,
+    addStoreContext
+} from '../middleware/multiTenancy.js'
 
 const foodRouter = express.Router();
+
+// Middleware para identificar a loja
+foodRouter.use(identifyStore);
 
 // Image Storage Engine
 
@@ -15,8 +24,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage:storage})
 
-foodRouter.post('/add',upload.single('image'),addFood)
+// Rotas públicas (para clientes)
 foodRouter.get('/list',listFood)
+
+// Rotas protegidas (para admins)
+foodRouter.use(authMultiTenant);
+foodRouter.use(requireStoreAdmin);
+foodRouter.use(addStoreContext);
+
+foodRouter.post('/add',upload.single('image'),addFood)
 foodRouter.post('/remove', removeFood)
 foodRouter.put('/update',upload.single('image'),updateFood)
 

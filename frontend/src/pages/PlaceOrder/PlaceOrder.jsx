@@ -3,9 +3,11 @@ import './PlaceOrder.css'
 import { StoreContext } from '../../components/context/StoreContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import useDeliveryCalculation from '../../hooks/useDeliveryCalculation';
 
 const PlaceOrder = () => {
   const {getTotalCartAmount, token, food_list, cartItems, url} = useContext(StoreContext);
+  const { deliveryData, calculateDeliveryFee } = useDeliveryCalculation(url);
 
   const [data, setData] = useState({
     firstName:"",
@@ -23,6 +25,7 @@ const PlaceOrder = () => {
   const [cardType, setCardType] = useState('credito');
   const [pixKey, setPixKey] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
+  const [deliveryType, setDeliveryType] = useState('delivery');
 
   const onChangeHandler = (event) =>{
     const name = event.target.name;
@@ -62,10 +65,13 @@ const PlaceOrder = () => {
         orderItems.push(itemInfo);
       }
     })
+    const deliveryFee = deliveryType === 'delivery' ? deliveryData.fee : 0;
     let orderData = {
       address:data,
       items:orderItems,
-      amount:getTotalCartAmount()+2,
+      amount:getTotalCartAmount()+deliveryFee,
+      deliveryType: deliveryType,
+      deliveryFee: deliveryFee
     }
 
     let response = await axios.post(url+'/api/order/place', orderData,{headers:{token}})
@@ -94,6 +100,20 @@ const PlaceOrder = () => {
     }
   }, [paymentMethod]);
 
+  // Calcular taxa de entrega quando endereço mudar
+  useEffect(() => {
+    if (deliveryType === 'delivery' && data.street && data.city && data.state) {
+      const address = {
+        street: data.street,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipcode,
+        country: data.country || 'Brasil'
+      };
+      calculateDeliveryFee(address);
+    }
+  }, [data.street, data.city, data.state, data.zipcode, data.country, deliveryType, calculateDeliveryFee]);
+
   return (
     <form onSubmit={placeOrder} className='place-order'>
       <div className="place-order-left">
@@ -113,6 +133,36 @@ const PlaceOrder = () => {
           <input required name='country' onChange={onChangeHandler} value={data.country} type="text" placeholder='País'/>
         </div>
         <input required name='phone' onChange={onChangeHandler} value={data.phone} type="text" placeholder='Telefone' />
+        
+        {/* Delivery Type Selection */}
+        <div className="delivery-type-section">
+          <p className="title">Tipo de Pedido</p>
+          <div className="delivery-options">
+            <div className="payment-option">
+              <input 
+                type="radio" 
+                id="delivery" 
+                name="deliveryType" 
+                value="delivery" 
+                checked={deliveryType === 'delivery'}
+                onChange={(e) => setDeliveryType(e.target.value)}
+              />
+              <label htmlFor="delivery">🚚 Entrega</label>
+            </div>
+            
+            <div className="payment-option">
+              <input 
+                type="radio" 
+                id="pickup" 
+                name="deliveryType" 
+                value="pickup" 
+                checked={deliveryType === 'pickup'}
+                onChange={(e) => setDeliveryType(e.target.value)}
+              />
+              <label htmlFor="pickup">🏪 Retirar no Local</label>
+            </div>
+          </div>
+        </div>
         
         {/* Payment Method Section */}
         <div className="payment-section">
@@ -226,13 +276,29 @@ const PlaceOrder = () => {
             </div>
             <hr />
             <div className="cart-total-detail">
-              <p>Taxa de Entrega</p>
-              <p>R$ {getTotalCartAmount()===0?0:2}</p>
+              <p>{deliveryType === 'delivery' ? 'Taxa de Entrega' : 'Taxa de Serviço'}</p>
+              <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <p>R$ {getTotalCartAmount()===0?0:(deliveryType === 'delivery' ? deliveryData.fee : 0).toFixed(2)}</p>
+                {deliveryType === 'delivery' && deliveryData.isCalculating && (
+                  <span style={{fontSize: '12px', color: '#666'}}>Calculando...</span>
+                )}
+              </div>
             </div>
+            {deliveryType === 'delivery' && deliveryData.distance && (
+              <div className="delivery-info" style={{fontSize: '12px', color: '#666', margin: '8px 0'}}>
+                <p>📍 Distância: {deliveryData.distance.text}</p>
+                <p>⏱️ Tempo estimado: {deliveryData.duration.text}</p>
+              </div>
+            )}
+            {deliveryType === 'delivery' && deliveryData.error && (
+              <div className="delivery-error" style={{fontSize: '12px', color: '#ff6b35', margin: '8px 0'}}>
+                <p>⚠️ {deliveryData.error}</p>
+              </div>
+            )}
             <hr />
             <div className="cart-total-detail">
               <b>Total</b>
-              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+2).toFixed(2)}</b>
+              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+(deliveryType === 'delivery' ? deliveryData.fee : 0)).toFixed(2)}</b>
             </div> 
           </div>
           <button type='submit'>PROSSEGUIR PARA PAGAMENTO</button>

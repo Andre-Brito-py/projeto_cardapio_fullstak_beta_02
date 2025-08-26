@@ -30,16 +30,20 @@ const placeOrder = async (req, res) =>{
             quantity: item.quantity
         }))
 
-        line_items.push({
-            price_data :{
-                currency:"INR",
-                product_data:{
-                    name:"Delivery Charges"
+        // A taxa de entrega agora é calculada dinamicamente no frontend
+        // e já está incluída no amount total do pedido
+        if (req.body.deliveryFee && req.body.deliveryFee > 0) {
+            line_items.push({
+                price_data :{
+                    currency:"INR",
+                    product_data:{
+                        name:"Delivery Charges"
+                    },
+                    unit_amount:req.body.deliveryFee*100
                 },
-                unit_amount:2*100
-            },
-            quantity:1
-        })
+                quantity:1
+            })
+        }
 
         const session = await stripe.checkout.sessions.create({
             line_items:line_items,
