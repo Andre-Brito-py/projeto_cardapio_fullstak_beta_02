@@ -4,7 +4,7 @@ import { StoreContext } from '../../components/context/StoreContext';
 import FoodDisplay from '../../components/FoodDisplay/FoodDisplay';
 import ExploreMenu from '../../components/ExploreMenu/ExploreMenu';
 import Header from '../../components/Header/Header';
-import AppDownload from '../../components/AppDownload/AppDownload';
+
 import ShareStore from '../../components/ShareStore/ShareStore';
 import SEO from '../../components/SEO/SEO';
 import './StoreHome.css';
@@ -114,6 +114,11 @@ const StoreHome = () => {
                                     {currentStore.address}
                                 </p>
                             )}
+                            {/* Status da loja */}
+                            <div className={`store-status ${currentStore.isOpen ? 'open' : 'closed'}`}>
+                                <i className={`fas ${currentStore.isOpen ? 'fa-clock' : 'fa-times-circle'}`}></i>
+                                <span>{currentStore.isOpen ? 'Aberta' : 'Fechada'}</span>
+                            </div>
                         </div>
                         <div className="store-actions">
                             <ShareStore storeData={currentStore} />
@@ -122,25 +127,41 @@ const StoreHome = () => {
                 </div>
             </div>
 
-            {/* Banner personalizado */}
-            <Header storeData={currentStore} />
-            
-            {/* Menu de exploração */}
-            <ExploreMenu 
-                category={category} 
-                setCategory={setCategory}
-                categories={storeMenu.categories}
-            />
-            
-            {/* Exibição de produtos */}
-            <FoodDisplay 
-                category={category}
-                foods={storeMenu.foods}
-                storeId={currentStore.id}
-            />
-            
-            {/* Download do app */}
-            <AppDownload />
+            {/* Verificar se a loja está fechada */}
+            {!currentStore.isOpen ? (
+                <div className="store-closed-message">
+                    <div className="closed-content">
+                        <i className="fas fa-moon"></i>
+                        <h2>Loja Temporariamente Fechada</h2>
+                        <p>Desculpe, a <strong>{currentStore.name}</strong> está fechada no momento.</p>
+                        <p>Por favor, volte em outro momento para fazer seu pedido.</p>
+                        <div className="closed-actions">
+                            <a href="/" className="btn-home">Ver Outras Lojas</a>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    {/* Banner personalizado */}
+                    <Header storeData={currentStore} />
+                    
+                    {/* Menu de exploração */}
+                    <ExploreMenu 
+                        category={category} 
+                        setCategory={setCategory}
+                        categories={storeMenu.categories}
+                    />
+                    
+                    {/* Exibição de produtos */}
+                    <FoodDisplay 
+                        category={category}
+                        foods={storeMenu.foods}
+                        storeId={currentStore.id}
+                    />
+                    
+
+                </>
+            )}
         </div>
     );
 };

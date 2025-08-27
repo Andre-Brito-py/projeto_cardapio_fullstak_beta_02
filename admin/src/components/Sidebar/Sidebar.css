@@ -227,6 +227,11 @@
         animation: slideInLeft 0.3s ease-out;
     }
     
+    .sidebar.mobile-open ~ .sidebar-backdrop {
+        opacity: 1;
+        visibility: visible;
+    }
+    
     .sidebar-backdrop {
         position: fixed;
         inset: 0;

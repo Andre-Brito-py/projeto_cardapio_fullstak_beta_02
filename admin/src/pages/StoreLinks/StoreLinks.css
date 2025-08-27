@@ -1,0 +1,256 @@
+.store-links {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.store-links-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.store-links-header h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 28px;
+}
+
+.store-links-header p {
+  color: #666;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.store-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.store-info h3 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.store-info p {
+  color: #666;
+  font-size: 16px;
+}
+
+.link-section,
+.share-section,
+.qr-section,
+.instructions {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.link-section h4,
+.share-section h4,
+.qr-section h4,
+.instructions h4 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.link-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.link-input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #f9f9f9;
+  color: #333;
+}
+
+.copy-btn {
+  padding: 12px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.copy-btn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.copy-btn.success {
+  background: #28a745;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.whatsapp-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: #25d366;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.whatsapp-btn:hover {
+  background: #1da851;
+  transform: translateY(-1px);
+}
+
+.whatsapp-btn span {
+  font-size: 20px;
+}
+
+.qr-section {
+  text-align: center;
+}
+
+.qr-section p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.qr-code {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background: white;
+}
+
+.download-qr-btn {
+  padding: 10px 20px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.download-qr-btn:hover {
+  background: #545b62;
+  transform: translateY(-1px);
+}
+
+.instructions ul {
+  list-style: none;
+  padding: 0;
+}
+
+.instructions li {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  color: #555;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 25px;
+}
+
+.instructions li:before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.instructions li:last-child {
+  border-bottom: none;
+}
+
+.store-links-loading,
+.store-links-error {
+  text-align: center;
+  padding: 50px;
+  color: #666;
+  font-size: 18px;
+}
+
+.store-links-error {
+  color: #dc3545;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .store-links {
+    margin: 10px;
+    padding: 15px;
+  }
+  
+  .link-container {
+    flex-direction: column;
+  }
+  
+  .link-input {
+    margin-bottom: 10px;
+  }
+  
+  .share-buttons {
+    justify-content: center;
+  }
+  
+  .store-links-header h2 {
+    font-size: 24px;
+  }
+  
+  .store-info h3 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .store-links {
+    margin: 5px;
+    padding: 10px;
+  }
+  
+  .store-links-header h2 {
+    font-size: 20px;
+  }
+  
+  .link-section h4,
+  .share-section h4,
+  .qr-section h4,
+  .instructions h4 {
+    font-size: 18px;
+  }
+}

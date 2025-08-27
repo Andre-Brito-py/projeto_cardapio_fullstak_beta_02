@@ -65,6 +65,10 @@ const storeSchema = new mongoose.Schema({
     pixKey: {
       type: String
     },
+    isOpen: {
+      type: Boolean,
+      default: true
+    },
     deliveryZones: [{
       name: {
         type: String,

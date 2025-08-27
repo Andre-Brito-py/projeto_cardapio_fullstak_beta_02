@@ -1,9 +1,0 @@
-<svg width="180" height="53" viewBox="0 0 180 53" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="53" rx="8" fill="#000000"/>
-<path d="M25 13L35 23L25 33L15 23L25 13Z" fill="#34A853"/>
-<path d="M15 23L25 13L35 23L25 33L15 23Z" fill="#FBBC05"/>
-<path d="M25 13L35 23L25 33" fill="#EA4335"/>
-<path d="M15 23L25 33L35 23" fill="#4285F4"/>
-<text x="50" y="20" fill="white" font-family="Arial" font-size="8" font-weight="300">DISPONÍVEL NO</text>
-<text x="50" y="32" fill="white" font-family="Arial" font-size="12" font-weight="bold">Google Play</text>
-</svg>

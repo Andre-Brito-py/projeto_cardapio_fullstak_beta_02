@@ -15,6 +15,7 @@ import Banners from './pages/Banners/Banners';
 import BluetoothPrint from './components/BluetoothPrint/BluetoothPrint';
 import StoreManagement from './pages/SuperAdmin/StoreManagement/StoreManagement';
 import SystemSettings from './pages/SuperAdmin/SystemSettings/SystemSettings';
+import StoreLinks from './pages/StoreLinks/StoreLinks';
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -103,12 +104,16 @@ const App = () => {
             onClose={() => setSidebarOpen(false)}
           />
         ) : (
-          <Sidebar/>
+          <Sidebar 
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
         )}
         <Routes>
           {/* Rotas do Super Admin */}
           <Route path='/super-admin/stores' element={<StoreManagement url={url} token={token}/>} />
           <Route path='/super-admin/system-settings' element={<SystemSettings url={url} token={token}/>} />
+          <Route path='/store-links' element={<StoreLinks url={url} token={token}/>} />
           
           {/* Rotas normais do admin */}
           <Route path='/add' element={<Add url={url} />} />

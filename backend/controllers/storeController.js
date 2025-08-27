@@ -124,7 +124,20 @@ const createStore = async (req, res) => {
 // Obter dados da loja
 const getStore = async (req, res) => {
     try {
-        const { storeId } = req.params;
+        let storeId;
+        
+        // Se a rota for '/current', usar o storeId do contexto do usuário
+        if (req.route.path === '/current') {
+            // req.user.storeId pode ser um ObjectId ou um objeto populado
+            storeId = req.user?.storeId?._id || req.user?.storeId || req.storeId;
+        } else {
+            // Para outras rotas, usar o parâmetro da URL
+            storeId = req.params.storeId;
+        }
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "ID da loja não encontrado" });
+        }
         
         const store = await Store.findById(storeId).populate('owner', 'name email');
         if (!store) {
@@ -133,7 +146,7 @@ const getStore = async (req, res) => {
         
         res.json({ success: true, data: store });
     } catch (error) {
-        console.log(error);
+        console.log('Erro em getStore:', error);
         res.json({ success: false, message: "Erro ao obter dados da loja" });
     }
 };
@@ -352,7 +365,8 @@ const getPublicStoreData = async (req, res) => {
                 deliveryZones: store.settings?.deliveryZones,
                 maxDeliveryDistance: store.settings?.maxDeliveryDistance,
                 customization: store.customization,
-                domain: store.domain
+                domain: store.domain?.customDomain || store.domain?.subdomain || store.slug,
+                isOpen: store.settings?.isOpen !== undefined ? store.settings.isOpen : true
             }
         });
     } catch (error) {
@@ -410,6 +424,42 @@ const getPublicStoreMenu = async (req, res) => {
     }
 };
 
+// Atualizar status aberta/fechada da loja
+const updateStoreStatus = async (req, res) => {
+    try {
+        const { isOpen } = req.body;
+        const storeId = req.user.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Loja não identificada" });
+        }
+        
+        const store = await Store.findById(storeId);
+        if (!store) {
+            return res.json({ success: false, message: "Loja não encontrada" });
+        }
+        
+        // Verificar se o usuário tem permissão para editar esta loja
+        if (req.user.role !== 'super_admin' && req.user.storeId.toString() !== storeId.toString()) {
+            return res.json({ success: false, message: "Sem permissão para editar esta loja" });
+        }
+        
+        store.settings.isOpen = isOpen;
+        await store.save();
+        
+        res.json({ 
+            success: true, 
+            message: `Loja ${isOpen ? 'aberta' : 'fechada'} com sucesso`,
+            data: {
+                isOpen: store.settings.isOpen
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Erro ao atualizar status da loja" });
+    }
+};
+
 export {
     createStore,
     getStore,
@@ -419,5 +469,6 @@ export {
     updateSubscription,
     loginStoreAdmin,
     getPublicStoreData,
-    getPublicStoreMenu
+    getPublicStoreMenu,
+    updateStoreStatus
 };

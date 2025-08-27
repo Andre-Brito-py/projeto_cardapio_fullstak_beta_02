@@ -165,59 +165,6 @@ const getBanner = async (req, res) => {
     }
 };
 
-// Update Google Maps settings (Admin only)
-const updateGoogleMapsSettings = async (req, res) => {
-    try {
-        const { googleMapsApiKey, restaurantAddress, maxDeliveryDistance, deliveryZones } = req.body;
-        
-        let settings = await settingsModel.findOne();
-        
-        if (!settings) {
-            // Create new settings if none exist
-            settings = new settingsModel({
-                pixKey: '',
-                googleMapsApiKey: googleMapsApiKey || '',
-                restaurantAddress: restaurantAddress || {
-                    street: '',
-                    city: '',
-                    state: '',
-                    zipCode: '',
-                    country: 'Brasil'
-                },
-                maxDeliveryDistance: maxDeliveryDistance || 10,
-                deliveryZones: deliveryZones || [
-                    { maxDistance: 5, fee: 2 },
-                    { maxDistance: 10, fee: 4 }
-                ]
-            });
-        } else {
-            // Update existing settings
-            if (googleMapsApiKey !== undefined) settings.googleMapsApiKey = googleMapsApiKey;
-            if (restaurantAddress !== undefined) settings.restaurantAddress = restaurantAddress;
-            if (maxDeliveryDistance !== undefined) settings.maxDeliveryDistance = maxDeliveryDistance;
-            if (deliveryZones !== undefined) settings.deliveryZones = deliveryZones;
-            settings.updatedAt = new Date();
-        }
-        
-        await settings.save();
-        
-        res.json({
-            success: true,
-            message: "Configurações do Google Maps atualizadas com sucesso",
-            data: {
-                googleMapsApiKey: settings.googleMapsApiKey,
-                restaurantAddress: settings.restaurantAddress,
-                maxDeliveryDistance: settings.maxDeliveryDistance,
-                deliveryZones: settings.deliveryZones
-            }
-        });
-    } catch (error) {
-        console.log(error);
-        res.json({
-            success: false,
-            message: "Erro ao atualizar configurações do Google Maps"
-        });
-    }
-};
 
-export { getPixKey, updatePixKey, getSettings, updateBanner, getBanner, updateGoogleMapsSettings };
+
+export { getPixKey, updatePixKey, getSettings, updateBanner, getBanner };

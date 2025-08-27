@@ -95,7 +95,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: var(--z-modal);
+  z-index: 1000;
   padding: var(--spacing-lg);
   backdrop-filter: blur(8px);
   animation: fadeIn var(--transition-normal) ease;
@@ -477,6 +477,123 @@
   color: var(--error-color);
 }
 
+/* Estilos para a tabela de lojas */
+.stores-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--background-white);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-top: var(--spacing-lg);
+  position: relative;
+  z-index: 1;
+}
+
+.stores-table thead {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+}
+
+.stores-table th,
+.stores-table td {
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
+}
+
+.stores-table th {
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stores-table tbody tr {
+  transition: all var(--transition-normal) ease;
+  background: var(--background-white);
+}
+
+.stores-table tbody tr:hover {
+  background: var(--background-secondary);
+  transform: scale(1.01);
+}
+
+.stores-table tbody tr.inactive {
+  opacity: 0.7;
+  background: var(--error-light);
+}
+
+.stores-table td.actions {
+  white-space: nowrap;
+  position: relative;
+  z-index: 10;
+}
+
+.stores-table .actions button {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  margin: 0 var(--spacing-xs);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-normal) ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 15;
+  pointer-events: auto;
+}
+
+.stores-table .actions .edit-btn {
+  background: var(--info-color);
+  color: var(--text-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.stores-table .actions .edit-btn:hover:not(:disabled) {
+  background: var(--info-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.stores-table .actions .toggle-btn.active {
+  background: var(--warning-color);
+  color: var(--text-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+.stores-table .actions .toggle-btn.inactive {
+  background: var(--success-color);
+  color: var(--text-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.stores-table .actions .toggle-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.stores-table .actions .delete-btn {
+  background: var(--error-color);
+  color: var(--text-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.stores-table .actions .delete-btn:hover:not(:disabled) {
+  background: var(--error-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.stores-table .actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 @media (max-width: 768px) {
   .store-management {
     padding: var(--spacing-md);
@@ -525,6 +642,21 @@
   .form-actions {
     flex-direction: column;
     gap: var(--spacing-sm);
+  }
+  
+  .stores-table {
+    font-size: var(--font-size-xs);
+  }
+  
+  .stores-table th,
+  .stores-table td {
+    padding: var(--spacing-sm);
+  }
+  
+  .stores-table .actions button {
+    padding: var(--spacing-xs);
+    margin: 0 2px;
+    font-size: 10px;
   }
 }
 

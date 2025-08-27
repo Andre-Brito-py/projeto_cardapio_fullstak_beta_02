@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste dos Botões de Ativar/Desativar Loja</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste dos Botões de Ativar/Desativar Loja</h1>
+    
+    <div class="container">
+        <h2>Configuração</h2>
+        <div class="input-group">
+            <label for="token">Token do Super Admin:</label>
+            <input type="text" id="token" placeholder="Cole o token aqui">
+        </div>
+        <div class="input-group">
+            <label for="storeId">ID da Loja:</label>
+            <input type="text" id="storeId" placeholder="Cole o ID da loja aqui">
+        </div>
+        <button class="button" onclick="getToken()">🔐 Obter Token Automaticamente</button>
+        <button class="button" onclick="getStores()">📋 Listar Lojas</button>
+    </div>
+    
+    <div class="container">
+        <h2>Ações</h2>
+        <button class="button" onclick="toggleStatus('active')">✅ Ativar Loja</button>
+        <button class="button" onclick="toggleStatus('suspended')">❌ Suspender Loja</button>
+        <button class="button" onclick="clearLog()">🧹 Limpar Log</button>
+    </div>
+    
+    <div class="container">
+        <h2>Log de Execução</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:4000';
+        
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+        
+        async function getToken() {
+            try {
+                log('🔐 Fazendo login como super admin...');
+                
+                const response = await fetch(`${API_URL}/api/system/super-admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'superadmin@sistema.com',
+                        password: 'superadmin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('token').value = data.token;
+                    log('✅ Token obtido com sucesso!');
+                } else {
+                    log(`❌ Erro no login: ${data.message}`);
+                }
+            } catch (error) {
+                log(`❌ Erro na requisição: ${error.message}`);
+            }
+        }
+        
+        async function getStores() {
+            const token = document.getElementById('token').value;
+            
+            if (!token) {
+                log('❌ Token não informado!');
+                return;
+            }
+            
+            try {
+                log('📋 Buscando lojas...');
+                
+                const response = await fetch(`${API_URL}/api/system/stores`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log(`✅ Encontradas ${data.data.stores.length} lojas:`);
+                    data.data.stores.forEach(store => {
+                        log(`  - ${store.name} (ID: ${store._id}, Status: ${store.status})`);
+                    });
+                    
+                    if (data.data.stores.length > 0) {
+                        document.getElementById('storeId').value = data.data.stores[0]._id;
+                        log(`📌 ID da primeira loja copiado para o campo`);
+                    }
+                } else {
+                    log(`❌ Erro ao buscar lojas: ${data.message}`);
+                }
+            } catch (error) {
+                log(`❌ Erro na requisição: ${error.message}`);
+            }
+        }
+        
+        async function toggleStatus(newStatus) {
+            const token = document.getElementById('token').value;
+            const storeId = document.getElementById('storeId').value;
+            
+            if (!token) {
+                log('❌ Token não informado!');
+                return;
+            }
+            
+            if (!storeId) {
+                log('❌ ID da loja não informado!');
+                return;
+            }
+            
+            try {
+                log(`🔄 Alterando status da loja para: ${newStatus}`);
+                log(`📊 URL: ${API_URL}/api/system/stores/${storeId}/status`);
+                log(`📋 Dados: {"status": "${newStatus}"}`);
+                
+                const response = await fetch(`${API_URL}/api/system/stores/${storeId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        status: newStatus,
+                        reason: 'Teste via HTML'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                log(`📨 Resposta HTTP: ${response.status}`);
+                log(`📋 Dados da resposta: ${JSON.stringify(data, null, 2)}`);
+                
+                if (data.success) {
+                    log(`✅ Status alterado com sucesso!`);
+                } else {
+                    log(`❌ Erro: ${data.message}`);
+                }
+            } catch (error) {
+                log(`❌ Erro na requisição: ${error.message}`);
+            }
+        }
+        
+        // Log inicial
+        log('🚀 Teste de botões iniciado');
+        log('📝 Instruções:');
+        log('1. Clique em "Obter Token Automaticamente"');
+        log('2. Clique em "Listar Lojas" para ver as lojas disponíveis');
+        log('3. Use os botões "Ativar" ou "Suspender" para testar');
+        log('');
+    </script>
+</body>
+</html>

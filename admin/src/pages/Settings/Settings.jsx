@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './Settings.css';
-import axios from 'axios';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const Settings = ({ url }) => {
   const [pixKey, setPixKey] = useState('');
+  const [isOpen, setIsOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
   
@@ -14,20 +15,7 @@ const Settings = ({ url }) => {
   const [bannerImage, setBannerImage] = useState(null);
   const [currentBannerImage, setCurrentBannerImage] = useState('');
 
-  // Google Maps states
-  const [googleMapsApiKey, setGoogleMapsApiKey] = useState('');
-  const [restaurantAddress, setRestaurantAddress] = useState({
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: 'Brasil'
-  });
-  const [maxDeliveryDistance, setMaxDeliveryDistance] = useState(10);
-  const [deliveryZones, setDeliveryZones] = useState([
-    { maxDistance: 5, fee: 2 },
-    { maxDistance: 10, fee: 4 }
-  ]);
+
 
   // Fetch current settings
   const fetchSettings = async () => {
@@ -36,6 +24,7 @@ const Settings = ({ url }) => {
       const response = await axios.get(`${url}/api/settings`);
       if (response.data.success) {
         setPixKey(response.data.data.pixKey || '');
+        setIsOpen(response.data.data.isOpen !== undefined ? response.data.data.isOpen : true);
         
         // Set banner data if exists
         if (response.data.data.banner) {
@@ -44,15 +33,7 @@ const Settings = ({ url }) => {
           setCurrentBannerImage(response.data.data.banner.image || '');
         }
 
-        // Set Google Maps data if exists
-        setGoogleMapsApiKey(response.data.data.googleMapsApiKey || '');
-        if (response.data.data.restaurantAddress) {
-          setRestaurantAddress(response.data.data.restaurantAddress);
-        }
-        setMaxDeliveryDistance(response.data.data.maxDeliveryDistance || 10);
-        if (response.data.data.deliveryZones && response.data.data.deliveryZones.length > 0) {
-          setDeliveryZones(response.data.data.deliveryZones);
-        }
+
       }
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
@@ -151,71 +132,33 @@ const Settings = ({ url }) => {
     setBannerImage(e.target.files[0]);
   };
 
-  // Update Google Maps settings
-  const updateGoogleMapsSettings = async (e) => {
-    e.preventDefault();
+  // Atualizar status da loja (aberta/fechada)
+  const handleStoreStatusChange = async (newStatus) => {
     try {
-      setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await axios.post(
-        `${url}/api/settings/google-maps`,
+      const response = await axios.put(`${url}/api/store/status`, 
+        { isOpen: newStatus },
         {
-          googleMapsApiKey,
-          restaurantAddress,
-          maxDeliveryDistance: parseFloat(maxDeliveryDistance),
-          deliveryZones: deliveryZones.map(zone => ({
-            maxDistance: parseFloat(zone.maxDistance),
-            fee: parseFloat(zone.fee)
-          }))
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         }
       );
-      
+
       if (response.data.success) {
-        toast.success('Configurações do Google Maps atualizadas com sucesso!');
+        setIsOpen(newStatus);
+        toast.success(response.data.message);
       } else {
-        toast.error(response.data.message || 'Erro ao atualizar configurações do Google Maps');
+        toast.error(response.data.message || 'Erro ao atualizar status da loja');
       }
     } catch (error) {
-      console.error('Erro ao atualizar configurações do Google Maps:', error);
-      toast.error('Erro ao atualizar configurações do Google Maps');
-    } finally {
-      setLoading(false);
+      console.error('Erro ao atualizar status da loja:', error);
+      toast.error('Erro ao atualizar status da loja');
     }
   };
 
-  // Handle restaurant address change
-  const handleRestaurantAddressChange = (field, value) => {
-    setRestaurantAddress(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
-  // Handle delivery zone change
-  const handleDeliveryZoneChange = (index, field, value) => {
-    const updatedZones = [...deliveryZones];
-    updatedZones[index][field] = value;
-    setDeliveryZones(updatedZones);
-  };
 
-  // Add new delivery zone
-  const addDeliveryZone = () => {
-    setDeliveryZones([...deliveryZones, { maxDistance: 0, fee: 0 }]);
-  };
 
-  // Remove delivery zone
-  const removeDeliveryZone = (index) => {
-    if (deliveryZones.length > 1) {
-      const updatedZones = deliveryZones.filter((_, i) => i !== index);
-      setDeliveryZones(updatedZones);
-    }
-  };
 
   useEffect(() => {
     fetchSettings();
@@ -267,6 +210,32 @@ const Settings = ({ url }) => {
             <strong>Chave PIX atual:</strong> {pixKey}
           </div>
         )}
+      </div>
+
+      {/* Store Status Section */}
+      <div className="settings-section">
+        <h3>Status da Loja</h3>
+        <p className="section-description">
+          Controle se a loja está aberta ou fechada para receber pedidos.
+        </p>
+        
+        <div className="store-status-toggle">
+          <label className="toggle-switch">
+            <input
+              type="checkbox"
+              checked={isOpen}
+              onChange={(e) => handleStoreStatusChange(e.target.checked)}
+            />
+            <span className="slider"></span>
+          </label>
+          <span className={`status-text ${isOpen ? 'open' : 'closed'}`}>
+            {isOpen ? 'Loja Aberta' : 'Loja Fechada'}
+          </span>
+        </div>
+        
+        <div className="current-setting">
+          <strong>Status atual:</strong> {isOpen ? 'Aberta para pedidos' : 'Fechada para pedidos'}
+        </div>
       </div>
 
       {/* Banner Section */}
@@ -338,149 +307,7 @@ const Settings = ({ url }) => {
         )}
       </div>
 
-      {/* Google Maps Section */}
-      <div className="settings-section">
-        <h3>Configurações do Google Maps</h3>
-        <p className="section-description">
-          Configure a integração com o Google Maps para cálculo automático de taxa de entrega.
-        </p>
-        
-        <form onSubmit={updateGoogleMapsSettings} className="settings-form">
-          <div className="form-group">
-            <label htmlFor="googleMapsApiKey">Chave da API do Google Maps:</label>
-            <input
-              type="text"
-              id="googleMapsApiKey"
-              value={googleMapsApiKey}
-              onChange={(e) => setGoogleMapsApiKey(e.target.value)}
-              placeholder="Digite sua chave da API do Google Maps"
-              className="settings-input"
-            />
-          </div>
 
-          <h4>Endereço do Restaurante</h4>
-          <div className="form-group">
-            <label htmlFor="restaurantStreet">Rua:</label>
-            <input
-              type="text"
-              id="restaurantStreet"
-              value={restaurantAddress.street}
-              onChange={(e) => handleRestaurantAddressChange('street', e.target.value)}
-              placeholder="Digite o endereço da rua"
-              className="settings-input"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="restaurantCity">Cidade:</label>
-            <input
-              type="text"
-              id="restaurantCity"
-              value={restaurantAddress.city}
-              onChange={(e) => handleRestaurantAddressChange('city', e.target.value)}
-              placeholder="Digite a cidade"
-              className="settings-input"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="restaurantState">Estado:</label>
-            <input
-              type="text"
-              id="restaurantState"
-              value={restaurantAddress.state}
-              onChange={(e) => handleRestaurantAddressChange('state', e.target.value)}
-              placeholder="Digite o estado"
-              className="settings-input"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="restaurantZipCode">CEP:</label>
-            <input
-              type="text"
-              id="restaurantZipCode"
-              value={restaurantAddress.zipCode}
-              onChange={(e) => handleRestaurantAddressChange('zipCode', e.target.value)}
-              placeholder="Digite o CEP"
-              className="settings-input"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="maxDeliveryDistance">Distância Máxima de Entrega (km):</label>
-            <input
-              type="number"
-              id="maxDeliveryDistance"
-              value={maxDeliveryDistance}
-              onChange={(e) => setMaxDeliveryDistance(e.target.value)}
-              min="1"
-              step="0.1"
-              className="settings-input"
-            />
-          </div>
-
-          <h4>Zonas de Entrega</h4>
-          {deliveryZones.map((zone, index) => (
-            <div key={index} className="delivery-zone">
-              <div className="form-group">
-                <label>Até {zone.maxDistance} km - Taxa: R$ {zone.fee}</label>
-                <div className="zone-inputs">
-                  <input
-                    type="number"
-                    value={zone.maxDistance}
-                    onChange={(e) => handleDeliveryZoneChange(index, 'maxDistance', e.target.value)}
-                    placeholder="Distância (km)"
-                    min="0.1"
-                    step="0.1"
-                    className="settings-input zone-input"
-                  />
-                  <input
-                    type="number"
-                    value={zone.fee}
-                    onChange={(e) => handleDeliveryZoneChange(index, 'fee', e.target.value)}
-                    placeholder="Taxa (R$)"
-                    min="0"
-                    step="0.01"
-                    className="settings-input zone-input"
-                  />
-                  {deliveryZones.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeDeliveryZone(index)}
-                      className="remove-zone-btn"
-                    >
-                      Remover
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-          
-          <button
-            type="button"
-            onClick={addDeliveryZone}
-            className="add-zone-btn"
-          >
-            Adicionar Zona de Entrega
-          </button>
-          
-          <button 
-            type="submit" 
-            className="settings-btn"
-            disabled={loading}
-          >
-            {loading ? 'Salvando...' : 'Salvar Configurações do Google Maps'}
-          </button>
-        </form>
-        
-        {googleMapsApiKey && (
-          <div className="current-setting">
-            <strong>API Key configurada:</strong> {googleMapsApiKey.substring(0, 10)}...
-          </div>
-        )}
-      </div>
     </div>
   );
 };

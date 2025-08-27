@@ -21,6 +21,33 @@ const StoreManagement = ({ url, token }) => {
     subscriptionPlan: 'Básico'
   });
 
+  // Debug: verificar se há elementos bloqueando os cliques
+  useEffect(() => {
+    console.log('🔍 StoreManagement montado - verificando elementos que podem bloquear cliques');
+    
+    const checkForBlockingElements = () => {
+      const backdrop = document.querySelector('.sidebar-backdrop');
+      const overlay = document.querySelector('.store-form-overlay');
+      
+      console.log('📊 Estado dos elementos:');
+      console.log('  - Sidebar backdrop:', backdrop ? 'Presente' : 'Ausente');
+      console.log('  - Store form overlay:', overlay ? 'Presente' : 'Ausente');
+      
+      if (backdrop) {
+        const backdropStyles = getComputedStyle(backdrop);
+        console.log('  - Backdrop visível:', backdropStyles.display !== 'none');
+        console.log('  - Backdrop z-index:', backdropStyles.zIndex);
+      }
+    };
+    
+    checkForBlockingElements();
+    
+    // Verificar novamente após um pequeno delay
+    const timer = setTimeout(checkForBlockingElements, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     fetchStores();
   }, []);
@@ -156,24 +183,56 @@ const StoreManagement = ({ url, token }) => {
   };
 
   const toggleStoreStatus = async (storeId, currentStatus) => {
+    console.log('🔄 toggleStoreStatus chamado:', { storeId, currentStatus, token: token ? 'presente' : 'ausente' });
+    
+    if (!token) {
+      console.error('❌ Token não encontrado!');
+      toast.error('Token de autenticação não encontrado. Faça login novamente.');
+      return;
+    }
+    
     setLoading(true);
     try {
       const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-      const response = await axios.put(`${url}/api/system/stores/${storeId}/status`, 
-        { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      console.log('📊 Alterando status de', currentStatus, 'para', newStatus);
+      
+      const requestUrl = `${url}/api/system/stores/${storeId}/status`;
+      const requestData = { status: newStatus };
+      const requestHeaders = { Authorization: `Bearer ${token}` };
+      
+      console.log('🌐 Fazendo requisição:', {
+        url: requestUrl,
+        data: requestData,
+        headers: { ...requestHeaders, Authorization: 'Bearer [HIDDEN]' }
+      });
+      
+      const response = await axios.put(requestUrl, requestData, { headers: requestHeaders });
+      
+      console.log('✅ Resposta recebida:', response.data);
       
       if (response.data.success) {
-        toast.success('Status da loja atualizado!');
+        toast.success(`Loja ${newStatus === 'active' ? 'ativada' : 'desativada'} com sucesso!`);
+        console.log('🔄 Recarregando lista de lojas...');
         fetchStores();
       } else {
+        console.error('❌ Erro na resposta:', response.data.message);
         toast.error(response.data.message || 'Erro ao atualizar status');
       }
     } catch (error) {
-      console.error('Erro ao atualizar status:', error);
-      toast.error('Erro ao atualizar status da loja');
+      console.error('❌ Erro ao atualizar status:', error);
+      console.error('📋 Detalhes do erro:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Erro ao atualizar status da loja');
+      }
     } finally {
+      console.log('🏁 toggleStoreStatus finalizado');
       setLoading(false);
     }
   };
@@ -360,16 +419,18 @@ const StoreManagement = ({ url, token }) => {
             </thead>
             <tbody>
               {stores.map(store => (
-                <tr key={store._id} className={!store.isActive ? 'inactive' : ''}>
+                <tr key={store._id} className={store.status !== 'active' ? 'inactive' : ''}>
                   <td>{store.name}</td>
                   <td>{store.ownerName}</td>
                   <td>{store.ownerEmail}</td>
                   <td>
-                    <span className={`status ${store.isActive ? 'active' : 'inactive'}`}>
-                      {store.isActive ? 'Ativa' : 'Inativa'}
+                    <span className={`status ${store.status === 'active' ? 'active' : 'inactive'}`}>
+                      {store.status === 'active' ? 'Ativa' : 
+                       store.status === 'suspended' ? 'Suspensa' :
+                       store.status === 'pending' ? 'Pendente' : 'Inativa'}
                     </span>
                   </td>
-                  <td>{store.subscriptionPlan}</td>
+                  <td>{store.subscription?.plan || store.subscriptionPlan}</td>
                   <td>{new Date(store.createdAt).toLocaleDateString('pt-BR')}</td>
                   <td className='actions'>
                     <button 
@@ -380,11 +441,11 @@ const StoreManagement = ({ url, token }) => {
                       Editar
                     </button>
                     <button 
-                      className={`toggle-btn ${store.isActive ? 'active' : 'inactive'}`}
-                      onClick={() => toggleStoreStatus(store._id, store.isActive)}
+                      className={`toggle-btn ${store.status === 'active' ? 'active' : 'inactive'}`}
+                      onClick={() => toggleStoreStatus(store._id, store.status)}
                       disabled={loading}
                     >
-                      {store.isActive ? 'Desativar' : 'Ativar'}
+                      {store.status === 'active' ? 'Desativar' : 'Ativar'}
                     </button>
                     <button 
                       className='delete-btn'

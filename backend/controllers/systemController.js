@@ -139,6 +139,12 @@ const updateStoreStatus = async (req, res) => {
         const { storeId } = req.params;
         const { status, reason } = req.body;
         
+        // Validar status
+        const validStatuses = ['active', 'inactive', 'suspended', 'pending'];
+        if (!validStatuses.includes(status)) {
+            return res.json({ success: false, message: "Status inválido" });
+        }
+        
         const store = await Store.findById(storeId);
         if (!store) {
             return res.json({ success: false, message: "Loja não encontrada" });
@@ -151,7 +157,14 @@ const updateStoreStatus = async (req, res) => {
         
         await store.save();
         
-        res.json({ success: true, message: "Status da loja atualizado com sucesso" });
+        res.json({ 
+            success: true, 
+            message: "Status da loja atualizado com sucesso",
+            data: {
+                storeId: store._id,
+                status: store.status
+            }
+        });
     } catch (error) {
         console.log(error);
         res.json({ success: false, message: "Erro ao atualizar status da loja" });
@@ -265,7 +278,7 @@ const getPublicStores = async (req, res) => {
                     primaryColor: store.customization?.primaryColor,
                     secondaryColor: store.customization?.secondaryColor
                 },
-                domain: store.domain
+                domain: store.domain?.customDomain || store.domain?.subdomain || store.slug
             }))
         });
     } catch (error) {

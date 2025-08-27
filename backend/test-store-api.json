@@ -1,9 +1,0 @@
-{
-  "name": "Loja Teste API",
-  "description": "Loja criada via API para teste",
-  "restaurantAddress": "Rua Teste, 123",
-  "ownerName": "Proprietario Teste",
-  "ownerEmail": "teste@email.com",
-  "ownerPassword": "123456",
-  "subscriptionPlan": "Premium"
-}

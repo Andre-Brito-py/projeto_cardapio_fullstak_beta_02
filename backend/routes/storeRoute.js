@@ -6,7 +6,8 @@ import {
     checkPlanLimits,
     loginStoreAdmin,
     getPublicStoreData,
-    getPublicStoreMenu
+    getPublicStoreMenu,
+    updateStoreStatus
 } from '../controllers/storeController.js';
 import {
     identifyStore,
@@ -36,8 +37,10 @@ storeRouter.use(requireActiveStore);
 storeRouter.use(addStoreContext);
 
 // Rotas da loja
+storeRouter.get('/current', getStore); // Nova rota para obter loja atual
 storeRouter.get('/:storeId', getStore);
 storeRouter.put('/:storeId/settings', updateStoreSettings);
+storeRouter.put('/status', updateStoreStatus); // Nova rota para atualizar status aberta/fechada
 storeRouter.get('/:storeId/stats', getStoreStats);
 storeRouter.get('/:storeId/limits', checkPlanLimits);
 
