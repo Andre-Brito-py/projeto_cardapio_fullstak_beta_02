@@ -4,7 +4,9 @@ import {
     updateStoreSettings,
     getStoreStats,
     checkPlanLimits,
-    loginStoreAdmin
+    loginStoreAdmin,
+    getPublicStoreData,
+    getPublicStoreMenu
 } from '../controllers/storeController.js';
 import {
     identifyStore,
@@ -17,7 +19,11 @@ import {
 
 const storeRouter = express.Router();
 
-// Middleware para identificar a loja em todas as rotas
+// Rotas públicas (sem middleware de identificação)
+storeRouter.get('/public/:slug', getPublicStoreData);
+storeRouter.get('/public/:slug/menu', getPublicStoreMenu);
+
+// Middleware para identificar a loja em todas as rotas abaixo
 storeRouter.use(identifyStore);
 
 // Rota pública para login do admin da loja

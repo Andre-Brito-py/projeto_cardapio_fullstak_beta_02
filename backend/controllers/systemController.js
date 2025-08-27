@@ -1,6 +1,8 @@
 import SystemSettings from '../models/systemSettingsModel.js';
 import Store from '../models/storeModel.js';
 import userModel from '../models/userModel.js';
+import foodModel from '../models/foodModel.js';
+import bannerModel from '../models/bannerModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -240,6 +242,152 @@ const loginSuperAdmin = async (req, res) => {
     }
 };
 
+// Listar lojas públicas (sem autenticação)
+const getPublicStores = async (req, res) => {
+    try {
+        const stores = await Store.find({ 
+            status: 'active',
+            'subscription.status': { $in: ['active', 'trial'] }
+        })
+        .select('name slug description logo domain customization settings.restaurantAddress')
+        .sort({ name: 1 });
+        
+        res.json({ 
+            success: true, 
+            stores: stores.map(store => ({
+                id: store._id,
+                name: store.name,
+                slug: store.slug,
+                description: store.description,
+                logo: store.logo,
+                address: store.settings?.restaurantAddress,
+                customization: {
+                    primaryColor: store.customization?.primaryColor,
+                    secondaryColor: store.customization?.secondaryColor
+                },
+                domain: store.domain
+            }))
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Erro ao listar lojas públicas" });
+    }
+};
+
+// Verificar se existe super admin
+const checkSuperAdmin = async (req, res) => {
+    try {
+        const superAdmin = await userModel.findOne({ role: 'super_admin' });
+        res.json({ 
+            success: true, 
+            exists: !!superAdmin,
+            data: superAdmin ? {
+                id: superAdmin._id,
+                name: superAdmin.name,
+                email: superAdmin.email,
+                role: superAdmin.role,
+                isActive: superAdmin.isActive,
+                createdAt: superAdmin.createdAt
+            } : null
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Erro ao verificar super admin" });
+    }
+};
+
+// Resetar senha do super admin (temporário para debug)
+const resetSuperAdminPassword = async (req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+        
+        const superAdmin = await userModel.findOne({ email, role: 'super_admin' });
+        if (!superAdmin) {
+            return res.json({ success: false, message: "Super Admin não encontrado" });
+        }
+        
+        // Hash da nova senha
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        
+        superAdmin.password = hashedPassword;
+        await superAdmin.save();
+        
+        res.json({ success: true, message: "Senha do Super Admin resetada com sucesso" });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Erro ao resetar senha" });
+    }
+};
+
+// Excluir loja e todos os dados relacionados
+const deleteStore = async (req, res) => {
+    console.log('=== FUNÇÃO DELETE STORE CHAMADA ===');
+    console.log('StoreId recebido:', req.params.storeId);
+    console.log('Usuário autenticado:', req.user);
+    
+    try {
+        const { storeId } = req.params;
+
+        // Verificar se a loja existe
+        const store = await Store.findById(storeId);
+        if (!store) {
+            return res.status(404).json({
+                success: false,
+                message: "Loja não encontrada"
+            });
+        }
+
+        // Validação de segurança: verificar se há pedidos recentes (últimos 30 dias)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        // Nota: Como o orderModel não tem storeId, esta validação seria implementada
+        // quando o modelo de pedidos for atualizado para incluir referência à loja
+        
+        // Validação: não permitir exclusão se a loja estiver ativa
+        if (store.status === 'active') {
+            return res.status(400).json({
+                success: false,
+                message: "Não é possível excluir uma loja ativa. Desative a loja primeiro."
+            });
+        }
+
+        // Buscar todos os alimentos da loja para excluir banners relacionados
+        const storeFood = await foodModel.find({ storeId });
+        const foodIds = storeFood.map(food => food._id);
+
+        // Excluir banners que referenciam produtos da loja
+        if (foodIds.length > 0) {
+            await bannerModel.deleteMany({ productId: { $in: foodIds } });
+        }
+
+        // Excluir todos os alimentos da loja
+        await foodModel.deleteMany({ storeId });
+
+        // Excluir usuários store_admin da loja
+        await userModel.deleteMany({ 
+            storeId: storeId,
+            role: 'store_admin'
+        });
+
+        // Excluir a loja
+        await Store.findByIdAndDelete(storeId);
+
+        res.json({
+            success: true,
+            message: "Loja e todos os dados relacionados foram excluídos com sucesso"
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Erro interno do servidor"
+        });
+    }
+};
+
 export {
     getSystemSettings,
     updateSystemSettings,
@@ -247,5 +395,9 @@ export {
     getAllStores,
     updateStoreStatus,
     createSuperAdmin,
-    loginSuperAdmin
+    loginSuperAdmin,
+    getPublicStores,
+    checkSuperAdmin,
+    resetSuperAdminPassword,
+    deleteStore
 };

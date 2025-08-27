@@ -64,6 +64,6 @@ userSchema.methods.hasPermission = function(permission) {
     return this.permissions.includes(permission);
 };
 
-const userModel = mongoose.model.user || mongoose.model("user", userSchema);
+const userModel = mongoose.model.User || mongoose.model("User", userSchema);
 
 export default userModel;

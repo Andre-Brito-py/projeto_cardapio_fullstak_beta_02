@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { StoreContext } from '../../components/context/StoreContext';
 import { assets } from '../../assets/assets';
 import axios from 'axios';
+import SEO from '../../components/SEO/SEO';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -140,6 +141,11 @@ const ProductDetail = () => {
 
     return (
         <div className="product-detail">
+            <SEO 
+                title={`${product.name} - Food Delivery`}
+                description={product.description || `Peça ${product.name} com entrega rápida`}
+                keywords={`${product.name}, ${product.category}, food delivery, pedido online`}
+            />
             <div className="product-detail-container">
                 <button onClick={() => navigate('/')} className="back-button">
                     ← Voltar ao Menu

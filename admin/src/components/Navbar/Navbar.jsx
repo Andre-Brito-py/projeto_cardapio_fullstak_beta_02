@@ -2,9 +2,16 @@ import React from 'react'
 import './Navbar.css'
 import { assets } from './../../assets/assets';
 
-const Navbar = ({ logout, isSuperAdmin }) => {
+const Navbar = ({ logout, isSuperAdmin, onToggleSidebar }) => {
   return (
     <div className='navbar'>
+        {isSuperAdmin && (
+          <button className='mobile-menu-toggle' onClick={onToggleSidebar}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        )}
         <img className='logo' src={assets.logo} alt="" />
         <div className='navbar-center'>
           {isSuperAdmin && (

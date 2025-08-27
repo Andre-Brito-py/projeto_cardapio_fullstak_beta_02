@@ -4,6 +4,7 @@ import './Cart.css'
 import { StoreContext } from '../../components/context/StoreContext'
 import { useNavigate } from 'react-router-dom';
 import useDeliveryCalculation from '../../hooks/useDeliveryCalculation';
+import SEO from '../../components/SEO/SEO';
 
 const Cart = () => {
 
@@ -60,6 +61,11 @@ const Cart = () => {
   };
   return (
     <div className='cart'>
+      <SEO 
+        title="Carrinho - Food Delivery"
+        description="Revise seus itens no carrinho e finalize seu pedido com entrega rápida."
+        keywords="carrinho, pedido, checkout, food delivery"
+      />
       <div className="cart-items">
         <div className="cart-items-title">
           <p>Itens</p>

@@ -120,16 +120,23 @@ const checkPlanLimits = (type) => {
 // Middleware de autenticação com suporte a multi-tenancy
 const authMultiTenant = async (req, res, next) => {
     try {
+        console.log('AuthMultiTenant - Headers:', req.headers.authorization);
         const token = req.headers.authorization?.split(' ')[1];
         
         if (!token) {
+            console.log('AuthMultiTenant - Token não fornecido');
             return res.status(401).json({ success: false, message: "Token não fornecido" });
         }
         
+        console.log('AuthMultiTenant - Verificando token:', token.substring(0, 20) + '...');
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log('AuthMultiTenant - Token decodificado:', decoded);
+        
         const user = await userModel.findById(decoded.id).populate('storeId');
+        console.log('AuthMultiTenant - Usuário encontrado:', user ? { id: user._id, role: user.role, isActive: user.isActive } : 'null');
         
         if (!user || !user.isActive) {
+            console.log('AuthMultiTenant - Usuário não encontrado ou inativo');
             return res.status(401).json({ success: false, message: "Usuário não encontrado ou inativo" });
         }
         
@@ -151,6 +158,7 @@ const authMultiTenant = async (req, res, next) => {
             }
         }
         
+        console.log('AuthMultiTenant - Autenticação bem-sucedida para:', user.role);
         next();
     } catch (error) {
         console.log('Erro na autenticação multi-tenant:', error);

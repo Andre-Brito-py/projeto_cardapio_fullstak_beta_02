@@ -3,6 +3,7 @@ import './Verify.css'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { StoreContext } from './../../components/context/StoreContext';
 import axios from 'axios';
+import SEO from '../../components/SEO/SEO';
 
 const Verify = () => {
 
@@ -28,6 +29,11 @@ const Verify = () => {
    
   return (
     <div className='verify'>
+      <SEO 
+        title="Verificando Pagamento - Food Delivery"
+        description="Aguarde enquanto verificamos seu pagamento e confirmamos seu pedido."
+        keywords="verificação pagamento, confirmação pedido, food delivery"
+      />
         <div className="spinner"></div>
     </div>
   )

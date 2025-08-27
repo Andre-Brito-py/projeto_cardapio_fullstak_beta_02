@@ -6,7 +6,11 @@ import {
     getAllStores,
     updateStoreStatus,
     createSuperAdmin,
-    loginSuperAdmin
+    loginSuperAdmin,
+    getPublicStores,
+    checkSuperAdmin,
+    resetSuperAdminPassword,
+    deleteStore
 } from '../controllers/systemController.js';
 import {
     createStore,
@@ -20,8 +24,11 @@ import {
 const systemRouter = express.Router();
 
 // Rotas públicas (sem autenticação)
+systemRouter.get('/stores/public', getPublicStores);
+systemRouter.get('/super-admin/check', checkSuperAdmin);
 systemRouter.post('/super-admin/create', createSuperAdmin);
 systemRouter.post('/super-admin/login', loginSuperAdmin);
+systemRouter.post('/super-admin/reset-password', resetSuperAdminPassword);
 
 // Middleware de autenticação para todas as rotas abaixo
 systemRouter.use(authMultiTenant);
@@ -39,5 +46,6 @@ systemRouter.get('/stores', getAllStores);
 systemRouter.post('/stores', createStore);
 systemRouter.put('/stores/:storeId/status', updateStoreStatus);
 systemRouter.put('/stores/:storeId/subscription', updateSubscription);
+systemRouter.delete('/stores/:storeId', deleteStore);
 
 export default systemRouter;

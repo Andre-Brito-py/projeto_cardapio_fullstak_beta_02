@@ -1,45 +1,88 @@
 .system-settings {
-  padding: 20px;
-  max-width: 1000px;
+  padding: var(--spacing-lg);
+  max-width: var(--container-max-width);
   margin: 0 auto;
+  background: var(--background-primary);
+  min-height: 100vh;
+  position: relative;
+}
+
+.system-settings::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: var(--gradient-primary);
+  opacity: 0.05;
+  z-index: 0;
 }
 
 .system-settings-header {
-  margin-bottom: 30px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 2px solid var(--border-light);
+  position: relative;
+  z-index: 1;
 }
 
 .system-settings-header h2 {
-  color: #333;
-  font-size: 28px;
-  margin: 0 0 10px 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--spacing-xs) 0;
+  text-shadow: var(--text-shadow-sm);
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .system-settings-header p {
-  color: #666;
-  font-size: 16px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
   margin: 0;
+  line-height: 1.5;
 }
 
 .loading {
   text-align: center;
-  padding: 60px 20px;
-  font-size: 18px;
-  color: #666;
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  background: var(--background-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin: var(--spacing-lg) 0;
 }
 
 .settings-form {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  background: var(--background-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+  z-index: 1;
+  border: 1px solid var(--border-light);
+}
+
+.settings-form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+  z-index: 1;
 }
 
 .settings-section {
-  padding: 30px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-light);
+  position: relative;
 }
 
 .settings-section:last-child {
@@ -47,102 +90,155 @@
 }
 
 .settings-section h3 {
-  color: #333;
-  font-size: 20px;
-  margin: 0 0 25px 0;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #667eea;
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--spacing-lg) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--primary-color);
   display: inline-block;
+  text-shadow: var(--text-shadow-sm);
+  position: relative;
+}
+
+.settings-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transition: transform var(--transition-normal) ease;
+}
+
+.settings-section:hover h3::after {
+  transform: scaleX(1);
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 25px;
-  margin-bottom: 20px;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  color: #555;
-  font-weight: 600;
-  font-size: 14px;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-normal) ease;
   box-sizing: border-box;
-  background: white;
+  background: var(--background-white);
+  color: var(--text-primary);
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-light);
+  transform: translateY(-1px);
 }
 
 .form-help {
   display: block;
-  margin-top: 5px;
-  color: #6c757d;
-  font-size: 12px;
+  margin-top: var(--spacing-xs);
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
   font-style: italic;
+  line-height: 1.4;
 }
 
 .checkbox-group {
-  margin-bottom: 15px;
+  margin-bottom: var(--spacing-md);
 }
 
 .checkbox-group label {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-weight: 500;
-  color: #555;
-  padding: 10px 0;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  padding: var(--spacing-xs) 0;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: var(--font-size-base);
+  transition: color var(--transition-normal) ease;
+}
+
+.checkbox-group label:hover {
+  color: var(--primary-color);
 }
 
 .checkbox-group input[type="checkbox"] {
   width: auto;
-  margin-right: 12px;
+  margin-right: var(--spacing-sm);
   transform: scale(1.2);
+  accent-color: var(--primary-color);
 }
 
 .form-actions {
-  padding: 30px;
-  background: #f8f9fa;
+  padding: var(--spacing-xl);
+  background: var(--background-secondary);
   text-align: center;
+  border-top: 1px solid var(--border-light);
 }
 
 .form-actions button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--gradient-primary);
+  color: var(--text-white);
   border: none;
-  padding: 15px 40px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: var(--spacing-md) var(--spacing-xxl);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all var(--transition-normal) ease;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.form-actions button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
+  transition: left var(--transition-slow) ease;
+  z-index: -1;
 }
 
 .form-actions button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: var(--shadow-lg);
+}
+
+.form-actions button:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .form-actions button:disabled {
@@ -152,57 +248,109 @@
 }
 
 .system-actions {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-  padding: 30px;
+  background: var(--background-white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-xl);
+  position: relative;
+  z-index: 1;
+  border: 1px solid var(--border-light);
+}
+
+.system-actions::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, var(--error-color) 0%, var(--warning-color) 100%);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
 }
 
 .system-actions h3 {
-  color: #333;
-  font-size: 20px;
-  margin: 0 0 25px 0;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #dc3545;
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--spacing-lg) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--error-color);
   display: inline-block;
+  text-shadow: var(--text-shadow-sm);
 }
 
 .action-buttons {
   display: flex;
-  gap: 20px;
+  gap: var(--spacing-lg);
   flex-wrap: wrap;
 }
 
 .action-buttons button {
-  padding: 12px 24px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal) ease;
   flex: 1;
   min-width: 200px;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .backup-btn {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--success-color) 0%, var(--info-color) 100%);
+  color: var(--text-white);
+  box-shadow: var(--shadow-sm);
+}
+
+.backup-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-slow) ease;
 }
 
 .backup-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+  box-shadow: var(--shadow-lg);
+}
+
+.backup-btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .clear-logs-btn {
-  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
-  color: #212529;
+  background: linear-gradient(135deg, var(--warning-color) 0%, var(--warning-dark) 100%);
+  color: var(--text-dark);
+  box-shadow: var(--shadow-sm);
+}
+
+.clear-logs-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-slow) ease;
 }
 
 .clear-logs-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+  box-shadow: var(--shadow-lg);
+}
+
+.clear-logs-btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 .action-buttons button:disabled {
@@ -229,71 +377,80 @@ select {
   appearance: none;
   background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
   background-repeat: no-repeat;
-  background-position: right 12px center;
+  background-position: right var(--spacing-sm) center;
   background-size: 12px;
-  padding-right: 40px;
+  padding-right: var(--spacing-xxl);
 }
 
 /* Estados de validação */
 .form-group input:invalid {
-  border-color: #dc3545;
+  border-color: var(--error-color);
+  box-shadow: 0 0 0 3px var(--error-light);
 }
 
 .form-group input:valid {
-  border-color: #28a745;
+  border-color: var(--success-color);
+  box-shadow: 0 0 0 3px var(--success-light);
 }
 
-/* Responsividade */
+/* Media Queries */
 @media (max-width: 768px) {
   .system-settings {
-    padding: 15px;
+    padding: var(--spacing-md);
+  }
+  
+  .system-settings-header h2 {
+    font-size: var(--font-size-lg);
+    text-align: center;
   }
   
   .form-row {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: var(--spacing-md);
   }
   
   .settings-section {
-    padding: 20px;
+    padding: var(--spacing-lg);
+  }
+  
+  .settings-section h3 {
+    font-size: var(--font-size-base);
   }
   
   .form-actions {
-    padding: 20px;
+    padding: var(--spacing-lg);
   }
   
   .action-buttons {
     flex-direction: column;
+    gap: var(--spacing-md);
   }
   
   .action-buttons button {
     min-width: auto;
   }
-  
-  .system-settings-header h2 {
-    font-size: 24px;
-  }
-  
-  .settings-section h3 {
-    font-size: 18px;
-  }
 }
 
 @media (max-width: 480px) {
   .system-settings {
-    padding: 10px;
+    padding: var(--spacing-sm);
   }
   
   .settings-section {
-    padding: 15px;
+    padding: var(--spacing-md);
   }
   
   .form-actions {
-    padding: 15px;
+    padding: var(--spacing-md);
   }
   
   .form-actions button {
-    padding: 12px 20px;
-    font-size: 14px;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: var(--font-size-sm);
+  }
+  
+  .action-buttons button {
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-size: var(--font-size-xs);
   }
 }

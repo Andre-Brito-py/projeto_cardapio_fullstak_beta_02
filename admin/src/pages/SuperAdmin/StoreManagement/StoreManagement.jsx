@@ -8,6 +8,9 @@ const StoreManagement = ({ url, token }) => {
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingStore, setEditingStore] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [storeToDelete, setStoreToDelete] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -26,7 +29,7 @@ const StoreManagement = ({ url, token }) => {
     setLoading(true);
     try {
       const response = await axios.get(`${url}/api/system/stores`, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -56,7 +59,7 @@ const StoreManagement = ({ url, token }) => {
     
     try {
       const response = await axios.post(`${url}/api/system/stores`, formData, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -97,8 +100,59 @@ const StoreManagement = ({ url, token }) => {
     setShowForm(true);
   };
 
-  const handleDelete = async (storeId) => {
-    toast.info('Funcionalidade de exclusão será implementada em breve');
+  const handleDelete = (storeId) => {
+    const store = stores.find(s => s._id === storeId);
+    if (!store) return;
+
+    setStoreToDelete(store);
+    setShowDeleteModal(true);
+    setDeleteConfirmText('');
+  };
+
+  const confirmDelete = async () => {
+    console.log('=== INICIANDO EXCLUSÃO ===');
+    console.log('URL:', `${url}/api/system/stores/${storeToDelete._id}`);
+    console.log('Token:', token ? 'Token presente' : 'Token ausente');
+    console.log('Store ID:', storeToDelete._id);
+    
+    try {
+      const response = await axios.delete(`${url}/api/system/stores/${storeToDelete._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      console.log('=== RESPOSTA DO SERVIDOR ===');
+      console.log('Status:', response.status);
+      console.log('Data:', response.data);
+
+      if (response.data.success) {
+        toast.success('Loja excluída com sucesso!');
+        setShowDeleteModal(false);
+        setStoreToDelete(null);
+        setDeleteConfirmText('');
+        fetchStores(); // Recarregar a lista
+      } else {
+        console.log('Erro do servidor:', response.data.message);
+        toast.error(response.data.message || 'Erro ao excluir loja');
+      }
+    } catch (error) {
+      console.error('=== ERRO COMPLETO ===');
+      console.error('Error object:', error);
+      console.error('Response:', error.response);
+      console.error('Response data:', error.response?.data);
+      console.error('Response status:', error.response?.status);
+      
+      if (error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error('Erro ao excluir loja. Tente novamente.');
+      }
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setStoreToDelete(null);
+    setDeleteConfirmText('');
   };
 
   const toggleStoreStatus = async (storeId, currentStatus) => {
@@ -107,7 +161,7 @@ const StoreManagement = ({ url, token }) => {
       const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
       const response = await axios.put(`${url}/api/system/stores/${storeId}/status`, 
         { status: newStatus },
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       
       if (response.data.success) {
@@ -241,6 +295,45 @@ const StoreManagement = ({ url, token }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className='store-form-overlay'>
+          <div className='delete-modal'>
+            <h3>⚠️ Confirmar Exclusão</h3>
+            <div className='delete-warning'>
+              <p>Tem certeza que deseja excluir a loja <strong>"{storeToDelete?.name}"</strong>?</p>
+              
+              <div className='warning-list'>
+                <p><strong>ATENÇÃO: Esta ação irá excluir permanentemente:</strong></p>
+                <ul>
+                  <li>A loja e todas suas configurações</li>
+                  <li>Todos os produtos da loja</li>
+                  <li>Todos os administradores da loja</li>
+                  <li>Banners relacionados aos produtos</li>
+                </ul>
+                <p><strong>Esta ação NÃO PODE ser desfeita!</strong></p>
+              </div>
+            </div>
+            
+            <div className='modal-actions'>
+              <button 
+                type='button' 
+                className='cancel-btn'
+                onClick={cancelDelete}
+              >
+                Cancelar
+              </button>
+              <button 
+                type='button' 
+                className='confirm-delete-btn'
+                onClick={confirmDelete}
+              >
+                Excluir Permanentemente
+              </button>
+            </div>
           </div>
         </div>
       )}

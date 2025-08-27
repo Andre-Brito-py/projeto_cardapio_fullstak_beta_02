@@ -1,7 +1,8 @@
 .product-detail {
     min-height: 100vh;
-    padding: 20px;
+    padding: var(--spacing-xl);
     background-color: #f8f9fa;
+    animation: fadeInUp var(--animation-duration-normal) var(--animation-timing-ease);
 }
 
 .product-detail-container {
@@ -11,6 +12,7 @@
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    transition: all var(--transition-normal) ease;
 }
 
 .back-button {
@@ -47,8 +49,13 @@
     max-width: 400px;
     height: 300px;
     object-fit: cover;
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-xl);
+    transition: all var(--transition-slow) var(--animation-timing-ease);
+}
+
+.product-image-section:hover .product-detail-image {
+    transform: scale(1.05);
 }
 
 .product-info-section {
@@ -58,17 +65,32 @@
 }
 
 .product-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #333;
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
     margin: 0;
+    background: var(--text-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .product-description {
-    font-size: 1.1rem;
-    color: #666;
-    line-height: 1.6;
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
     margin: 0;
+    padding: var(--spacing-lg);
+    background: var(--gray-50);
+    border-radius: var(--border-radius-lg);
+    border-left: 4px solid var(--primary-color);
+    transition: all var(--transition-normal) ease;
+}
+
+.product-description:hover {
+    background: var(--white);
+    box-shadow: var(--shadow-md);
+    transform: translateX(var(--spacing-xs));
 }
 
 .product-category {
@@ -79,10 +101,12 @@
 }
 
 .product-base-price {
-    font-size: 1.2rem;
-    color: #333;
-    font-weight: 600;
+    font-size: var(--font-size-xl);
+    color: var(--primary-color);
+    font-weight: var(--font-weight-semibold);
     margin: 0;
+    text-shadow: var(--glow-primary);
+    animation: glow 2s ease-in-out infinite alternate;
 }
 
 .quantity-section {
@@ -276,13 +300,15 @@
 .finish-order-btn,
 .continue-shopping-btn {
     flex: 1;
-    padding: 15px 20px;
+    padding: var(--spacing-lg) var(--spacing-xl);
     border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 600;
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) var(--animation-timing-bounce);
+    position: relative;
+    overflow: hidden;
 }
 
 .finish-order-btn {
@@ -292,7 +318,8 @@
 
 .finish-order-btn:hover {
     background-color: #218838;
-    transform: translateY(-2px);
+    transform: translateY(var(--translate-hover)) scale(1.05);
+    box-shadow: var(--shadow-xl);
 }
 
 .continue-shopping-btn {
@@ -302,7 +329,8 @@
 
 .continue-shopping-btn:hover {
     background-color: #5a6268;
-    transform: translateY(-2px);
+    transform: translateY(var(--translate-hover)) scale(1.05);
+    box-shadow: var(--shadow-xl);
 }
 
 .product-detail-loading,
@@ -340,17 +368,18 @@
 /* Responsive Design */
 @media (max-width: 768px) {
     .product-detail {
-        padding: 10px;
+        padding: var(--spacing-md);
     }
     
     .product-detail-content {
         grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 0 20px 20px 20px;
+        gap: var(--spacing-xl);
+        padding: 0 var(--spacing-xl) var(--spacing-xl) var(--spacing-xl);
+        animation: fadeInUp var(--animation-duration-normal) var(--animation-timing-ease);
     }
     
     .product-title {
-        font-size: 2rem;
+        font-size: var(--font-size-2xl);
     }
     
     .product-detail-image {
@@ -363,7 +392,13 @@
     }
     
     .back-button {
-        margin: 10px;
+        margin: var(--spacing-md);
+    }
+    
+    .finish-order-btn,
+    .continue-shopping-btn {
+        width: 100%;
+        padding: var(--spacing-lg);
     }
 }
 

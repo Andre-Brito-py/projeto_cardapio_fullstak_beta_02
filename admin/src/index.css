@@ -1,38 +1,222 @@
+/* Importar sistema de design */
+@import url('../design-system.css');
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 
-*{
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-    font-family: Outfit;
-  }
-
-  body{
+/* Estilos específicos do painel admin */
+body {
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
     min-height: 100vh;
-    background-color: #fcfcfc;
-  }
-
-  a{
-  text-decoration: none;
-  color: inherit;
 }
 
-hr{
+hr {
     border: none;
     height: 1px;
-    background-color: #a9a9a9;
+    background: linear-gradient(90deg, transparent, var(--gray-300), transparent);
+    margin: var(--spacing-lg) 0;
 }
 
-.app-content{
-  display: flex;
+.app-content {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--gray-50);
 }
 
-.flex-col{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
 }
 
-.cursor{
-  cursor: pointer;
+.cursor {
+    cursor: pointer;
+}
+
+/* Layout principal do admin */
+.admin-main {
+    flex: 1;
+    padding: var(--spacing-xl);
+    background-color: var(--white);
+    margin: var(--spacing-lg);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow-y: auto;
+}
+
+/* Cabeçalho das páginas */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: var(--border-width) solid var(--gray-200);
+}
+
+.page-title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--gray-900);
+    margin: 0;
+}
+
+.page-subtitle {
+    font-size: var(--font-size-base);
+    color: var(--gray-600);
+    margin-top: var(--spacing-xs);
+}
+
+/* Cards do admin */
+.admin-card {
+    background: var(--white);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-sm);
+    border: var(--border-width) solid var(--gray-200);
+    overflow: hidden;
+    transition: var(--transition-normal);
+}
+
+.admin-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.admin-card-header {
+    padding: var(--spacing-xl);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: var(--white);
+}
+
+.admin-card-body {
+    padding: var(--spacing-xl);
+}
+
+/* Formulários do admin */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.form-label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-700);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-input {
+    padding: var(--spacing-md);
+    border: var(--border-width) solid var(--gray-300);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--font-size-base);
+    transition: var(--transition-fast);
+    background-color: var(--white);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.form-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Tabelas do admin */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-table th {
+    background: var(--gray-100);
+    padding: var(--spacing-lg);
+    text-align: left;
+    font-weight: var(--font-weight-semibold);
+    color: var(--gray-700);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-table td {
+    padding: var(--spacing-lg);
+    border-top: var(--border-width) solid var(--gray-200);
+    color: var(--gray-800);
+}
+
+.admin-table tr:hover {
+    background-color: var(--gray-50);
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-success {
+    background-color: var(--success-light);
+    color: var(--success-color);
+}
+
+.status-warning {
+    background-color: var(--warning-light);
+    color: var(--warning-color);
+}
+
+.status-error {
+    background-color: var(--error-light);
+    color: var(--error-color);
+}
+
+.status-info {
+    background-color: var(--info-light);
+    color: var(--info-color);
+}
+
+/* Responsividade do admin */
+@media (max-width: 768px) {
+    .app-content {
+        flex-direction: column;
+    }
+    
+    .admin-main {
+        margin: var(--spacing-sm);
+        padding: var(--spacing-lg);
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+    
+    .admin-table {
+        font-size: var(--font-size-sm);
+    }
+    
+    .admin-table th,
+    .admin-table td {
+        padding: var(--spacing-sm);
+    }
 }

@@ -17,7 +17,6 @@ import systemRouter from './routes/systemRoute.js';
 import storeRouter from './routes/storeRoute.js';
 
 // Utilitários
-import { populateInitialCategories } from './populateCategories.js';
 import 'dotenv/config';
 
 // Configuração da aplicação
@@ -56,9 +55,4 @@ app.get('/', (req, res) => {
 // Inicialização do servidor
 app.listen(port, () => {
     console.log(`Server started on http://localhost:${port}`);
-    
-    // Popula categorias iniciais após 2 segundos (aguarda conexão com DB)
-    setTimeout(() => {
-        populateInitialCategories();
-    }, 2000);
 });

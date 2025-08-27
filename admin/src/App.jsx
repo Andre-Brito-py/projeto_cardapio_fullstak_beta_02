@@ -19,10 +19,11 @@ import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
+  const url = 'http://localhost:4000';
   const [token, setToken] = useState('');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [showSuperAdminLogin, setShowSuperAdminLogin] = useState(false);
-  const url = 'http://localhost:4000';
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
@@ -89,10 +90,21 @@ const App = () => {
   return (
     <div>
       <ToastContainer/>
-      <Navbar logout={logout} isSuperAdmin={isSuperAdmin}/>
+      <Navbar 
+        logout={logout} 
+        isSuperAdmin={isSuperAdmin}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+      />
       <hr/>
       <div className="app-content">
-        {isSuperAdmin ? <SuperAdminSidebar/> : <Sidebar/>}
+        {isSuperAdmin ? (
+          <SuperAdminSidebar 
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+        ) : (
+          <Sidebar/>
+        )}
         <Routes>
           {/* Rotas do Super Admin */}
           <Route path='/super-admin/stores' element={<StoreManagement url={url} token={token}/>} />

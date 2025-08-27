@@ -1,5 +1,6 @@
 .my-orders{
     margin: 50px 0px;
+    animation: fadeInUp var(--animation-duration-normal) var(--animation-timing-ease);
 }
 
 .my-orders .container{
@@ -13,11 +14,40 @@
     display: grid;
     grid-template-columns: 0.5fr 2fr 1fr 1fr 2fr 1fr;
     align-items: center;
-    gap: 30px;
-    font-size: 14px;
-    padding: 10px 20px;
-    color: #454545;
-    border: 1px solid tomato;
+    gap: var(--spacing-2xl);
+    border: 2px solid var(--primary-color);
+    padding: var(--spacing-md) var(--spacing-xl);
+    margin: var(--spacing-md) 0px;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    border-radius: var(--border-radius-lg);
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal) var(--animation-timing-ease);
+    position: relative;
+    overflow: hidden;
+}
+
+.my-orders-order::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary-gradient);
+    transform: scaleX(0);
+    transition: transform var(--transition-normal) ease;
+}
+
+.my-orders-order:hover {
+    transform: translateY(var(--translate-hover)) scale(1.01);
+    box-shadow: var(--shadow-lg), var(--glow-primary);
+    border-color: var(--primary-dark);
+}
+
+.my-orders-order:hover::before {
+    transform: scaleX(1);
 }
 
 .my-orders-order img{
@@ -35,11 +65,42 @@
 
 .my-orders-order button{
     border: none;
-    padding: 12px 0px;
-    border-radius: 4px;
-    background-color: #ffe1e1;
-    color: #454545;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    background: var(--primary-light);
+    color: var(--text-primary);
     cursor: pointer;
+    transition: all var(--transition-normal) var(--animation-timing-bounce);
+    font-weight: var(--font-weight-medium);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.my-orders-order button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-shimmer);
+    transition: left var(--transition-slow) ease;
+}
+
+.my-orders-order button:hover {
+    background: var(--primary-color);
+    color: var(--white);
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: var(--shadow-md), var(--glow-primary);
+}
+
+.my-orders-order button:hover::before {
+    left: 100%;
+}
+
+.my-orders-order button:active {
+    transform: scale(var(--scale-active));
 }
 
 @media (max-width:900px){
@@ -51,5 +112,21 @@
 
     .my-orders-order button{
         font-size: 10px;
+    }
+}
+
+@media (max-width:750px) {
+    .my-orders-order{
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+        text-align: left;
+        padding: var(--spacing-lg);
+        animation: slideInLeft var(--animation-duration-normal) var(--animation-timing-ease);
+    }
+    
+    .my-orders-order button {
+        width: 100%;
+        padding: var(--spacing-md);
+        font-size: var(--font-size-base);
     }
 }

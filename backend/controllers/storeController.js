@@ -3,6 +3,7 @@ import userModel from '../models/userModel.js';
 import SystemSettings from '../models/systemSettingsModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
 // Criar nova loja
 const createStore = async (req, res) => {
@@ -33,21 +34,22 @@ const createStore = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(ownerPassword, salt);
         
-        // Criar usuário proprietário
-        const owner = new userModel({
-            name: ownerName,
-            email: ownerEmail,
-            password: hashedPassword,
-            role: 'store_admin'
-        });
+        // Criar um ObjectId temporário para o owner
+        const tempOwnerId = new mongoose.Types.ObjectId();
         
-        await owner.save();
+        // Gerar slug manualmente
+        const slug = name
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
         
-        // Criar loja
+        // Criar a loja com owner temporário
         const store = new Store({
             name,
+            slug,
             description,
-            owner: owner._id,
+            owner: tempOwnerId,
             subscription: {
                 plan: subscriptionPlan,
                 status: 'trial'
@@ -56,19 +58,12 @@ const createStore = async (req, res) => {
                 restaurantAddress,
                 deliveryZones: [
                     {
-                        name: 'Zona 1',
-                        maxDistance: 3,
-                        fee: 5.00
-                    },
-                    {
-                        name: 'Zona 2',
-                        maxDistance: 6,
-                        fee: 8.00
-                    },
-                    {
-                        name: 'Zona 3',
-                        maxDistance: 10,
-                        fee: 12.00
+                        name: 'Zona Principal',
+                        coordinates: [[0, 0], [1, 1]],
+                        deliveryFee: 5.00,
+                        minOrderValue: 20.00,
+                        fee: 5.00,
+                        maxDistance: 10
                     }
                 ],
                 operatingHours: {
@@ -85,9 +80,22 @@ const createStore = async (req, res) => {
         
         await store.save();
         
-        // Atualizar o usuário com o storeId
-        owner.storeId = store._id;
+        // Criar o usuário proprietário com o storeId
+        const owner = new userModel({
+            name: ownerName,
+            email: ownerEmail,
+            password: hashedPassword,
+            role: 'store_admin',
+            store: store._id,
+            storeId: store._id,
+            isActive: true
+        });
+        
         await owner.save();
+        
+        // Atualizar a loja com o proprietário real
+        store.owner = owner._id;
+        await store.save();
         
         res.json({
             success: true,
@@ -107,8 +115,9 @@ const createStore = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Erro ao criar loja" });
+        console.log('Erro detalhado ao criar loja:', error);
+        console.log('Stack trace:', error.stack);
+        res.json({ success: false, message: "Erro ao criar loja", error: error.message });
     }
 };
 
@@ -314,6 +323,93 @@ const loginStoreAdmin = async (req, res) => {
     }
 };
 
+// Obter dados públicos da loja por slug (sem autenticação)
+const getPublicStoreData = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        
+        const store = await Store.findOne({ 
+            slug: slug, 
+            status: 'active',
+            'subscription.status': { $in: ['active', 'trial'] }
+        })
+        .select('name slug description logo domain customization settings');
+        
+        if (!store) {
+            return res.json({ success: false, message: "Loja não encontrada ou não está ativa" });
+        }
+        
+        res.json({ 
+            success: true, 
+            store: {
+                id: store._id,
+                name: store.name,
+                slug: store.slug,
+                description: store.description,
+                logo: store.logo,
+                address: store.settings?.restaurantAddress,
+                operatingHours: store.settings?.operatingHours,
+                deliveryZones: store.settings?.deliveryZones,
+                maxDeliveryDistance: store.settings?.maxDeliveryDistance,
+                customization: store.customization,
+                domain: store.domain
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Erro ao obter dados da loja" });
+    }
+};
+
+// Obter cardápio público da loja por slug (sem autenticação)
+const getPublicStoreMenu = async (req, res) => {
+    try {
+        const { slug } = req.params;
+        
+        const store = await Store.findOne({ 
+            slug: slug, 
+            status: 'active',
+            'subscription.status': { $in: ['active', 'trial'] }
+        });
+        
+        if (!store) {
+            return res.json({ success: false, message: "Loja não encontrada ou não está ativa" });
+        }
+        
+        // Importar modelos necessários
+        const foodModel = (await import('../models/foodModel.js')).default;
+        const categoryModel = (await import('../models/categoryModel.js')).default;
+        
+        // Buscar categorias ativas da loja
+        const categories = await categoryModel.find({ 
+            storeId: store._id, 
+            isActive: true 
+        }).sort({ name: 1 });
+        
+        // Buscar produtos ativos da loja
+        const foods = await foodModel.find({ 
+            storeId: store._id, 
+            isActive: true 
+        }).sort({ category: 1, name: 1 });
+        
+        res.json({ 
+            success: true, 
+            data: {
+                store: {
+                    id: store._id,
+                    name: store.name,
+                    slug: store.slug
+                },
+                categories,
+                foods
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Erro ao obter cardápio da loja" });
+    }
+};
+
 export {
     createStore,
     getStore,
@@ -321,5 +417,7 @@ export {
     getStoreStats,
     checkPlanLimits,
     updateSubscription,
-    loginStoreAdmin
+    loginStoreAdmin,
+    getPublicStoreData,
+    getPublicStoreMenu
 };

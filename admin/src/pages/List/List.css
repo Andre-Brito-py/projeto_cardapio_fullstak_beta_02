@@ -1,76 +1,168 @@
-.list-table-format{
+.list-table-format {
     display: grid;
     grid-template-columns: 0.5fr 2fr 1fr 1fr 1.2fr;
     align-items: center;
-    gap: 10px;
-    padding: 12px 15px;
-    border: 1px solid #cacaca;
-    font-size: 13px;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 2px solid var(--neutral-200);
+    font-size: var(--font-size-sm);
+    background: var(--surface-primary);
+    transition: var(--transition-base);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xs);
 }
 
-.list-table-format.title{
-    background-color: #f9f9f9;
+.list-table-format:hover:not(.title) {
+    border-color: var(--primary-300);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
 }
 
-.list-table-format img{
+.list-table-format.title {
+    background: linear-gradient(135deg, var(--primary-50), var(--primary-100));
+    border-color: var(--primary-300);
+    font-weight: var(--font-weight-semibold);
+    color: var(--primary-700);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.list-table-format img {
     width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--neutral-200);
+    transition: var(--transition-base);
+}
+
+.list-table-format img:hover {
+    border-color: var(--primary-500);
+    transform: scale(1.1);
 }
 
 .action-buttons {
     display: flex;
-    gap: 8px;
+    gap: var(--spacing-sm);
     align-items: center;
 }
 
 .edit-btn {
-    background-color: #28a745;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
+    background: linear-gradient(135deg, var(--success-500), var(--success-600));
+    color: var(--surface-primary);
+    border: 2px solid transparent;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 12px;
-    transition: background-color 0.3s ease;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    transition: var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.edit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: var(--transition-base);
 }
 
 .edit-btn:hover {
-    background-color: #218838;
+    background: linear-gradient(135deg, var(--success-600), var(--success-700));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.edit-btn:hover::before {
+    left: 100%;
 }
 
 .delete-btn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 4px;
+    background: linear-gradient(135deg, var(--danger-500), var(--danger-600));
+    color: var(--surface-primary);
+    border: 2px solid transparent;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 12px;
-    transition: background-color 0.3s ease;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    transition: var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.delete-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: var(--transition-base);
 }
 
 .delete-btn:hover {
-    background-color: #c82333;
+    background: linear-gradient(135deg, var(--danger-600), var(--danger-700));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
-@media (max-width:600px){
-    .list-table-format{
-        grid-template-columns: 1fr 3fr 2fr;
-        gap: 15px;
+.delete-btn:hover::before {
+    left: 100%;
+}
+
+@media (max-width: 768px) {
+    .list-table-format {
+        grid-template-columns: 1fr 2fr 1.5fr;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
     }
 
-    .list-table-format.title{
+    .list-table-format.title {
         display: none;
+    }
+    
+    .list-table-format img {
+        width: 40px;
+        height: 40px;
     }
     
     .action-buttons {
         flex-direction: column;
-        gap: 4px;
+        gap: var(--spacing-xs);
     }
     
     .edit-btn,
     .delete-btn {
         width: 100%;
-        font-size: 11px;
-        padding: 4px 8px;
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .list-table-format {
+        grid-template-columns: 1fr 2fr;
+        gap: var(--spacing-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .list-table-format img {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .action-buttons {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: var(--spacing-xs);
     }
 }

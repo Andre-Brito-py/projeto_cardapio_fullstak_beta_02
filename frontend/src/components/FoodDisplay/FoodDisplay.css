@@ -1,16 +1,96 @@
-.food-display{
-    margin-top: 30px;
+.food-display {
+    margin-top: var(--spacing-xl);
+    padding: 0 var(--spacing-md);
+    animation: fadeInUp 0.8s ease-out;
 }
 
-.food-display h2{
-    font-size: max(2vw,24px);
-    font-weight: 600;
+.food-display h2 {
+    font-size: clamp(24px, 2vw, 32px);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-lg);
+    position: relative;
+    line-height: var(--line-height-tight);
 }
 
-.food-display-list{
+.food-display h2::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-500), var(--primary-300));
+    border-radius: var(--radius-full);
+}
+
+.food-display-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
-    margin-top: 30px;
-    gap: 30px;
-    row-gap: 50px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-md) 0;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1200px) {
+    .food-display-list {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .food-display {
+        padding: 0 var(--spacing-sm);
+        margin-top: var(--spacing-lg);
+    }
+    
+    .food-display h2 {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .food-display-list {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-md);
+    }
+}
+
+@media (max-width: 480px) {
+    .food-display {
+        padding: 0 var(--spacing-xs);
+    }
+    
+    .food-display-list {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--spacing-sm);
+    }
+}
+
+/* Loading state */
+.food-display.loading {
+    opacity: 0.7;
+}
+
+.food-display.loading .food-display-list {
+    pointer-events: none;
+}
+
+/* Empty state */
+.food-display-empty {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-lg);
+    margin-top: var(--spacing-xl);
+}
+
+.food-display-empty::before {
+    content: '🍽️';
+    display: block;
+    font-size: 48px;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
 }

@@ -15,6 +15,9 @@ const StoreContextProvider = (props) => {
     const url = "http://localhost:4000"; // URL da API
     const [token, setToken] = useState(""); // Token de autenticação
     const [food_list, setFoodList] = useState([]); // Lista de comidas disponíveis
+    const [currentStore, setCurrentStore] = useState(null); // Loja atual selecionada
+    const [storeMenu, setStoreMenu] = useState({ categories: [], foods: [] }); // Menu da loja atual
+    const [allStores, setAllStores] = useState([]); // Lista de todas as lojas disponíveis
 
     /**
      * Função para adicionar item ao carrinho
@@ -102,6 +105,55 @@ const StoreContextProvider = (props) => {
         setFoodList(response.data.data)
     }
 
+    // Função para carregar dados de uma loja específica
+    const loadStoreData = async (storeSlug) => {
+        try {
+            const [storeResponse, menuResponse] = await Promise.all([
+                axios.get(`${url}/api/store/public/${storeSlug}`),
+                axios.get(`${url}/api/store/public/${storeSlug}/menu`)
+            ]);
+            
+            if (storeResponse.data.success) {
+                setCurrentStore(storeResponse.data.store);
+            }
+            
+            if (menuResponse.data.success) {
+                setStoreMenu({
+                    categories: menuResponse.data.categories || [],
+                    foods: menuResponse.data.foods || []
+                });
+                setFoodList(menuResponse.data.foods || []);
+            }
+            
+            return { success: true };
+        } catch (error) {
+            console.error('Erro ao carregar dados da loja:', error);
+            return { success: false, error };
+        }
+    }
+
+    // Função para carregar lista de todas as lojas
+    const loadAllStores = async () => {
+        try {
+            const response = await axios.get(`${url}/api/system/stores/public`);
+            if (response.data.success) {
+                setAllStores(response.data.stores);
+            }
+            return response.data.stores || [];
+        } catch (error) {
+            console.error('Erro ao carregar lojas:', error);
+            return [];
+        }
+    }
+
+    // Função para limpar dados da loja atual
+    const clearStoreData = () => {
+        setCurrentStore(null);
+        setStoreMenu({ categories: [], foods: [] });
+        setFoodList([]);
+        setCartItems({}); // Limpar carrinho ao trocar de loja
+    }
+
     const loadCartData = async (token) =>{
         const response = await axios.post(url+"/api/cart/get",{},{headers:{token}})
         setCartItems(response.data.cartData);
@@ -128,7 +180,16 @@ const StoreContextProvider = (props) => {
         getTotalCartAmount,
         url,
         token,
-        setToken
+        setToken,
+        currentStore,
+        setCurrentStore,
+        storeMenu,
+        setStoreMenu,
+        allStores,
+        setAllStores,
+        loadStoreData,
+        loadAllStores,
+        clearStoreData
     }
 
     return (

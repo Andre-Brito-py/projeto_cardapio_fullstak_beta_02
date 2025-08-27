@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
 import './PlaceOrder.css'
-import { StoreContext } from '../../components/context/StoreContext';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { StoreContext } from '../../components/context/StoreContext'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import SEO from '../../components/SEO/SEO';
 import useDeliveryCalculation from '../../hooks/useDeliveryCalculation';
 
 const PlaceOrder = () => {
@@ -115,7 +116,13 @@ const PlaceOrder = () => {
   }, [data.street, data.city, data.state, data.zipcode, data.country, deliveryType, calculateDeliveryFee]);
 
   return (
-    <form onSubmit={placeOrder} className='place-order'>
+    <>
+      <SEO 
+        title="Finalizar Pedido - Food Delivery"
+        description="Complete seu pedido com informações de entrega e pagamento seguro."
+        keywords="finalizar pedido, pagamento, entrega, food delivery"
+      />
+      <form onSubmit={placeOrder} className='place-order'>
       <div className="place-order-left">
         <p className="title">Informações de Entrega</p>
         <div className="multi-fields">
@@ -305,6 +312,7 @@ const PlaceOrder = () => {
         </div>
       </div>
     </form>
+    </>  
   )
 }
 

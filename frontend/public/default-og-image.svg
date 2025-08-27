@@ -1,0 +1,88 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#f7931e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffd23f;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="plateGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="50" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="1100" cy="530" r="80" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="200" cy="500" r="30" fill="rgba(255,255,255,0.15)"/>
+  <circle cx="1000" cy="150" r="40" fill="rgba(255,255,255,0.1)"/>
+  
+  <!-- Main plate -->
+  <ellipse cx="600" cy="315" rx="180" ry="25" fill="rgba(0,0,0,0.1)"/>
+  <circle cx="600" cy="300" r="150" fill="url(#plateGradient)" stroke="#e9ecef" stroke-width="3"/>
+  
+  <!-- Food items on plate -->
+  <!-- Pizza slice -->
+  <path d="M520 280 L580 250 L580 320 Z" fill="#ffc107" stroke="#ff8f00" stroke-width="2"/>
+  <circle cx="540" cy="285" r="3" fill="#dc3545"/>
+  <circle cx="560" cy="275" r="2" fill="#28a745"/>
+  <circle cx="555" cy="295" r="2" fill="#dc3545"/>
+  
+  <!-- Burger -->
+  <ellipse cx="640" cy="280" rx="25" ry="15" fill="#8b4513"/>
+  <ellipse cx="640" cy="275" rx="23" ry="8" fill="#228b22"/>
+  <ellipse cx="640" cy="270" rx="20" ry="6" fill="#ff6b47"/>
+  <ellipse cx="640" cy="265" rx="25" ry="12" fill="#daa520"/>
+  
+  <!-- Sushi -->
+  <ellipse cx="580" cy="320" rx="15" ry="8" fill="#ffffff"/>
+  <ellipse cx="580" cy="318" rx="12" ry="6" fill="#ff6b47"/>
+  <rect x="575" y="315" width="10" height="2" fill="#2d5016"/>
+  
+  <!-- Fork and knife -->
+  <g transform="translate(450, 250)">
+    <!-- Fork -->
+    <rect x="0" y="0" width="2" height="60" fill="#6c757d"/>
+    <rect x="-2" y="0" width="1" height="8" fill="#6c757d"/>
+    <rect x="0" y="0" width="1" height="8" fill="#6c757d"/>
+    <rect x="2" y="0" width="1" height="8" fill="#6c757d"/>
+    <rect x="4" y="0" width="1" height="8" fill="#6c757d"/>
+  </g>
+  
+  <g transform="translate(720, 250)">
+    <!-- Knife -->
+    <rect x="0" y="0" width="2" height="60" fill="#6c757d"/>
+    <path d="M0 0 L8 0 L4 8 Z" fill="#adb5bd"/>
+  </g>
+  
+  <!-- Main title -->
+  <text x="600" y="450" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">
+    Food Delivery
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="490" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" fill="rgba(255,255,255,0.9)">
+    Peça comida online dos melhores restaurantes
+  </text>
+  
+  <!-- Delivery icon -->
+  <g transform="translate(520, 520)">
+    <!-- Delivery truck -->
+    <rect x="0" y="10" width="40" height="20" rx="3" fill="white"/>
+    <rect x="35" y="5" width="20" height="15" rx="2" fill="white"/>
+    <circle cx="10" cy="35" r="5" fill="#343a40"/>
+    <circle cx="45" cy="35" r="5" fill="#343a40"/>
+    <rect x="5" y="12" width="8" height="6" fill="#ff6b35"/>
+  </g>
+  
+  <!-- Speed lines -->
+  <g transform="translate(580, 530)">
+    <rect x="0" y="0" width="15" height="2" rx="1" fill="rgba(255,255,255,0.7)"/>
+    <rect x="0" y="5" width="20" height="2" rx="1" fill="rgba(255,255,255,0.5)"/>
+    <rect x="0" y="10" width="12" height="2" rx="1" fill="rgba(255,255,255,0.7)"/>
+  </g>
+</svg>

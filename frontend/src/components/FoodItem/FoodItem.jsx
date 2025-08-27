@@ -1,10 +1,10 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useCallback, useMemo, memo } from 'react'
 import './FoodItem.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../context/StoreContext'
 import { useNavigate } from 'react-router-dom';
 
-const FoodItem = ({id,name,price,description,image,extras}) => {
+const FoodItem = memo(({id,name,price,description,image,extras}) => {
 
     const {cartItems,addToCart,removeFromCart,url} = useContext(StoreContext);
     const navigate = useNavigate();
@@ -31,7 +31,7 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
         return id;
     };
     
-    const handleExtraToggle = (extra) => {
+    const handleExtraToggle = useCallback((extra) => {
         const isSelected = selectedExtras.find(e => e.name === extra.name);
         if (isSelected) {
             setSelectedExtras(prev => prev.filter(e => e.name !== extra.name));
@@ -40,14 +40,14 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
             setSelectedExtras(prev => [...prev, extra]);
             setTotalPrice(prev => prev + extra.price);
         }
-    };
+    }, [selectedExtras]);
     
-    const handleAddToCart = (e) => {
+    const handleAddToCart = useCallback((e) => {
         e?.stopPropagation();
         setShowExtrasModal(true);
-    };
+    }, []);
     
-    const confirmAddToCart = () => {
+    const confirmAddToCart = useCallback(() => {
         addToCart(id, selectedExtras, observations, includeDisposables);
         // Reset all states
         setSelectedExtras([]);
@@ -55,30 +55,53 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
         setObservations('');
         setIncludeDisposables(false);
         setShowExtrasModal(false);
-    };
+    }, [addToCart, id, selectedExtras, observations, includeDisposables, price]);
     
-    const cancelModal = () => {
+    const cancelModal = useCallback(() => {
         setShowExtrasModal(false);
         setSelectedExtras([]);
         setTotalPrice(price);
         setObservations('');
         setIncludeDisposables(false);
-    };
+    }, [price]);
     
-    const handleProductClick = () => {
+    const handleProductClick = useCallback(() => {
         navigate(`/product/${id}`);
-    };
+    }, [navigate, id]);
 
   return (
     <div className='food-item'>
         <div className="food-item-img-container" onClick={handleProductClick} style={{cursor: 'pointer'}}>
-            <img className='food-item-image' src={url+'/images/'+image} alt="" />
+            <img 
+                className='food-item-image' 
+                src={url+'/images/'+image} 
+                alt={name}
+                loading="lazy"
+                onError={(e) => {
+                    e.target.src = assets.default_food_image || '/placeholder-food.jpg';
+                }}
+            />
             {
-                getItemQuantityInCart() === 0 ? <img className='add' onClick={handleAddToCart} src={assets.add_icon_white}/>: 
+                getItemQuantityInCart() === 0 ? <img 
+                    className='add' 
+                    onClick={handleAddToCart} 
+                    src={assets.add_icon_white}
+                    alt="Add to cart"
+                />: 
                 <div className="food-item-counter">
-                    <img onClick={()=>removeFromCart(getSimpleCartKey())} src={assets.remove_icon_red} alt="" />
+                    <img 
+                        onClick={()=>removeFromCart(getSimpleCartKey())} 
+                        src={assets.remove_icon_red} 
+                        alt="Remove item"
+                        className="counter-btn"
+                    />
                     <p>{getItemQuantityInCart()}</p>
-                    <img onClick={handleAddToCart}  src={assets.add_icon_green} alt="" />
+                    <img 
+                        onClick={handleAddToCart}  
+                        src={assets.add_icon_green} 
+                        alt="Add item"
+                        className="counter-btn"
+                    />
                 </div>
             }
         </div>
@@ -169,6 +192,8 @@ const FoodItem = ({id,name,price,description,image,extras}) => {
 
     </div>
   )
-}
+})
+
+FoodItem.displayName = 'FoodItem';
 
 export default FoodItem

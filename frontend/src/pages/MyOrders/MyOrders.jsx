@@ -3,6 +3,7 @@ import './MyOrders.css'
 import { StoreContext } from './../../components/context/StoreContext';
 import axios from 'axios';
 import { assets } from './../../assets/assets';
+import SEO from '../../components/SEO/SEO';
 
 const MyOrders = () => {
 
@@ -22,6 +23,11 @@ useEffect(()=>{
 
   return (
     <div className='my-orders'>
+      <SEO 
+        title="Meus Pedidos - Food Delivery"
+        description="Acompanhe o status dos seus pedidos e histórico de compras."
+        keywords="meus pedidos, histórico, status pedido, food delivery"
+      />
         <h2>Meus Pedidos</h2>
         <div className="container">
             {data.map((order, index)=>{

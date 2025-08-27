@@ -1,64 +1,117 @@
 .super-admin-sidebar {
   width: 18%;
   min-height: 100vh;
-  border: 1.5px solid #a9a9a9;
+  border: 2px solid var(--neutral-300);
   border-top: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-600) 0%, var(--accent-600) 100%);
   position: relative;
+  backdrop-filter: blur(10px);
+}
+
+.super-admin-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
+  pointer-events: none;
 }
 
 .super-admin-sidebar-options {
-  padding-top: 50px;
+  padding-top: var(--spacing-3xl);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--spacing-lg);
+  position: relative;
+  z-index: 1;
 }
 
 .super-admin-sidebar-option {
   display: flex;
   align-items: center;
-  gap: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  gap: var(--spacing-sm);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   border-right: 0;
-  padding: 10px 10px 10px 20px;
-  border-radius: 0px 0px 0px 10px;
+  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) var(--spacing-lg);
+  border-radius: 0 0 0 var(--radius-lg);
   cursor: pointer;
   text-decoration: none;
-  color: white;
-  transition: all 0.3s ease;
-  margin-right: 20px;
+  color: var(--surface-primary);
+  transition: var(--transition-base);
+  margin-right: var(--spacing-lg);
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.super-admin-sidebar-option::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 4px;
+  height: 0;
+  background: linear-gradient(180deg, var(--accent-400), var(--primary-400));
+  transform: translateY(-50%);
+  transition: var(--transition-base);
+  border-radius: 0 2px 2px 0;
 }
 
 .super-admin-sidebar-option:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateX(5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transform: translateX(var(--spacing-xs));
+  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.super-admin-sidebar-option:hover::after {
+  height: 60%;
 }
 
 .super-admin-sidebar-option.active {
-  border-color: #ff6347;
+  border-color: var(--accent-300);
   background: rgba(255, 255, 255, 0.25);
-  transform: translateX(10px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  transform: translateX(var(--spacing-sm));
+  box-shadow: var(--shadow-lg);
+}
+
+.super-admin-sidebar-option.active::after {
+  height: 80%;
+  background: linear-gradient(180deg, var(--accent-300), var(--primary-300));
 }
 
 .super-admin-sidebar-option img {
-  width: 20px;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  margin-right: var(--spacing-sm);
+  transition: all var(--transition-normal) ease;
   filter: brightness(0) invert(1);
-  transition: transform 0.3s ease;
 }
 
 .super-admin-sidebar-option:hover img {
-  transform: scale(1.1);
+  transform: scale(1.1) rotate(5deg);
+}
+
+.super-admin-sidebar-option.active img {
+  transform: scale(1.15);
+  filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255,255,255,0.5));
 }
 
 .super-admin-sidebar-option p {
   margin: 0;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-normal) ease;
+  letter-spacing: 0.5px;
+}
+
+.super-admin-sidebar-option:hover p {
+  transform: translateX(2px);
 }
 
 /* Efeito de brilho no hover */
@@ -69,22 +122,27 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
+  transition: left var(--transition-slow) ease;
+  z-index: 1;
 }
 
 .super-admin-sidebar-option:hover::before {
   left: 100%;
 }
 
-/* Responsividade */
+/* Media Queries */
 @media (max-width: 1000px) {
   .super-admin-sidebar {
-    width: 25%;
+    width: 200px;
+  }
+  
+  .super-admin-sidebar-option {
+    padding: var(--spacing-sm) var(--spacing-md);
   }
   
   .super-admin-sidebar-option p {
-    font-size: 12px;
+    font-size: calc(var(--font-size-sm) - 1px);
   }
   
   .super-admin-sidebar-option img {
@@ -94,10 +152,19 @@
 
 @media (max-width: 768px) {
   .super-admin-sidebar {
-    width: 100%;
+    width: 180px;
+    position: fixed;
+    left: -180px;
+    z-index: var(--z-modal);
+    transition: left var(--transition-normal) ease;
+    box-shadow: var(--shadow-lg);
     min-height: auto;
     border-bottom: 1.5px solid #a9a9a9;
     border-right: 1.5px solid #a9a9a9;
+  }
+  
+  .super-admin-sidebar.open {
+    left: 0;
   }
   
   .super-admin-sidebar-options {
@@ -116,7 +183,7 @@
     text-align: center;
     flex-direction: column;
     gap: 5px;
-    padding: 15px 10px;
+    padding: var(--spacing-xs) var(--spacing-sm);
   }
   
   .super-admin-sidebar-option:hover,
@@ -124,22 +191,46 @@
     transform: translateY(-2px);
   }
   
+  .super-admin-sidebar-option img {
+    width: calc(var(--icon-size-sm) - 2px);
+    height: calc(var(--icon-size-sm) - 2px);
+  }
+  
   .super-admin-sidebar-option p {
-    font-size: 11px;
+    font-size: calc(var(--font-size-sm) - 2px);
   }
 }
 
+/* Backdrop para mobile */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: calc(var(--z-modal) - 1);
+  opacity: 1;
+  visibility: visible;
+  transition: var(--transition-base);
+}
+
 @media (max-width: 480px) {
+  .super-admin-sidebar {
+    width: 160px;
+    left: -160px;
+  }
+  
   .super-admin-sidebar-option {
     min-width: 100px;
-    padding: 12px 8px;
+    padding: calc(var(--spacing-xs) - 2px) var(--spacing-xs);
   }
   
   .super-admin-sidebar-option img {
-    width: 16px;
+    width: calc(var(--icon-size-sm) - 4px);
+    height: calc(var(--icon-size-sm) - 4px);
+    margin-right: calc(var(--spacing-xs) - 2px);
   }
   
   .super-admin-sidebar-option p {
-    font-size: 10px;
+    font-size: calc(var(--font-size-sm) - 3px);
   }
 }

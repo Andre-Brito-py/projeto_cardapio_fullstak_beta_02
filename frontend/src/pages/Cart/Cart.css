@@ -1,5 +1,6 @@
 .cart{
     margin-top: 100px;
+    animation: fadeInUp var(--animation-duration-normal) var(--animation-timing-ease);
 }
 
 .cart-items-title{
@@ -12,6 +13,9 @@
 .cart-items-item{
     margin: 10px 0px;
     color: black;
+    transition: all var(--transition-normal) var(--animation-timing-ease);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-sm);
 }
 
 .cart-items-item img{
@@ -26,6 +30,15 @@
 
 .cart-items-item .cross{
     cursor: pointer;
+    transition: all var(--transition-fast) var(--animation-timing-ease);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-xs);
+}
+
+.cart-items-item .cross:hover {
+    background: var(--error-light);
+    color: var(--error-color);
+    transform: scale(1.2) rotate(90deg);
 }
 
 .cart-bottom{
@@ -55,11 +68,39 @@
 .cart-total button{
     border: none;
     color: white;
-    background-color: tomato;
+    background: var(--primary-gradient);
     width: max(15vw,200px);
     padding: 12px 0px;
-    border-radius: 4px;
+    border-radius: var(--border-radius-lg);
     cursor: pointer;
+    transition: all var(--transition-normal) var(--animation-timing-bounce);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+}
+
+.cart-total button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--gradient-shimmer);
+    transition: left var(--transition-slow) ease;
+}
+
+.cart-total button:hover {
+    transform: translateY(var(--translate-hover)) scale(1.02);
+    box-shadow: var(--shadow-lg), var(--glow-primary);
+}
+
+.cart-total button:hover::before {
+    left: 100%;
+}
+
+.cart-total button:active {
+    transform: scale(var(--scale-active));
 }
 
 .cart-promocode{
@@ -89,10 +130,19 @@
 .cart-promocode-input button{
     width: max(10vw,150px);
     padding: 12px 5px;
-    background-color: black;
-    border: none;
+    background: var(--secondary-color);
     color: white;
-    border-radius: 4px;
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all var(--transition-normal) var(--animation-timing-ease);
+    box-shadow: var(--shadow-sm);
+}
+
+.cart-promocode-input button:hover {
+    background: var(--secondary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 /* Delivery Type Selection Styles */
@@ -121,23 +171,47 @@
     align-items: center;
     justify-content: center;
     padding: 15px;
-    border: 2px solid #e2e2e2;
-    border-radius: 8px;
-    background-color: white;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--border-radius-lg);
+    background: var(--gray-50);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal) var(--animation-timing-ease);
     position: relative;
+    overflow: hidden;
+}
+
+.delivery-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary-gradient);
+    transform: scaleX(0);
+    transition: transform var(--transition-normal) ease;
 }
 
 .delivery-option:hover {
-    border-color: #ff6347;
-    background-color: #fff5f3;
+    border-color: var(--primary-color);
+    background: var(--white);
+    transform: translateY(var(--translate-hover)) scale(1.01);
+    box-shadow: var(--shadow-lg), var(--glow-primary);
+}
+
+.delivery-option:hover::before {
+    transform: scaleX(1);
 }
 
 .delivery-option.active {
-    border-color: #ff6347;
-    background-color: #ff6347;
-    color: white;
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+    box-shadow: 0 0 0 3px var(--primary-light), var(--shadow-md);
+    animation: pulse 2s var(--animation-timing-ease) infinite;
+}
+
+.delivery-option.active::before {
+    transform: scaleX(1);
 }
 
 .delivery-option input[type="radio"] {

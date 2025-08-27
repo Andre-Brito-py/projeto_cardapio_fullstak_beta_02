@@ -179,7 +179,7 @@ storeSchema.pre('save', function(next) {
 
 // Gerar slug automaticamente baseado no nome
 storeSchema.pre('save', function(next) {
-  if (this.isModified('name') && !this.slug) {
+  if (this.isModified('name') || !this.slug) {
     this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '-')
