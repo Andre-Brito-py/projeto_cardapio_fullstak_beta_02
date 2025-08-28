@@ -12,6 +12,8 @@ import Categories from './pages/Categories/Categories';
 import Edit from './pages/Edit/Edit';
 import Settings from './pages/Settings/Settings';
 import Banners from './pages/Banners/Banners';
+import Tables from './pages/Tables/Tables';
+import Coupons from './pages/Coupons/Coupons';
 import BluetoothPrint from './components/BluetoothPrint/BluetoothPrint';
 import StoreManagement from './pages/SuperAdmin/StoreManagement/StoreManagement';
 import SystemSettings from './pages/SuperAdmin/SystemSettings/SystemSettings';
@@ -123,6 +125,8 @@ const App = () => {
           <Route path='/edit/:id' element={<Edit url={url}/>} />
           <Route path='/settings' element={<Settings url={url}/>} />
           <Route path='/banners' element={<Banners url={url}/>} />
+          <Route path='/tables' element={<Tables url={url}/>} />
+          <Route path='/coupons' element={<Coupons url={url}/>} />
           <Route path='/bluetooth-print' element={<BluetoothPrint url={url} token={token}/>} />
           
           {/* Rota padrão */}

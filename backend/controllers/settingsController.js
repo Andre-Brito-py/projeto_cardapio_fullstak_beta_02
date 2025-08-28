@@ -139,16 +139,11 @@ const getBanner = async (req, res) => {
         let settings = await settingsModel.findOne();
         
         if (!settings || !settings.banner) {
-            // Return default banner if none exist
-            const defaultBanner = {
-                title: "Peça sua comida favorita aqui",
-                description: "Nosso aplicativo de entrega de comida traz refeições deliciosas diretamente à sua porta. Navegue por uma variedade de restaurantes, faça seu pedido e acompanhe em tempo real. Desfrute de comida quente e fresca sem sair de casa. Rápido, conveniente e fácil de usar.",
-                image: "/header_img.png"
-            };
-            
+            // Return null if no banner is configured
             res.json({
-                success: true,
-                data: defaultBanner
+                success: false,
+                message: "Nenhum banner principal configurado",
+                data: null
             });
         } else {
             res.json({

@@ -24,8 +24,18 @@ const loginUser = async (req,res) =>{
             return res.json({success:false, message:'Invalid credentials'})
         }
 
-        const token = createToken(user._id);
-        res.json({success:true, token})
+        const token = createToken(user._id, user);
+        res.json({
+            success: true, 
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                storeId: user.storeId
+            }
+        })
     } catch (error) {
         res.json({success:false, message:'Error'})
     }
@@ -34,10 +44,20 @@ const loginUser = async (req,res) =>{
 /**
  * Função para criar token JWT
  * @param {String} id - ID do usuário
+ * @param {Object} user - Objeto do usuário com role e storeId
  * @returns {String} Token JWT assinado
  */
-const createToken = (id) => {
-    return jwt.sign({id}, process.env.JWT_SECRET);
+const createToken = (id, user = null) => {
+    const payload = { id };
+    
+    if (user) {
+        payload.role = user.role;
+        if (user.storeId) {
+            payload.storeId = user.storeId;
+        }
+    }
+    
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 /**
@@ -74,8 +94,18 @@ const registerUser = async (req, res) => {
         })
 
       const user =  await newUser.save()
-      const token = createToken(user._id)
-      res.json({success:true, token})
+      const token = createToken(user._id, user)
+      res.json({
+          success: true, 
+          token,
+          user: {
+              id: user._id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+              storeId: user.storeId
+          }
+      })
 
     } catch (error) {
         res.json({success:false, message:'Error'})

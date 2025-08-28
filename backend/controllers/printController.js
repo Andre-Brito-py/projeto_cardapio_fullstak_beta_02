@@ -125,6 +125,52 @@ const disconnectPrinter = async (req, res) => {
     }
 };
 
+// Imprimir QR code via Bluetooth
+const printQRCode = async (req, res) => {
+    try {
+        const { qrData } = req.body;
+        
+        if (!qrData) {
+            return res.json({
+                success: false,
+                message: 'Dados do QR code são obrigatórios'
+            });
+        }
+
+        const result = await bluetoothPrintService.printQRCode(qrData);
+        res.json(result);
+    } catch (error) {
+        console.error('Erro ao imprimir QR code:', error);
+        res.json({
+            success: false,
+            message: 'Erro ao imprimir QR code via Bluetooth'
+        });
+    }
+};
+
+// Imprimir QR code via porta serial
+const printQRCodeSerial = async (req, res) => {
+    try {
+        const { qrData, portPath } = req.body;
+        
+        if (!qrData) {
+            return res.json({
+                success: false,
+                message: 'Dados do QR code são obrigatórios'
+            });
+        }
+
+        const result = await bluetoothPrintService.printQRCodeViaSerial(qrData, portPath);
+        res.json(result);
+    } catch (error) {
+        console.error('Erro ao imprimir QR code via serial:', error);
+        res.json({
+            success: false,
+            message: 'Erro ao imprimir QR code via porta serial'
+        });
+    }
+};
+
 // Testar impressão (imprimir texto de teste)
 const testPrint = async (req, res) => {
     try {
@@ -171,6 +217,8 @@ export {
     connectPrinter,
     printOrder,
     printOrderSerial,
+    printQRCode,
+    printQRCodeSerial,
     disconnectPrinter,
     testPrint
 };

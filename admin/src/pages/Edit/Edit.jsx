@@ -39,7 +39,12 @@ const Edit = ({ url }) => {
     useEffect(() => {
         const fetchFoodItem = async () => {
             try {
-                const response = await axios.get(`${url}/api/food/list`);
+                const token = localStorage.getItem('token');
+                const response = await axios.get(`${url}/api/food/admin/list`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (response.data.success) {
                     const foodItem = response.data.data.find(item => item._id == id);
                     if (foodItem) {
@@ -55,6 +60,8 @@ const Edit = ({ url }) => {
                         toast.error('Produto não encontrado');
                         navigate('/list');
                     }
+                } else {
+                    toast.error(response.data.message || 'Erro ao carregar produto');
                 }
                 setLoading(false);
             } catch (error) {
@@ -113,12 +120,17 @@ const Edit = ({ url }) => {
         }
         
         try {
-            const response = await axios.put(`${url}/api/food/update`, formData);
+            const token = localStorage.getItem('token');
+            const response = await axios.put(`${url}/api/food/update`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             if (response.data.success) {
                 toast.success(response.data.message);
                 navigate('/list');
             } else {
-                toast.error(response.data.message);
+                toast.error(response.data.message || 'Erro ao atualizar produto');
             }
         } catch (error) {
             console.error('Error updating food:', error);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './StoreLinks.css';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { FRONTEND_URL } from '../../config/urls';
 
 const StoreLinks = ({ url }) => {
   const [storeData, setStoreData] = useState(null);
@@ -53,7 +54,8 @@ const StoreLinks = ({ url }) => {
 
   const generateStoreLink = (store) => {
     if (store && store.slug) {
-      const link = `http://localhost:5173/loja/${store.slug}`;
+      // Usar a URL correta do frontend (cliente) - porta 5173
+      const link = `${FRONTEND_URL}/loja/${store.slug}`;
       setGeneratedLink(link);
       
       // Gerar QR Code usando uma API gratuita

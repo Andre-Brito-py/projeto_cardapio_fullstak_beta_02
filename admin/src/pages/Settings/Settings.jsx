@@ -6,6 +6,7 @@ import axios from 'axios';
 const Settings = ({ url }) => {
   const [pixKey, setPixKey] = useState('');
   const [isOpen, setIsOpen] = useState(true);
+  const [autoAcceptOrders, setAutoAcceptOrders] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
   
@@ -25,6 +26,7 @@ const Settings = ({ url }) => {
       if (response.data.success) {
         setPixKey(response.data.data.pixKey || '');
         setIsOpen(response.data.data.isOpen !== undefined ? response.data.data.isOpen : true);
+        setAutoAcceptOrders(response.data.data.autoAcceptOrders !== undefined ? response.data.data.autoAcceptOrders : false);
         
         // Set banner data if exists
         if (response.data.data.banner) {
@@ -49,7 +51,7 @@ const Settings = ({ url }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      console.log('Token usado:', token); // Log para debug
+      
       
       const response = await axios.post(
         `${url}/api/settings/pix-key`,
@@ -61,7 +63,7 @@ const Settings = ({ url }) => {
         }
       );
       
-      console.log('Resposta da API:', response.data); // Log para debug
+      
       
       if (response.data.success) {
         toast.success('Chave PIX atualizada com sucesso!');
@@ -156,6 +158,30 @@ const Settings = ({ url }) => {
     }
   };
 
+  // Atualizar configuração de aceitar pedidos automaticamente
+  const handleAutoAcceptOrdersChange = async (newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await axios.put(`${url}/api/store/auto-accept`, 
+        { autoAcceptOrders: newStatus },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data.success) {
+        setAutoAcceptOrders(newStatus);
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message || 'Erro ao atualizar configuração de aceitar pedidos automaticamente');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar configuração de aceitar pedidos automaticamente:', error);
+      toast.error('Erro ao atualizar configuração de aceitar pedidos automaticamente');
+    }
+  };
+
 
 
 
@@ -235,6 +261,32 @@ const Settings = ({ url }) => {
         
         <div className="current-setting">
           <strong>Status atual:</strong> {isOpen ? 'Aberta para pedidos' : 'Fechada para pedidos'}
+        </div>
+      </div>
+
+      {/* Auto Accept Orders Section */}
+      <div className="settings-section">
+        <h3>Aceitar Pedidos Automaticamente</h3>
+        <p className="section-description">
+          Quando ativado, todos os novos pedidos serão aceitos automaticamente sem necessidade de confirmação manual.
+        </p>
+        
+        <div className="store-status-toggle">
+          <label className="toggle-switch">
+            <input
+              type="checkbox"
+              checked={autoAcceptOrders}
+              onChange={(e) => handleAutoAcceptOrdersChange(e.target.checked)}
+            />
+            <span className="slider"></span>
+          </label>
+          <span className={`status-text ${autoAcceptOrders ? 'open' : 'closed'}`}>
+            {autoAcceptOrders ? 'Aceitação Automática Ativada' : 'Aceitação Automática Desativada'}
+          </span>
+        </div>
+        
+        <div className="current-setting">
+          <strong>Status atual:</strong> {autoAcceptOrders ? 'Pedidos são aceitos automaticamente' : 'Pedidos precisam ser aceitos manualmente'}
         </div>
       </div>
 

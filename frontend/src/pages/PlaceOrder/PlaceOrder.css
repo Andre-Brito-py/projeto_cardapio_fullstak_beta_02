@@ -197,3 +197,318 @@
     }
 }
 
+/* Coupon Section Styles */
+.coupon-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.coupon-section h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.coupon-section h3::before {
+    content: "🎫";
+    font-size: 18px;
+}
+
+.coupon-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.coupon-input-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.coupon-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    background-color: white;
+}
+
+.coupon-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.coupon-apply-btn {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.coupon-apply-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.coupon-apply-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.coupon-error {
+    color: #dc3545;
+    font-size: 13px;
+    padding: 8px 12px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.coupon-applied {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.coupon-success {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.coupon-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.coupon-code-applied {
+    font-size: 16px;
+    font-weight: 700;
+    color: #155724;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
+.coupon-name {
+    font-size: 13px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.coupon-remove-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.coupon-remove-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.coupon-discount-info {
+    font-size: 14px;
+    font-weight: 600;
+    color: #155724;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.coupon-discount {
+    background-color: #d4edda;
+    border-radius: 4px;
+    padding: 5px 0;
+}
+
+.coupon-discount p {
+    font-weight: 600;
+}
+
+/* Responsive Design for Coupon Section */
+@media (max-width: 768px) {
+    .coupon-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .coupon-input-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .coupon-apply-btn {
+        width: 100%;
+    }
+    
+    .coupon-success {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .coupon-remove-btn {
+        align-self: flex-end;
+    }
+}
+
+/* Guest Checkout Info Styles */
+.guest-checkout-info {
+    margin-bottom: 30px;
+}
+
+.info-box {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.info-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: rotate(45deg);
+}
+
+.info-box h4 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #fff;
+    position: relative;
+    z-index: 1;
+}
+
+.info-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.info-box li {
+    padding: 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.optional-note {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+}
+
+.optional-note strong {
+    color: #ffd700;
+    font-weight: 600;
+}
+
+.register-suggestion-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.register-suggestion-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Design for Guest Checkout Info */
+@media (max-width: 768px) {
+    .info-box {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .info-box h4 {
+        font-size: 18px;
+    }
+    
+    .info-box li {
+        font-size: 13px;
+    }
+    
+    .optional-note {
+        padding: 12px;
+        font-size: 13px;
+    }
+    
+    .register-suggestion-btn {
+        width: 100%;
+        padding: 15px;
+        font-size: 13px;
+    }
+}
+

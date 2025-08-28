@@ -13,19 +13,31 @@ const Verify = () => {
     const {url} = useContext(StoreContext);
     const navigate = useNavigate();
 
-    const verifyPayment = async () =>{
-        const response = await axios.post(url+"/api/order/verify",{success, orderId});
-        if(response.data.success){
-            navigate('/myorders');
-        }
-        else{
-            navigate('/')
+    const verifyPayment = async () => {
+        try {
+            const response = await axios.post(`${url}/api/order/verify`, {
+                success, 
+                orderId
+            });
+            
+            if (response.data.success) {
+                navigate('/myorders');
+            } else {
+                console.error('Erro na verificação do pagamento:', response.data.message);
+                alert(response.data.message || 'Erro na verificação do pagamento.');
+                navigate('/');
+            }
+        } catch (error) {
+            console.error('Erro ao verificar pagamento:', error);
+            const errorMessage = error.response?.data?.message || 'Erro ao verificar pagamento. Tente novamente.';
+            alert(errorMessage);
+            navigate('/');
         }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         verifyPayment();
-    },[])
+    }, [])
    
   return (
     <div className='verify'>

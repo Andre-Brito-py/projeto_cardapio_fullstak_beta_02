@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-key */
 import React, { useContext, useState, useEffect } from 'react'
 import './Cart.css'
 import { StoreContext } from '../../components/context/StoreContext'
@@ -9,6 +8,7 @@ import SEO from '../../components/SEO/SEO';
 const Cart = () => {
 
   const {cartItems, food_list, removeFromCart, getTotalCartAmount, url, token} = useContext(StoreContext);
+ 
   const [deliveryType, setDeliveryType] = useState('delivery'); // 'delivery' or 'pickup'
   const [deliveryAddress, setDeliveryAddress] = useState({
     street: '',
@@ -35,7 +35,7 @@ const Cart = () => {
       const fullAddress = `${deliveryAddress.street}, ${deliveryAddress.city}, ${deliveryAddress.state}, ${deliveryAddress.zipCode}`;
       calculateDeliveryFee(fullAddress);
     }
-  }, [deliveryAddress, deliveryType]);
+  }, [deliveryAddress, deliveryType, calculateDeliveryFee]);
 
   const handleAddressChange = (field, value) => {
     setDeliveryAddress(prev => ({
@@ -59,8 +59,11 @@ const Cart = () => {
     }
     navigate('/order');
   };
+
+
   return (
     <div className='cart'>
+
       <SEO 
         title="Carrinho - Food Delivery"
         description="Revise seus itens no carrinho e finalize seu pedido com entrega rápida."
@@ -97,7 +100,7 @@ const Cart = () => {
                       {cartItem.extras && cartItem.extras.length > 0 && (
                         <div style={{fontSize: '12px', color: '#666', marginTop: '4px'}}>
                           <strong>Extras:</strong> {cartItem.extras.map((extra, idx) => (
-                            <span key={idx}>+ {extra.name} (R$ {extra.price}){idx < cartItem.extras.length - 1 ? ', ' : ''}</span>
+                            <span key={`${cartKey}-extra-${idx}`}>+ {extra.name} (R$ {extra.price}){idx < cartItem.extras.length - 1 ? ', ' : ''}</span>
                           ))}
                         </div>
                       )}

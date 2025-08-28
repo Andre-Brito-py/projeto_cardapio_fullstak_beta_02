@@ -31,16 +31,12 @@ const ProductDetail = () => {
             }
             
             try {
-                console.log('Fetching product with ID:', id);
                 const response = await axios.get(`${url}/api/food/list`);
-                console.log('API Response:', response.data);
                 
                 if (response.data.success) {
                     const foundProduct = response.data.data.find(item => {
-                        console.log('Comparing:', item._id, 'with', id);
                         return item._id.toString() === id.toString();
                     });
-                    console.log('Found product:', foundProduct);
                     
                     if (foundProduct) {
                         setProduct(foundProduct);
@@ -104,8 +100,6 @@ const ProductDetail = () => {
         navigate('/');
     };
 
-    console.log('Render state - loading:', loading, 'product:', product, 'error:', error);
-    
     if (loading) {
         return (
             <div className="product-detail-loading">

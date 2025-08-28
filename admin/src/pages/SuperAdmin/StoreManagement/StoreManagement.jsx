@@ -21,7 +21,7 @@ const StoreManagement = ({ url, token }) => {
     subscriptionPlan: 'Básico'
   });
 
-  // Debug: verificar se há elementos bloqueando os cliques
+  
   useEffect(() => {
     console.log('🔍 StoreManagement montado - verificando elementos que podem bloquear cliques');
     

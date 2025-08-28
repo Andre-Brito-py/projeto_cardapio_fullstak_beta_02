@@ -1,4 +1,4 @@
-import React, { useContext, useState, useCallback, useMemo, memo } from 'react'
+import React, { useContext, useState, useCallback, memo } from 'react'
 import './LoginPopup.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from './../context/StoreContext';
@@ -17,15 +17,15 @@ const LoginPopup = memo(({setShowLogin}) => {
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
 
-    const onChangeHandler = useCallback((event) => {
-        const name = event.target.name
-        const value = event.target.value 
-        setData(data=>({...data,[name]:value}))
+    const handleChange = useCallback((event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setData(data => ({...data, [name]: value}));
         // Clear error when user starts typing
         if (errors[name]) {
-            setErrors(prev => ({...prev, [name]: ''}))
+            setErrors(prev => ({...prev, [name]: ''}));
         }
-    }, [errors])
+    }, [errors]);
 
     const validateForm = useCallback(() => {
         const newErrors = {}
@@ -48,7 +48,7 @@ const LoginPopup = memo(({setShowLogin}) => {
         
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
-    }, [currentState, data])
+    }, [currentState, data]);
 
     const onLogin = useCallback(async (event) => {
         event.preventDefault()
@@ -104,7 +104,7 @@ const LoginPopup = memo(({setShowLogin}) => {
                     <div className="input-group">
                         <input 
                             name='name' 
-                            onChange={onChangeHandler} 
+                            onChange={handleChange} 
                             value={data.name} 
                             type="text" 
                             placeholder='Seu nome' 
@@ -118,7 +118,7 @@ const LoginPopup = memo(({setShowLogin}) => {
                 <div className="input-group">
                     <input 
                         name='email' 
-                        onChange={onChangeHandler} 
+                        onChange={handleChange} 
                         value={data.email} 
                         type="email" 
                         placeholder='Seu email' 
@@ -131,7 +131,7 @@ const LoginPopup = memo(({setShowLogin}) => {
                 <div className="input-group">
                     <input 
                         name='password' 
-                        onChange={onChangeHandler} 
+                        onChange={handleChange} 
                         value={data.password} 
                         type="password" 
                         placeholder='Senha' 

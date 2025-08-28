@@ -1,10 +1,11 @@
 import React, { useContext, useState, useCallback, useMemo, memo } from 'react'
+import PropTypes from 'prop-types'
 import './FoodItem.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../context/StoreContext'
 import { useNavigate } from 'react-router-dom';
 
-const FoodItem = memo(({id,name,price,description,image,extras}) => {
+const FoodItem = memo(({id,name,price,description,image,extras = []}) => {
 
     const {cartItems,addToCart,removeFromCart,url} = useContext(StoreContext);
     const navigate = useNavigate();
@@ -195,5 +196,22 @@ const FoodItem = memo(({id,name,price,description,image,extras}) => {
 })
 
 FoodItem.displayName = 'FoodItem';
+
+FoodItem.propTypes = {
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    description: PropTypes.string.isRequired,
+    image: PropTypes.string.isRequired,
+    extras: PropTypes.arrayOf(
+        PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+            description: PropTypes.string
+        })
+    )
+};
+
+
 
 export default FoodItem

@@ -84,7 +84,7 @@ const addFood = async (req,res) =>{
         price: req.body.price,
         category: req.body.category,
         image: image_filename,
-        storeId: req.store._id, // Adicionar storeId do contexto
+        storeId: req.store ? req.store._id : null, // Adicionar storeId do contexto se disponível
         extras: extras
     });
 

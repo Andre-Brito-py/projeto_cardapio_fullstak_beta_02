@@ -100,7 +100,14 @@ const Add = ({url}) => {
         
         console.log('Making axios request to:', `${url}/api/food/add`);
         try {
-            const response = await axios.post(`${url}/api/food/add`, formData);
+            const token = localStorage.getItem('token');
+            console.log('Token being used:', token ? token.substring(0, 20) + '...' : 'No token found');
+            
+            const response = await axios.post(`${url}/api/food/add`, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             console.log('Response received:', response.data);
 
             if(response.data.success){
@@ -119,7 +126,12 @@ const Add = ({url}) => {
             }
         } catch (error) {
             console.error('Error making request:', error);
-            toast.error('Erro ao conectar com o servidor');
+            if (error.response) {
+                console.error('Error response:', error.response.data);
+                toast.error(error.response.data.message || 'Erro ao criar produto');
+            } else {
+                toast.error('Erro ao conectar com o servidor');
+            }
         }
     }
 

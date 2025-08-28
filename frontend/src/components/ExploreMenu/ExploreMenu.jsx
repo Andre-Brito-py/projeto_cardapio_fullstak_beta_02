@@ -1,25 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
+import PropTypes from 'prop-types'
 import './ExploreMenu.css'
 import axios from 'axios'
+import { StoreContext } from '../context/StoreContext'
 
 const ExploreMenu = ({category, setCategory}) => {
+    const { url } = useContext(StoreContext);
     const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
     const scrollContainerRef = useRef(null);
-    const url = 'http://localhost:4000';
 
     const fetchCategories = async () => {
         try {
+            setLoading(true);
+            setError(null);
             const response = await axios.get(`${url}/api/category/active`);
+            
             if (response.data.success) {
                 setCategories(response.data.data);
+            } else {
+                setError(response.data.message || 'Erro ao carregar categorias.');
             }
         } catch (error) {
-            console.log('Erro ao carregar categorias:', error);
+            console.error('Erro ao carregar categorias:', error);
+            const errorMessage = error.response?.data?.message || 'Erro ao conectar com o servidor. Tente novamente.';
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -66,8 +79,10 @@ const ExploreMenu = ({category, setCategory}) => {
     };
 
     useEffect(() => {
-        fetchCategories();
-    }, []);
+        if (url) {
+            fetchCategories();
+        }
+    }, [url]);
 
     useEffect(() => {
         checkScrollButtons();
@@ -78,6 +93,31 @@ const ExploreMenu = ({category, setCategory}) => {
             return () => container.removeEventListener('scroll', handleScroll);
         }
     }, [categories]);
+
+    if (loading) {
+        return (
+            <div className='explore-menu' id='explore-menu'>
+                <h1>Explore Nosso Cardápio</h1>
+                <div className="explore-menu-loading">
+                    <p>Carregando categorias...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className='explore-menu' id='explore-menu'>
+                <h1>Explore Nosso Cardápio</h1>
+                <div className="explore-menu-error">
+                    <p>{error}</p>
+                    <button onClick={fetchCategories} className="retry-btn">
+                        Tentar novamente
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className='explore-menu' id='explore-menu'>
@@ -122,5 +162,10 @@ const ExploreMenu = ({category, setCategory}) => {
         </div>
     )
 }
+
+ExploreMenu.propTypes = {
+    category: PropTypes.string.isRequired,
+    setCategory: PropTypes.func.isRequired
+};
 
 export default ExploreMenu

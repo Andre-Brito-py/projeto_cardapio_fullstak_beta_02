@@ -4,6 +4,8 @@ import {
     connectPrinter, 
     printOrder, 
     printOrderSerial, 
+    printQRCode,
+    printQRCodeSerial,
     disconnectPrinter, 
     testPrint 
 } from '../controllers/printController.js';
@@ -17,6 +19,8 @@ printRouter.post('/scan', identifyStore, authMultiTenant, requireStoreAdmin, add
 printRouter.post('/connect', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, connectPrinter);
 printRouter.post('/print', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, printOrder);
 printRouter.post('/print-serial', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, printOrderSerial);
+printRouter.post('/print-qr', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, printQRCode);
+printRouter.post('/print-qr-serial', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, printQRCodeSerial);
 printRouter.post('/disconnect', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, disconnectPrinter);
 printRouter.post('/test', identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext, testPrint);
 

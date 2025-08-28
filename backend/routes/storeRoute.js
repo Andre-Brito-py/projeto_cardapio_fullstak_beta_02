@@ -7,7 +7,8 @@ import {
     loginStoreAdmin,
     getPublicStoreData,
     getPublicStoreMenu,
-    updateStoreStatus
+    updateStoreStatus,
+    updateAutoAcceptOrders
 } from '../controllers/storeController.js';
 import {
     identifyStore,
@@ -41,6 +42,7 @@ storeRouter.get('/current', getStore); // Nova rota para obter loja atual
 storeRouter.get('/:storeId', getStore);
 storeRouter.put('/:storeId/settings', updateStoreSettings);
 storeRouter.put('/status', updateStoreStatus); // Nova rota para atualizar status aberta/fechada
+storeRouter.put('/auto-accept', updateAutoAcceptOrders); // Nova rota para aceitar pedidos automaticamente
 storeRouter.get('/:storeId/stats', getStoreStats);
 storeRouter.get('/:storeId/limits', checkPlanLimits);
 

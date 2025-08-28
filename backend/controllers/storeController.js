@@ -460,6 +460,42 @@ const updateStoreStatus = async (req, res) => {
     }
 };
 
+// Atualizar configuração de aceitar pedidos automaticamente
+const updateAutoAcceptOrders = async (req, res) => {
+    try {
+        const { autoAcceptOrders } = req.body;
+        const storeId = req.user.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Loja não identificada" });
+        }
+        
+        const store = await Store.findById(storeId);
+        if (!store) {
+            return res.json({ success: false, message: "Loja não encontrada" });
+        }
+        
+        // Verificar se o usuário tem permissão para editar esta loja
+        if (req.user.role !== 'super_admin' && req.user.storeId.toString() !== storeId.toString()) {
+            return res.json({ success: false, message: "Sem permissão para editar esta loja" });
+        }
+        
+        store.settings.autoAcceptOrders = autoAcceptOrders;
+        await store.save();
+        
+        res.json({ 
+            success: true, 
+            message: `Aceitar pedidos automaticamente ${autoAcceptOrders ? 'ativado' : 'desativado'} com sucesso`,
+            data: {
+                autoAcceptOrders: store.settings.autoAcceptOrders
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Erro ao atualizar configuração de aceitar pedidos automaticamente" });
+    }
+};
+
 export {
     createStore,
     getStore,
@@ -470,5 +506,6 @@ export {
     loginStoreAdmin,
     getPublicStoreData,
     getPublicStoreMenu,
-    updateStoreStatus
+    updateStoreStatus,
+    updateAutoAcceptOrders
 };

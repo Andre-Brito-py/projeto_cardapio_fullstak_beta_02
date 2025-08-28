@@ -7,13 +7,7 @@ import axios from 'axios'
 const Header = () => {
   const { url } = useContext(StoreContext);
   const navigate = useNavigate();
-  const [banners, setBanners] = useState([
-    {
-      title: "Peça sua comida favorita aqui",
-      description: "Nosso aplicativo de entrega de comida traz refeições deliciosas diretamente à sua porta. Navegue por uma variedade de restaurantes, faça seu pedido e acompanhe em tempo real. Desfrute de comida quente e fresca sem sair de casa. Rápido, conveniente e fácil de usar.",
-      image: "/header_img.png"
-    }
-  ]);
+  const [banners, setBanners] = useState([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [intervalId, setIntervalId] = useState(null);
 
@@ -22,12 +16,30 @@ const Header = () => {
       const response = await axios.get(`${url}/api/banner/list`);
       if (response.data.success && response.data.data.length > 0) {
         setBanners(response.data.data);
+      } else {
+        // Se não há banners cadastrados, busca o banner principal das configurações
+        await fetchMainBanner();
       }
     } catch (error) {
       console.error('Erro ao buscar banners:', error);
-      // Mantém os valores padrão em caso de erro
+      // Em caso de erro, tenta buscar banner principal
+      await fetchMainBanner();
     }
   };
+
+  const fetchMainBanner = async () => {
+    try {
+      const response = await axios.get(`${url}/api/settings/banner`);
+      if (response.data.success && response.data.data) {
+        setBanners([response.data.data]);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar banner principal:', error);
+      // Em caso de erro, não exibe nenhum banner
+    }
+  };
+
+
 
   // Função para iniciar/reiniciar o timer
   const startTimer = () => {
@@ -93,12 +105,12 @@ const Header = () => {
     }
   }, [url]);
 
-  useEffect(() => {
-    if (banners.length > 0) {
-      console.log('Banners carregados:', banners);
-      console.log('Banner atual:', banners[currentBannerIndex]);
-    }
-  }, [banners, currentBannerIndex]);
+
+
+  // Se não há banners, não renderiza nada até carregar
+  if (banners.length === 0) {
+    return null;
+  }
 
   const currentBanner = banners[currentBannerIndex];
   const backgroundImage = currentBanner.image.startsWith('/') 

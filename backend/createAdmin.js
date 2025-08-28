@@ -47,7 +47,7 @@ const createAdminUser = async () => {
         console.log('Email:', adminEmail);
         console.log('Senha:', adminPassword);
         console.log('\n📋 INSTRUÇÕES:');
-        console.log('1. Acesse o painel admin em: http://localhost:5174');
+        console.log('1. Acesse o painel admin em: http://localhost:5174 (ADMIN)');
         console.log('2. Use as credenciais acima para fazer login');
         console.log('3. ⚠️  IMPORTANTE: Altere a senha após o primeiro login!');
         console.log('\n✅ Sistema de login configurado com sucesso!');

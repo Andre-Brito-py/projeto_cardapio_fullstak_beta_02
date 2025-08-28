@@ -309,7 +309,7 @@ const checkSuperAdmin = async (req, res) => {
     }
 };
 
-// Resetar senha do super admin (temporário para debug)
+// Reset super admin password
 const resetSuperAdminPassword = async (req, res) => {
     try {
         const { email, newPassword } = req.body;

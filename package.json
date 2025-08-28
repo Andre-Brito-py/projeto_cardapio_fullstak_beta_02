@@ -1,0 +1,43 @@
+{
+  "name": "food-delivery-app",
+  "version": "1.0.0",
+  "description": "Full Stack Food Delivery Web Application",
+  "type": "module",
+  "scripts": {
+    "validate-urls": "node scripts/validate-urls.js",
+    "dev:all": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix admin\" \"npm start --prefix backend\"",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:admin": "npm run dev --prefix admin",
+    "dev:backend": "npm start --prefix backend",
+    "install:all": "npm install && npm install --prefix frontend && npm install --prefix admin && npm install --prefix backend",
+    "build:all": "npm run build --prefix frontend && npm run build --prefix admin",
+    "test:urls": "npm run validate-urls",
+    "setup": "npm run install:all && node backend/createAdmin.js"
+  },
+  "keywords": [
+    "food-delivery",
+    "restaurant",
+    "multi-tenant",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "Food Delivery Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "workspaces": [
+    "frontend",
+    "admin",
+    "backend"
+  ]
+}

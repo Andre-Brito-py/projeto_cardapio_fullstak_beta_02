@@ -12,7 +12,7 @@ import './StoreHome.css';
 const StoreHome = () => {
     const { storeSlug } = useParams();
     const { currentStore, storeMenu, loadStoreData, clearStoreData } = useContext(StoreContext);
-    const [category, setCategory] = useState("All");
+    const [category, setCategory] = useState("Todos");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -116,7 +116,7 @@ const StoreHome = () => {
                             )}
                             {/* Status da loja */}
                             <div className={`store-status ${currentStore.isOpen ? 'open' : 'closed'}`}>
-                                <i className={`fas ${currentStore.isOpen ? 'fa-clock' : 'fa-times-circle'}`}></i>
+                                <i className={`fas ${currentStore.isOpen ? 'fa-circle' : 'fa-circle'}`}></i>
                                 <span>{currentStore.isOpen ? 'Aberta' : 'Fechada'}</span>
                             </div>
                         </div>
@@ -136,7 +136,7 @@ const StoreHome = () => {
                         <p>Desculpe, a <strong>{currentStore.name}</strong> está fechada no momento.</p>
                         <p>Por favor, volte em outro momento para fazer seu pedido.</p>
                         <div className="closed-actions">
-                            <a href="/" className="btn-home">Ver Outras Lojas</a>
+                            <p className="closed-note">Aguarde a reabertura da loja para fazer seu pedido.</p>
                         </div>
                     </div>
                 </div>

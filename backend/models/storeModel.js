@@ -69,6 +69,10 @@ const storeSchema = new mongoose.Schema({
       type: Boolean,
       default: true
     },
+    autoAcceptOrders: {
+      type: Boolean,
+      default: false
+    },
     deliveryZones: [{
       name: {
         type: String,

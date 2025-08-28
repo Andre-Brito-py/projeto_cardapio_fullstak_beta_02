@@ -27,17 +27,14 @@ const upload = multer({storage:storage})
 // Rotas públicas (para clientes)
 foodRouter.get('/list',listFood)
 
-// Rotas protegidas (para admins)
-foodRouter.use(authMultiTenant);
-foodRouter.use(requireStoreAdmin);
-foodRouter.use(addStoreContext);
-
-foodRouter.post('/add',upload.single('image'),addFood)
-foodRouter.post('/remove', removeFood)
-foodRouter.put('/update',upload.single('image'),updateFood)
+// Rotas protegidas (para admins) - aplicar middlewares específicos
+foodRouter.get('/admin/list', authMultiTenant, requireStoreAdmin, addStoreContext, listFood)
+foodRouter.post('/add', authMultiTenant, requireStoreAdmin, addStoreContext, upload.single('image'), addFood)
+foodRouter.post('/remove', authMultiTenant, requireStoreAdmin, addStoreContext, removeFood)
+foodRouter.put('/update', authMultiTenant, requireStoreAdmin, addStoreContext, upload.single('image'), updateFood)
 
 // Test endpoint
-foodRouter.post('/test', (req, res) => {
+foodRouter.post('/test', authMultiTenant, requireStoreAdmin, addStoreContext, (req, res) => {
     console.log('=== TEST ENDPOINT CALLED ===');
     console.log('Request body:', req.body);
     res.json({success: true, message: 'Test endpoint working'});

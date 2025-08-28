@@ -3,6 +3,11 @@ import userModel from './../models/userModel.js';
 // add items to user cart
 const addToCart = async (req,res) =>{
     try {
+        // Se usuário não está autenticado, retornar sucesso (carrinho gerenciado no frontend)
+        if (!req.body.userId) {
+            return res.json({success:true,message:'Added to cart (local storage)'});
+        }
+
         let userData = await userModel.findById(req.body.userId)
         let cartData = await userData.cartData;
         
@@ -42,6 +47,11 @@ const addToCart = async (req,res) =>{
 // remove items to user cart
 const removeFromCart = async (req, res) =>{
     try {
+        // Se usuário não está autenticado, retornar sucesso (carrinho gerenciado no frontend)
+        if (!req.body.userId) {
+            return res.json({success:true,message:'Removed from cart (local storage)'});
+        }
+
         let userData = await userModel.findById(req.body.userId)
         let cartData = await userData.cartData;
 
@@ -68,6 +78,11 @@ const removeFromCart = async (req, res) =>{
 // fetch user cart data
 const getCart = async (req,res) =>{
     try {
+        // Se usuário não está autenticado, retornar carrinho vazio (gerenciado no frontend)
+        if (!req.body.userId) {
+            return res.json({success:true,cartData:{}});
+        }
+
         let userData = await userModel.findById(req.body.userId)
         let cartData = await userData.cartData;
         res.json({success:true,cartData});

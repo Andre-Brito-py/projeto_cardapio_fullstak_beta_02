@@ -32,11 +32,19 @@ const Banners = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(`${url}/api/food/list`);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${url}/api/food/admin/list`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.data.success) {
         setProducts(response.data.data);
+      } else {
+        toast.error(response.data.message || 'Erro ao carregar produtos');
       }
     } catch (error) {
+      console.error('Erro ao carregar produtos:', error);
       toast.error('Erro ao carregar produtos');
     }
   };

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import './ShareStore.css';
 
-const ShareStore = ({ storeData }) => {
+const ShareStore = ({ storeData = null }) => {
     const [showShareModal, setShowShareModal] = useState(false);
     const [copySuccess, setCopySuccess] = useState(false);
 
@@ -72,7 +73,7 @@ const ShareStore = ({ storeData }) => {
                     url: storeUrl
                 });
             } catch (err) {
-                console.log('Compartilhamento cancelado ou erro:', err);
+                // Compartilhamento cancelado pelo usuário
             }
         } else {
             setShowShareModal(true);
@@ -192,5 +193,14 @@ const ShareStore = ({ storeData }) => {
         </>
     );
 };
+
+ShareStore.propTypes = {
+    storeData: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        slug: PropTypes.string.isRequired
+    })
+};
+
+
 
 export default ShareStore;

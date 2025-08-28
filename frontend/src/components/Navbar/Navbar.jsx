@@ -1,29 +1,65 @@
 import React, { useContext, useState } from 'react'
+import PropTypes from 'prop-types'
 import './Navbar.css'
 import { assets } from './../../assets/assets';
-import {Link, useNavigate} from 'react-router-dom'
+import {Link, useNavigate, useLocation} from 'react-router-dom'
 import { StoreContext } from './../context/StoreContext';
 
 const Navbar = ({setShowLogin}) => {
 
   const [menu, setMenu] = useState('home');
 
-  const {getTotalCartAmount, token, setToken} = useContext(StoreContext);
+  const {getTotalCartAmount, token, setToken, currentStore} = useContext(StoreContext);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const logout = () =>{
+  const logout = () => {
     localStorage.removeItem("token");
     setToken("");
     navigate("/")
   }
 
+  // Função para lidar com o clique na logo
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    
+    // Verificar se estamos em uma página de loja específica
+    const storeMatch = location.pathname.match(/^\/loja\/([^/]+)$/);
+    
+    if (storeMatch) {
+      // Se estamos em uma página de loja, rolar para o topo mantendo a mesma loja
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setMenu('home');
+    } else {
+      // Se não estamos em uma página de loja, recarregar para ativar o redirecionamento automático
+      window.location.reload();
+    }
+  }
+
+  // Função para lidar com o clique no botão "início"
+  const handleHomeClick = (e) => {
+    e.preventDefault();
+    
+    // Verificar se estamos em uma página de loja específica
+    const storeMatch = location.pathname.match(/^\/loja\/([^/]+)$/);
+    
+    if (storeMatch) {
+      // Se estamos em uma página de loja, rolar para o topo mantendo a mesma loja
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setMenu('home');
+    } else {
+      // Se não estamos em uma página de loja, recarregar para ativar o redirecionamento automático
+      window.location.reload();
+    }
+  }
+
   return (
     <div className='navbar'>
-       <Link to='/'> <img src={assets.logo} alt="" className='logo' /></Link>
+       <a href="#" onClick={handleLogoClick}> <img src={assets.logo} alt="" className='logo' /></a>
         <ul className="navbar-menu">
-            <Link to='/' onClick={()=> setMenu('home')} className={menu === 'home'?'active':''}>início</Link>
-            <a href='#explore-menu' onClick={()=> setMenu('menu')} className={menu === 'menu'?'active':''}>cardápio</a>
+            <a href="#" onClick={handleHomeClick} className={menu === 'home'?'active':''}>inicio</a>
+            <a href='#explore-menu' onClick={()=> setMenu('menu')} className={menu === 'menu'?'active':''}>cardapio</a>
             <a href='#footer' onClick={()=> setMenu('contact-us')} className={menu === 'contact-us'?'active':''}>contato</a>
         </ul>
         <div className="navbar-right">
@@ -46,5 +82,9 @@ const Navbar = ({setShowLogin}) => {
     </div>
   )
 }
+
+Navbar.propTypes = {
+    setShowLogin: PropTypes.func.isRequired
+};
 
 export default Navbar

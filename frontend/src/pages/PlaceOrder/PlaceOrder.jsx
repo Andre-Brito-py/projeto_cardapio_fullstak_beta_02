@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import SEO from '../../components/SEO/SEO';
 import useDeliveryCalculation from '../../hooks/useDeliveryCalculation';
 
-const PlaceOrder = () => {
+const PlaceOrder = ({ setShowLogin }) => {
   const {getTotalCartAmount, token, food_list, cartItems, url} = useContext(StoreContext);
   const { deliveryData, calculateDeliveryFee } = useDeliveryCalculation(url);
 
@@ -27,12 +27,19 @@ const PlaceOrder = () => {
   const [pixKey, setPixKey] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
   const [deliveryType, setDeliveryType] = useState('delivery');
+  
+  // Coupon states
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState('');
 
-  const onChangeHandler = (event) =>{
-    const name = event.target.name;
-    const value = event.target.value;
-    setData(data =>({...data,[name]:value}))
-  }
+  const handleChange = (event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setData(data => ({...data, [name]: value}));
+    }
 
   const fetchPixKey = async () => {
     try {
@@ -56,44 +63,123 @@ const PlaceOrder = () => {
     }
   };
 
-  const placeOrder = async (event) =>{
-    event.preventDefault();
-    let orderItems = [];
-    food_list.map((item, index)=>{
-      if(cartItems[item._id]>0){
-        let itemInfo = item;
-        itemInfo["quantity"] = cartItems[item._id];
-        orderItems.push(itemInfo);
-      }
-    })
-    const deliveryFee = deliveryType === 'delivery' ? deliveryData.fee : 0;
-    let orderData = {
-      address:data,
-      items:orderItems,
-      amount:getTotalCartAmount()+deliveryFee,
-      deliveryType: deliveryType,
-      deliveryFee: deliveryFee
+  // Coupon functions
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError('Digite um código de cupom');
+      return;
     }
 
-    let response = await axios.post(url+'/api/order/place', orderData,{headers:{token}})
-    if(response.data.success){
-      const {session_url} = response.data;
-      window.location.replace(session_url);
+    setCouponLoading(true);
+    setCouponError('');
+
+    try {
+      const subtotal = getTotalCartAmount();
+      const response = await axios.post(`${url}/api/coupons/validate`, {
+        code: couponCode.toUpperCase(),
+        orderValue: subtotal
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data.success) {
+        const coupon = response.data.coupon;
+        const discount = response.data.discount;
+        
+        setAppliedCoupon(coupon);
+        setCouponDiscount(discount);
+        setCouponError('');
+      } else {
+        setCouponError(response.data.message || 'Cupom inválido');
+        setAppliedCoupon(null);
+        setCouponDiscount(0);
+      }
+    } catch (error) {
+      console.error('Erro ao validar cupom:', error);
+      setCouponError(error.response?.data?.message || 'Erro ao validar cupom');
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+    } finally {
+      setCouponLoading(false);
     }
-    else{
-      alert('Error')
+  };
+
+  const removeCoupon = () => {
+    setCouponCode('');
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+    setCouponError('');
+  };
+
+  const handleCouponInputChange = (e) => {
+    setCouponCode(e.target.value.toUpperCase());
+    if (appliedCoupon) {
+      removeCoupon();
+    }
+  };
+
+  const placeOrder = async (event) => {
+    event.preventDefault();
+    
+    try {
+      let orderItems = [];
+      
+      // Processar itens do carrinho com suas chaves compostas
+      Object.keys(cartItems).forEach(cartKey => {
+        const cartItem = cartItems[cartKey];
+        if (cartItem && cartItem.quantity > 0) {
+          // Encontrar o item na lista de comidas
+          const foodItem = food_list.find(item => item._id === cartItem.itemId);
+          if (foodItem) {
+            let itemInfo = {
+              ...foodItem,
+              quantity: cartItem.quantity,
+              extras: cartItem.extras || [],
+              observations: cartItem.observations || '',
+              includeDisposables: cartItem.includeDisposables || false
+            };
+            orderItems.push(itemInfo);
+          }
+        }
+      });
+      
+      const deliveryFee = deliveryType === 'delivery' ? deliveryData.fee : 0;
+      const finalAmount = getTotalCartAmount() + deliveryFee - couponDiscount;
+      
+      let orderData = {
+        address: data,
+        items: orderItems,
+        amount: finalAmount,
+        deliveryType: deliveryType,
+        deliveryFee: deliveryFee,
+        couponCode: appliedCoupon?.code || null,
+        discountAmount: couponDiscount
+      };
+
+      const response = await axios.post(`${url}/api/order/place`, orderData, {
+        headers: { token }
+      });
+      
+      if(response.data.success) {
+        const { session_url } = response.data;
+        window.location.replace(session_url);
+      } else {
+        alert(response.data.message || 'Erro ao processar pedido. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao fazer pedido:', error);
+      const errorMessage = error.response?.data?.message || 'Erro ao processar pedido. Verifique sua conexão e tente novamente.';
+      alert(errorMessage);
     }
   }
 
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    if(!token){
-      navigate('/cart')
-    }else if(getTotalCartAmount()===0){
+  useEffect(() => {
+    if(getTotalCartAmount()===0){
       navigate('/cart')
     }
-  },[token])
+  }, [])
 
   useEffect(() => {
     if (paymentMethod === 'pix') {
@@ -125,21 +211,49 @@ const PlaceOrder = () => {
       <form onSubmit={placeOrder} className='place-order'>
       <div className="place-order-left">
         <p className="title">Informações de Entrega</p>
+        
+        {/* Seção informativa sobre cadastro opcional */}
+        {!token && (
+          <div className="guest-checkout-info">
+            <div className="info-box">
+              <h4>💡 Dica: Cadastre-se e aproveite os benefícios!</h4>
+              <ul>
+                <li>🎯 Acompanhe seus pedidos em tempo real</li>
+                <li>📋 Histórico completo de pedidos</li>
+                <li>⚡ Checkout mais rápido em futuras compras</li>
+                <li>🎁 Ofertas e cupons exclusivos</li>
+                <li>📱 Notificações sobre o status do pedido</li>
+              </ul>
+              <p className="optional-note">
+                <strong>Não se preocupe:</strong> Você pode fazer seu pedido sem cadastro, 
+                mas recomendamos criar uma conta para uma experiência completa!
+              </p>
+              <button 
+                type="button" 
+                onClick={() => setShowLogin(true)}
+                className="register-suggestion-btn"
+              >
+                Criar Conta Agora
+              </button>
+            </div>
+          </div>
+        )}
+        
         <div className="multi-fields">
-          <input required name='firstName' onChange={onChangeHandler} value={data.firstName} type="text" placeholder='Nome'/>
-          <input required name='lastName' onChange={onChangeHandler} value={data.lastName} type="text" placeholder='Sobrenome'/>
+          <input required name='firstName' onChange={handleChange} value={data.firstName} type="text" placeholder='Nome'/>
+                <input required name='lastName' onChange={handleChange} value={data.lastName} type="text" placeholder='Sobrenome'/>
         </div>
-        <input required name='email' onChange={onChangeHandler} value={data.email} type="email" placeholder='Endereço de email'/>
-        <input required name='street' onChange={onChangeHandler} value={data.street} type="text" placeholder='Rua'/>
+        <input required name='email' onChange={handleChange} value={data.email} type="email" placeholder='Endereço de email'/>
+                <input required name='street' onChange={handleChange} value={data.street} type="text" placeholder='Rua'/>
         <div className="multi-fields">
-          <input required name='city' onChange={onChangeHandler} value={data.city}  type="text" placeholder='Cidade'/>
-          <input required name='state' onChange={onChangeHandler} value={data.state} type="text" placeholder='Estado'/>
+          <input required name='city' onChange={handleChange} value={data.city}  type="text" placeholder='Cidade'/>
+                <input required name='state' onChange={handleChange} value={data.state} type="text" placeholder='Estado'/>
         </div>
         <div className="multi-fields">
-          <input required name='zipcode' onChange={onChangeHandler} value={data.zipcode} type="text" placeholder='CEP'/>
-          <input required name='country' onChange={onChangeHandler} value={data.country} type="text" placeholder='País'/>
+          <input required name='zipcode' onChange={handleChange} value={data.zipcode} type="text" placeholder='CEP'/>
+                <input required name='country' onChange={handleChange} value={data.country} type="text" placeholder='País'/>
         </div>
-        <input required name='phone' onChange={onChangeHandler} value={data.phone} type="text" placeholder='Telefone' />
+        <input required name='phone' onChange={handleChange} value={data.phone} type="text" placeholder='Telefone' />
         
         {/* Delivery Type Selection */}
         <div className="delivery-type-section">
@@ -274,6 +388,58 @@ const PlaceOrder = () => {
         </div>
       </div>
       <div className="place-order-right">
+        {/* Coupon Section */}
+        <div className="coupon-section">
+          <h3>Cupom de Desconto</h3>
+          {!appliedCoupon ? (
+            <div className="coupon-input-container">
+              <div className="coupon-input-group">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={handleCouponInputChange}
+                  placeholder="Digite o código do cupom"
+                  className="coupon-input"
+                  maxLength={20}
+                />
+                <button
+                  type="button"
+                  onClick={validateCoupon}
+                  disabled={couponLoading || !couponCode.trim()}
+                  className="coupon-apply-btn"
+                >
+                  {couponLoading ? 'Validando...' : 'Aplicar'}
+                </button>
+              </div>
+              {couponError && (
+                <div className="coupon-error">
+                  ⚠️ {couponError}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="coupon-applied">
+              <div className="coupon-success">
+                <div className="coupon-info">
+                  <span className="coupon-code-applied">✅ {appliedCoupon.code}</span>
+                  <span className="coupon-name">{appliedCoupon.name}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeCoupon}
+                  className="coupon-remove-btn"
+                  title="Remover cupom"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="coupon-discount-info">
+                💰 Desconto: R$ {couponDiscount.toFixed(2)}
+              </div>
+            </div>
+          )}
+        </div>
+
       <div className="cart-total">
           <h2>Total do Carrinho</h2>
           <div>
@@ -302,10 +468,19 @@ const PlaceOrder = () => {
                 <p>⚠️ {deliveryData.error}</p>
               </div>
             )}
+            {appliedCoupon && (
+              <>
+                <hr />
+                <div className="cart-total-detail coupon-discount">
+                  <p>Desconto ({appliedCoupon.code})</p>
+                  <p style={{color: '#28a745'}}>- R$ {couponDiscount.toFixed(2)}</p>
+                </div>
+              </>
+            )}
             <hr />
             <div className="cart-total-detail">
               <b>Total</b>
-              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+(deliveryType === 'delivery' ? deliveryData.fee : 0)).toFixed(2)}</b>
+              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+(deliveryType === 'delivery' ? deliveryData.fee : 0)-couponDiscount).toFixed(2)}</b>
             </div> 
           </div>
           <button type='submit'>PROSSEGUIR PARA PAGAMENTO</button>

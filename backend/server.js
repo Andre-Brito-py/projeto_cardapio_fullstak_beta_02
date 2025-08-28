@@ -15,6 +15,8 @@ import printRouter from './routes/printRoute.js';
 import deliveryRouter from './routes/deliveryRoute.js';
 import systemRouter from './routes/systemRoute.js';
 import storeRouter from './routes/storeRoute.js';
+import tableRouter from './routes/tableRoute.js';
+import couponRouter from './routes/couponRoute.js';
 
 // Utilitários
 import 'dotenv/config';
@@ -34,6 +36,8 @@ connectDB();
 // Rotas do sistema multi-tenant
 app.use('/api/system', systemRouter); // Rotas para Super Admin
 app.use('/api/store', storeRouter); // Rotas para gerenciamento de lojas
+app.use('/api/tables', tableRouter); // Rotas para gerenciamento de mesas
+app.use('/api/coupons', couponRouter); // Rotas para gerenciamento de cupons
 
 // Rotas existentes (mantidas para compatibilidade)
 app.use('/api/food', foodRouter); // Rotas para gerenciamento de comidas

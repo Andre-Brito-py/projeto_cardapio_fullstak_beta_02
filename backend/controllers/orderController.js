@@ -1,5 +1,8 @@
 import orderModel from './../models/orderModel.js';
 import userModel from './../models/userModel.js';
+import Store from './../models/storeModel.js';
+import tableModel from './../models/tableModel.js';
+import couponModel from './../models/couponModel.js';
 import Stripe from "stripe"
 
 const stripe =  new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -9,26 +12,112 @@ const placeOrder = async (req, res) =>{
 
     const frontend_url = 'https://full-stack-food-delivery-web-application-a75a.onrender.com';
     try {
-        const newOrder = new orderModel({
-            userId: req.body.userId,
+        // Get storeId from request context (added by middleware)
+        const storeId = req.store ? req.store._id : req.body.storeId;
+        
+        if (!storeId) {
+            return res.json({success: false, message: "Store ID is required"});
+        }
+
+        // Prepare order data
+        let finalAmount = req.body.amount;
+        let discountAmount = 0;
+        let couponData = {};
+        
+        // Process coupon if provided
+        if (req.body.couponCode) {
+            const coupon = await couponModel.findOne({ 
+                code: req.body.couponCode.toUpperCase(),
+                isActive: true 
+            });
+            
+            if (coupon && coupon.isValid()) {
+                // Verify coupon can be used
+                if (req.body.amount >= coupon.minOrderValue) {
+                    // Check user usage limit
+                    const userUsageCount = await orderModel.countDocuments({
+                        userId: req.body.userId,
+                        couponCode: coupon.code,
+                        payment: true
+                    });
+                    
+                    if (userUsageCount < coupon.maxUsesPerUser) {
+                        // Calculate discount
+                        discountAmount = coupon.calculateDiscount(req.body.amount);
+                        finalAmount = Math.max(0, req.body.amount - discountAmount);
+                        
+                        couponData = {
+                            couponCode: coupon.code,
+                            couponId: coupon._id,
+                            discountAmount: discountAmount,
+                            originalAmount: req.body.amount
+                        };
+                    }
+                }
+            }
+        }
+        
+        const orderData = {
+            userId: req.body.userId, // Pode ser null para usuários não autenticados
+            storeId: storeId,
             items: req.body.items,
-            amount:req.body.amount,
-            address: req.body.address
-        })
+            amount: finalAmount,
+            address: req.body.address,
+            orderType: req.body.orderType || 'delivery',
+            ...couponData
+        };
+        
+        // If tableId is provided, get table information and add to order
+        if (req.body.tableId) {
+            const table = await tableModel.findById(req.body.tableId);
+            if (table && table.storeId.toString() === storeId.toString()) {
+                orderData.tableId = table._id;
+                orderData.tableNumber = table.tableNumber;
+                orderData.tableName = table.displayName;
+                orderData.orderType = 'dine_in';
+            }
+        }
+        
+        const newOrder = new orderModel(orderData)
 
         await newOrder.save();
-        await userModel.findByIdAndUpdate(req.body.userId,{cartData:{}});
+        
+        // Limpar carrinho apenas se o usuário estiver autenticado
+        if (req.body.userId) {
+            await userModel.findByIdAndUpdate(req.body.userId,{cartData:{}});
+        }
 
-        const line_items = req.body.items.map((item)=>({
-            price_data :{
-                currency: "INR",
-                product_data:{
-                    name: item.name
+        const line_items = req.body.items.map((item)=>{
+            // Calcular preço total do item incluindo extras
+            let totalPrice = item.price;
+            let itemName = item.name;
+            
+            // Adicionar preço dos extras
+            if (item.extras && item.extras.length > 0) {
+                const extrasPrice = item.extras.reduce((sum, extra) => sum + extra.price, 0);
+                totalPrice += extrasPrice;
+                
+                // Adicionar extras ao nome do produto
+                const extrasNames = item.extras.map(extra => extra.name).join(', ');
+                itemName += ` (+ ${extrasNames})`;
+            }
+            
+            // Adicionar observações ao nome se existirem
+            if (item.observations && item.observations.trim()) {
+                itemName += ` - Obs: ${item.observations.trim()}`;
+            }
+            
+            return {
+                price_data: {
+                    currency: "INR",
+                    product_data: {
+                        name: itemName
+                    },
+                    unit_amount: Math.round(totalPrice * 100)
                 },
-                unit_amount:item.price*100
-            },
-            quantity: item.quantity
-        }))
+                quantity: item.quantity
+            };
+        })
 
         // A taxa de entrega agora é calculada dinamicamente no frontend
         // e já está incluída no amount total do pedido
@@ -45,6 +134,20 @@ const placeOrder = async (req, res) =>{
             })
         }
 
+        // Add discount to line items if applicable
+        if (discountAmount > 0) {
+            line_items.push({
+                price_data: {
+                    currency: "INR",
+                    product_data: {
+                        name: `Desconto - ${req.body.couponCode}`
+                    },
+                    unit_amount: -Math.round(discountAmount * 100)
+                },
+                quantity: 1
+            });
+        }
+        
         const session = await stripe.checkout.sessions.create({
             line_items:line_items,
             mode:'payment',
@@ -62,13 +165,40 @@ const verifyOrder = async (req, res) =>{
     const {orderId, success} = req.body;
     try {
         if(success=='true'){
-            await orderModel.findByIdAndUpdate(orderId,{payment:true});
+            // Find the order to get store information
+            const order = await orderModel.findById(orderId);
+            if (!order) {
+                return res.json({success:false, message:"Order not found"});
+            }
+
+            // Get store settings to check auto-accept configuration
+            const store = await Store.findById(order.storeId);
+            
+            // Update payment status
+            const updateData = { payment: true };
+            
+            // If auto-accept is enabled, automatically accept the order
+            if (store && store.settings && store.settings.autoAcceptOrders) {
+                updateData.status = "Confirmed";
+            }
+            
+            await orderModel.findByIdAndUpdate(orderId, updateData);
+            
+            // Update coupon usage count if coupon was used
+            if (order.couponCode) {
+                await couponModel.findOneAndUpdate(
+                    { code: order.couponCode },
+                    { $inc: { usedCount: 1 } }
+                );
+            }
+            
             res.json({success:true, message:"Paid"})
         }else{
             await orderModel.findByIdAndDelete(orderId);
             res.json({success:false, message:"Not Paid"})
         }
     } catch (error) {
+        console.log(error);
         res.json({success:false, message:"Error"})
     }
 }
@@ -87,9 +217,16 @@ const userOrders = async (req,res) => {
 // listing orders for admin panel
 const listOrders = async (req,res) =>{
    try {
-    const orders = await orderModel.find({});
+    // Filter orders by store in multi-tenant context
+    const storeId = req.store ? req.store._id : null;
+    const query = storeId ? { storeId: storeId } : {};
+    
+    const orders = await orderModel.find(query)
+        .populate('tableId', 'tableNumber displayName capacity location')
+        .sort({ date: -1 });
     res.json({success:true, data:orders})
    } catch (error) {
+        console.log(error);
         res.json({success:false, message:"Error"})  
    } 
 }

@@ -11,23 +11,44 @@ const List = ({url}) => {
   const navigate = useNavigate();
 
   const fetchList = async () =>{
-    const response = await axios.get(`${url}/api/food/list`)
-   
-    if(response.data.success){
-      setList(response.data.data)
-    }
-    else{
-      toast.error("Error")
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${url}/api/food/admin/list`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+     
+      if(response.data.success){
+        setList(response.data.data)
+      }
+      else{
+        toast.error(response.data.message || "Erro ao carregar produtos")
+      }
+    } catch (error) {
+      console.error('Erro ao buscar produtos:', error);
+      toast.error('Erro ao conectar com o servidor');
     }
   }
 
   const removeFood = async (foodId) =>{
-    const response = await axios.post(`${url}/api/food/remove`,{id:foodId})
-    await fetchList();
-    if(response.data.success){
-      toast.success(response.data.message)
-    }else{
-      toast.error('Error');
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${url}/api/food/remove`, {id:foodId}, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if(response.data.success){
+        toast.success(response.data.message)
+        await fetchList();
+      }else{
+        toast.error(response.data.message || 'Erro ao excluir produto');
+      }
+    } catch (error) {
+      console.error('Erro ao excluir produto:', error);
+      toast.error('Erro ao conectar com o servidor');
     }
   }
 

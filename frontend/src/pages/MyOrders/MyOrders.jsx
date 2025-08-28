@@ -10,16 +10,31 @@ const MyOrders = () => {
 const {url, token} = useContext(StoreContext);
 const [data, setData] = useState([]);
 
-const fetchOrders = async () =>{
-    const response = await axios.post(url+'/api/order/userorders',{},{headers:{token}})
-    setData(response.data.data);
+const fetchOrders = async () => {
+    try {
+        const response = await axios.post(`${url}/api/order/userorders`, {}, {
+            headers: { token }
+        });
+        
+        if (response.data.success) {
+            setData(response.data.data);
+        } else {
+            console.error('Erro ao buscar pedidos:', response.data.message);
+            setData([]);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar pedidos:', error);
+        const errorMessage = error.response?.data?.message || 'Erro ao carregar pedidos. Tente novamente.';
+        alert(errorMessage);
+        setData([]);
+    }
 }
 
-useEffect(()=>{
+useEffect(() => {
     if(token){
         fetchOrders();
     }
-},[token])
+}, [token])
 
   return (
     <div className='my-orders'>
@@ -30,11 +45,11 @@ useEffect(()=>{
       />
         <h2>Meus Pedidos</h2>
         <div className="container">
-            {data.map((order, index)=>{
+            {data.map((order, index) => {
                     return (
                         <div key={index} className="my-orders-order">
                             <img src={assets.parcel_icon} alt="" />
-                            <p>{order.items.map((item, index)=>{
+                            <p>{order.items.map((item, index) => {
                                 if(index === order.items.length-1){
                                     return item.name+" x "+item.quantity
                                 }else{

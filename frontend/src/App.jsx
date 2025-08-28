@@ -11,7 +11,6 @@ import Verify from './pages/Verify/Verify';
 import MyOrders from './pages/MyOrders/MyOrders';
 import ProductDetail from './pages/ProductDetail/ProductDetail';
 import StoreHome from './pages/StoreHome/StoreHome';
-import StoreList from './components/StoreList/StoreList';
 
 const App = () => {
 
@@ -23,10 +22,9 @@ const App = () => {
         <Navbar setShowLogin={setShowLogin} />
         <Routes>
           <Route path='/' element={<Home />} />
-          <Route path='/lojas' element={<StoreList />} />
           <Route path='/loja/:storeSlug' element={<StoreHome />} />
           <Route path='/cart' element={<Cart />} />
-          <Route path='/order' element={<PlaceOrder />} />
+          <Route path='/order' element={<PlaceOrder setShowLogin={setShowLogin} />} />
           <Route path='/verify' element={<Verify />} />
           <Route path='/myorders' element={<MyOrders />} />
           <Route path='/product/:id' element={<ProductDetail />} />

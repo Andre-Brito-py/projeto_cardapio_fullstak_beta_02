@@ -74,11 +74,32 @@ const Orders = ({url, token}) => {
                 })}
               </p>
               <p className="order-item-name">{order.address.firstName + " "+order.address.lastName}</p>
-              <div className="order-item-address">
-                <p>{order.address.state + ","}</p>
-                <p>{order.address.city+" ,"+ order.address.state+" ,"+order.address.country+" ,"+order.address.zipcode}</p>
-              </div>
-              <p className='order-item-phone'>{order.address.phone}</p>
+              
+              {/* Informações da Mesa */}
+              {order.tableNumber && (
+                <div className="order-table-info">
+                  <p className="table-indicator">🍽️ Mesa {order.tableNumber}</p>
+                  {order.tableName && order.tableName !== `Mesa ${order.tableNumber}` && (
+                    <p className="table-name">({order.tableName})</p>
+                  )}
+                  <span className="order-type-badge dine-in">Consumo no Local</span>
+                </div>
+              )}
+              
+              {/* Endereço de Entrega (apenas para delivery) */}
+              {!order.tableNumber && order.address && (
+                <div className="order-item-address">
+                  <p>{order.address.state + ","}</p>
+                  <p>{order.address.city+" ,"+ order.address.state+" ,"+order.address.country+" ,"+order.address.zipcode}</p>
+                  <p className='order-item-phone'>{order.address.phone}</p>
+                  <span className="order-type-badge delivery">Entrega</span>
+                </div>
+              )}
+              
+              {/* Telefone para pedidos de mesa */}
+              {order.tableNumber && order.address?.phone && (
+                <p className='order-item-phone'>📞 {order.address.phone}</p>
+              )}
             </div>
             <p>Itmes: {order.items.length}</p>
             <p>₹{order.amount}</p>
