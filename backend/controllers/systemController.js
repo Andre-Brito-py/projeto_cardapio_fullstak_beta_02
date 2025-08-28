@@ -263,7 +263,7 @@ const getPublicStores = async (req, res) => {
             'subscription.status': { $in: ['active', 'trial'] }
         })
         .select('name slug description logo domain customization settings.restaurantAddress')
-        .sort({ name: 1 });
+        .sort({ createdAt: -1 });
         
         res.json({ 
             success: true, 
