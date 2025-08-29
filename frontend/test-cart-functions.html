@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste das Funções do Carrinho</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste das Funções do Carrinho</h1>
+    
+    <div class="test-section">
+        <h2>Instruções para Teste</h2>
+        <p>Para testar as correções implementadas:</p>
+        <ol>
+            <li><strong>Teste de Adição ao Carrinho:</strong>
+                <ul>
+                    <li>Vá para a página principal da aplicação</li>
+                    <li>Escolha um produto e clique em "Finalizar Pedido"</li>
+                    <li>Verifique se os produtos aparecem imediatamente no carrinho</li>
+                </ul>
+            </li>
+            <li><strong>Teste de Remoção do Carrinho:</strong>
+                <ul>
+                    <li>No carrinho, clique no "x" para remover um item</li>
+                    <li>Verifique se o item é removido imediatamente</li>
+                    <li>Teste também os botões "+" e "-" nos produtos</li>
+                </ul>
+            </li>
+            <li><strong>Teste de Sincronização:</strong>
+                <ul>
+                    <li>Adicione vários produtos rapidamente</li>
+                    <li>Navegue entre páginas</li>
+                    <li>Verifique se o carrinho mantém os produtos corretos</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Correções Implementadas</h2>
+        <div class="result success">
+            <h3>✅ Problemas Resolvidos:</h3>
+            <ul>
+                <li><strong>Sincronização do Carrinho:</strong> A função addToCart agora retorna uma Promise que resolve apenas quando o estado é completamente atualizado</li>
+                <li><strong>Botão de Remover:</strong> A função removeFromCart foi corrigida com a mesma abordagem de sincronização</li>
+                <li><strong>Navegação Prematura:</strong> Removido o setTimeout desnecessário, agora usa await adequadamente</li>
+                <li><strong>Consistência de Estado:</strong> Garantida a atualização do localStorage e backend de forma síncrona</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Acesso à Aplicação</h2>
+        <p>A aplicação está rodando em:</p>
+        <a href="http://localhost:5173/" target="_blank" style="display: inline-block; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;">Abrir Aplicação</a>
+    </div>
+
+    <div class="test-section">
+        <h2>Fluxo de Teste Recomendado</h2>
+        <ol>
+            <li>Abra a aplicação no link acima</li>
+            <li>Navegue até uma loja (ex: /toomato)</li>
+            <li>Adicione um produto ao carrinho clicando em "Finalizar Pedido"</li>
+            <li>Verifique se é redirecionado para o carrinho com o produto visível</li>
+            <li>Teste remover o produto clicando no "x"</li>
+            <li>Volte à loja e teste adicionar múltiplos produtos</li>
+            <li>Teste os botões "+" e "-" nos produtos</li>
+        </ol>
+    </div>
+
+    <script>
+        // Função para verificar se a aplicação está rodando
+        async function checkAppStatus() {
+            try {
+                const response = await fetch('http://localhost:5173/');
+                if (response.ok) {
+                    document.querySelector('.result').innerHTML += '<p style="color: green;">✅ Aplicação está rodando corretamente!</p>';
+                } else {
+                    document.querySelector('.result').innerHTML += '<p style="color: red;">❌ Aplicação não está respondendo.</p>';
+                }
+            } catch (error) {
+                document.querySelector('.result').innerHTML += '<p style="color: red;">❌ Erro ao conectar com a aplicação: ' + error.message + '</p>';
+            }
+        }
+
+        // Verificar status da aplicação ao carregar a página
+        window.addEventListener('load', checkAppStatus);
+    </script>
+</body>
+</html>

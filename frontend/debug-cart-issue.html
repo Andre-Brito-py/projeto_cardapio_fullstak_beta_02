@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Problema do Carrinho</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #e55a2b;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Debug - Problema do Carrinho</h1>
+        <p><strong>Problema relatado:</strong> "Ao finalizar o pedido, ou clicar no ícone da sacola, mesmo que itens tenham sido adicionados ao saco, a sacola aparece vazia, e somente ao clicar no ícone tomato, os itens aparecem"</p>
+        
+        <div class="test-section">
+            <h3>📋 Análise do Problema</h3>
+            <p>Vamos investigar:</p>
+            <ul>
+                <li>Como o carrinho é armazenado (localStorage vs backend)</li>
+                <li>Diferença entre ícone da sacola e ícone tomato</li>
+                <li>Sincronização entre frontend e backend</li>
+                <li>Estado do carrinho em diferentes páginas</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Teste 1: Verificar localStorage</h3>
+            <button onclick="checkLocalStorage()">Verificar localStorage</button>
+            <div id="localStorage-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Teste 2: Verificar APIs do Carrinho</h3>
+            <button onclick="testCartAPIs()">Testar APIs</button>
+            <div id="api-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Teste 3: Simular Adição ao Carrinho</h3>
+            <button onclick="simulateAddToCart()">Simular Adição</button>
+            <div id="add-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔍 Teste 4: Verificar Navegação</h3>
+            <button onclick="testNavigation()">Testar Navegação</button>
+            <div id="nav-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Resumo dos Achados</h3>
+            <div id="summary" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4001';
+        let findings = [];
+
+        function addFinding(type, message) {
+            findings.push({ type, message, timestamp: new Date().toLocaleTimeString() });
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const summaryDiv = document.getElementById('summary');
+            summaryDiv.innerHTML = findings.map(f => 
+                `[${f.timestamp}] ${f.type.toUpperCase()}: ${f.message}`
+            ).join('\n');
+        }
+
+        function checkLocalStorage() {
+            const resultDiv = document.getElementById('localStorage-result');
+            resultDiv.innerHTML = 'Verificando localStorage...\n';
+            
+            try {
+                const token = localStorage.getItem('token');
+                const cartItems = localStorage.getItem('cartItems');
+                
+                resultDiv.innerHTML += `Token: ${token ? 'Presente' : 'Ausente'}\n`;
+                resultDiv.innerHTML += `CartItems: ${cartItems || 'Vazio/Ausente'}\n`;
+                
+                if (cartItems) {
+                    try {
+                        const parsed = JSON.parse(cartItems);
+                        const itemCount = Object.keys(parsed).length;
+                        resultDiv.innerHTML += `Itens no carrinho local: ${itemCount}\n`;
+                        
+                        if (itemCount > 0) {
+                            resultDiv.innerHTML += 'Detalhes dos itens:\n';
+                            Object.entries(parsed).forEach(([key, item]) => {
+                                resultDiv.innerHTML += `  - ${key}: Qtd ${item.quantity}, ItemId: ${item.itemId}\n`;
+                            });
+                            addFinding('info', `${itemCount} itens encontrados no localStorage`);
+                        } else {
+                            addFinding('warning', 'localStorage vazio mas existe');
+                        }
+                    } catch (e) {
+                        resultDiv.innerHTML += `Erro ao parsear cartItems: ${e.message}\n`;
+                        addFinding('error', 'Erro ao parsear cartItems do localStorage');
+                    }
+                } else {
+                    addFinding('warning', 'Nenhum cartItems no localStorage');
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML += `Erro: ${error.message}\n`;
+                addFinding('error', `Erro ao verificar localStorage: ${error.message}`);
+            }
+        }
+
+        async function testCartAPIs() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = 'Testando APIs do carrinho...\n';
+            
+            try {
+                const token = localStorage.getItem('token');
+                
+                if (token) {
+                    resultDiv.innerHTML += 'Testando GET /api/cart/get com token...\n';
+                    
+                    const response = await fetch(`${API_BASE}/api/cart/get`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'token': token
+                        },
+                        body: JSON.stringify({})
+                    });
+                    
+                    const data = await response.json();
+                    resultDiv.innerHTML += `Resposta: ${JSON.stringify(data, null, 2)}\n`;
+                    
+                    if (data.success && data.cartData) {
+                        const itemCount = Object.keys(data.cartData).length;
+                        resultDiv.innerHTML += `Itens no carrinho backend: ${itemCount}\n`;
+                        addFinding('info', `${itemCount} itens encontrados no backend`);
+                    } else {
+                        addFinding('warning', 'Carrinho vazio no backend');
+                    }
+                } else {
+                    resultDiv.innerHTML += 'Sem token - usuário não autenticado\n';
+                    resultDiv.innerHTML += 'Carrinho deve estar no localStorage apenas\n';
+                    addFinding('info', 'Usuário não autenticado - carrinho local');
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML += `Erro: ${error.message}\n`;
+                addFinding('error', `Erro ao testar APIs: ${error.message}`);
+            }
+        }
+
+        async function simulateAddToCart() {
+            const resultDiv = document.getElementById('add-result');
+            resultDiv.innerHTML = 'Simulando adição ao carrinho...\n';
+            
+            try {
+                // Primeiro, buscar um produto para adicionar
+                const foodResponse = await fetch(`${API_BASE}/api/food/list`);
+                const foodData = await foodResponse.json();
+                
+                if (foodData.success && foodData.data.length > 0) {
+                    const product = foodData.data[0];
+                    resultDiv.innerHTML += `Produto selecionado: ${product.name} (ID: ${product._id})\n`;
+                    
+                    const token = localStorage.getItem('token');
+                    
+                    if (token) {
+                        // Usuário autenticado - adicionar via API
+                        resultDiv.innerHTML += 'Adicionando via API (usuário autenticado)...\n';
+                        
+                        const addResponse = await fetch(`${API_BASE}/api/cart/add`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'token': token
+                            },
+                            body: JSON.stringify({
+                                itemId: product._id,
+                                extras: [],
+                                observations: 'Teste debug',
+                                includeDisposables: false
+                            })
+                        });
+                        
+                        const addData = await addResponse.json();
+                        resultDiv.innerHTML += `Resultado: ${JSON.stringify(addData)}\n`;
+                        
+                        if (addData.success) {
+                            addFinding('success', 'Item adicionado via API com sucesso');
+                        } else {
+                            addFinding('error', 'Falha ao adicionar via API');
+                        }
+                    } else {
+                        // Usuário não autenticado - simular adição local
+                        resultDiv.innerHTML += 'Simulando adição local (usuário não autenticado)...\n';
+                        
+                        const cartKey = product._id;
+                        const cartItem = {
+                            quantity: 1,
+                            itemId: product._id,
+                            extras: [],
+                            observations: 'Teste debug local',
+                            includeDisposables: false
+                        };
+                        
+                        let cartItems = {};
+                        const existing = localStorage.getItem('cartItems');
+                        if (existing) {
+                            cartItems = JSON.parse(existing);
+                        }
+                        
+                        cartItems[cartKey] = cartItem;
+                        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                        
+                        resultDiv.innerHTML += `Item adicionado ao localStorage\n`;
+                        addFinding('success', 'Item adicionado ao localStorage');
+                    }
+                } else {
+                    resultDiv.innerHTML += 'Nenhum produto encontrado para testar\n';
+                    addFinding('error', 'Nenhum produto disponível para teste');
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML += `Erro: ${error.message}\n`;
+                addFinding('error', `Erro ao simular adição: ${error.message}`);
+            }
+        }
+
+        function testNavigation() {
+            const resultDiv = document.getElementById('nav-result');
+            resultDiv.innerHTML = 'Testando navegação...\n';
+            
+            try {
+                const currentPath = window.location.pathname;
+                resultDiv.innerHTML += `Página atual: ${currentPath}\n`;
+                
+                // Verificar se estamos na aplicação React
+                if (currentPath.includes('debug-cart-issue.html')) {
+                    resultDiv.innerHTML += 'Estamos na página de debug, não na aplicação React\n';
+                    resultDiv.innerHTML += 'Para testar navegação, acesse:\n';
+                    resultDiv.innerHTML += '- http://localhost:5173/store/loja-de-bolo (página da loja)\n';
+                    resultDiv.innerHTML += '- http://localhost:5173/cart (página do carrinho)\n';
+                    addFinding('info', 'Teste de navegação deve ser feito na aplicação React');
+                } else {
+                    resultDiv.innerHTML += 'Testando links de navegação...\n';
+                    
+                    // Verificar se há elementos de navegação
+                    const basketIcon = document.querySelector('img[alt=""][src*="basket"]');
+                    const tomatoIcon = document.querySelector('img[src*="tomato"]');
+                    
+                    resultDiv.innerHTML += `Ícone da sacola encontrado: ${basketIcon ? 'Sim' : 'Não'}\n`;
+                    resultDiv.innerHTML += `Ícone tomato encontrado: ${tomatoIcon ? 'Sim' : 'Não'}\n`;
+                    
+                    addFinding('info', 'Verificação de elementos de navegação concluída');
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML += `Erro: ${error.message}\n`;
+                addFinding('error', `Erro ao testar navegação: ${error.message}`);
+            }
+        }
+
+        // Executar verificação inicial ao carregar
+        window.addEventListener('load', () => {
+            addFinding('info', 'Página de debug carregada');
+            checkLocalStorage();
+        });
+    </script>
+</body>
+</html>

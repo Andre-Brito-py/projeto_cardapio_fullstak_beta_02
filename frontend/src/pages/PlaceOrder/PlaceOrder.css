@@ -512,3 +512,126 @@
     }
 }
 
+/* Cart Items Section Styles */
+.cart-items-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.cart-items-section h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 2px solid tomato;
+    padding-bottom: 10px;
+}
+
+.cart-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.cart-item-summary {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cart-item-summary .item-image {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cart-item-summary .item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-item-summary .item-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cart-item-summary .item-details h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.cart-item-summary .item-extras,
+.cart-item-summary .item-observations,
+.cart-item-summary .item-disposables {
+    font-size: 14px;
+    color: #666;
+}
+
+.cart-item-summary .item-extras strong,
+.cart-item-summary .item-observations strong {
+    color: #333;
+}
+
+.cart-item-summary .item-disposables {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.cart-item-summary .item-quantity-price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.cart-item-summary .quantity {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.cart-item-summary .price {
+    font-size: 16px;
+    font-weight: 600;
+    color: tomato;
+}
+
+@media (max-width:750px) {
+    .place-order{
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .cart-item-summary {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .cart-item-summary .item-image {
+        width: 100%;
+        height: 150px;
+    }
+    
+    .cart-item-summary .item-quantity-price {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+

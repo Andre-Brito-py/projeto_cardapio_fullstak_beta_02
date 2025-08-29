@@ -80,23 +80,25 @@ const ProductDetail = () => {
         }
     };
 
-    const handleAddToCart = () => {
+
+
+    const handleFinishOrder = async () => {
         // Add to cart with the specified quantity, extras, observations and disposables
         for (let i = 0; i < quantity; i++) {
-            addToCart(product._id, selectedExtras, observations, includeDisposables);
+            await addToCart(product._id, selectedExtras, observations, includeDisposables);
         }
         
-        // Show success message or redirect
-        alert(`${product.name} adicionado ao carrinho!`);
-    };
-
-    const handleFinishOrder = () => {
-        handleAddToCart();
+        // Navigate directly to cart
         navigate('/cart');
     };
 
-    const handleContinueShopping = () => {
-        handleAddToCart();
+    const handleContinueShopping = async () => {
+        // Add to cart with the specified quantity, extras, observations and disposables
+        for (let i = 0; i < quantity; i++) {
+            await addToCart(product._id, selectedExtras, observations, includeDisposables);
+        }
+        
+        // Navigate back to store page
         navigate('/');
     };
 

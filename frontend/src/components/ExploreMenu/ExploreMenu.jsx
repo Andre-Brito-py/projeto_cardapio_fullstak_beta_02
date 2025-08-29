@@ -4,11 +4,12 @@ import './ExploreMenu.css'
 import axios from 'axios'
 import { StoreContext } from '../context/StoreContext'
 
-const ExploreMenu = ({category, setCategory}) => {
+const ExploreMenu = ({category, setCategory, categories: propCategories}) => {
     const { url } = useContext(StoreContext);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [hasSetInitialCategory, setHasSetInitialCategory] = useState(false);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
@@ -79,10 +80,15 @@ const ExploreMenu = ({category, setCategory}) => {
     };
 
     useEffect(() => {
-        if (url) {
-            fetchCategories();
+        if (propCategories && propCategories.length > 0) {
+            setCategories(propCategories);
+            setLoading(false);
+        } else {
+            if (url) {
+                fetchCategories();
+            }
         }
-    }, [url]);
+    }, [url, propCategories]);
 
     useEffect(() => {
         checkScrollButtons();
@@ -93,6 +99,24 @@ const ExploreMenu = ({category, setCategory}) => {
             return () => container.removeEventListener('scroll', handleScroll);
         }
     }, [categories]);
+
+    useEffect(() => {
+        if (categories.length > 0 && !hasSetInitialCategory) {
+            const desertsCategory = categories.find(cat => cat.name === 'Deserts');
+            
+            if (desertsCategory) {
+                setTimeout(() => {
+                    setCategory('Deserts');
+                    setHasSetInitialCategory(true);
+                }, 100);
+            } else {
+                setTimeout(() => {
+                    setCategory(categories[0].name);
+                    setHasSetInitialCategory(true);
+                }, 100);
+            }
+        }
+    }, [categories, hasSetInitialCategory, setCategory]);
 
     if (loading) {
         return (
@@ -165,7 +189,8 @@ const ExploreMenu = ({category, setCategory}) => {
 
 ExploreMenu.propTypes = {
     category: PropTypes.string.isRequired,
-    setCategory: PropTypes.func.isRequired
+    setCategory: PropTypes.func.isRequired,
+    categories: PropTypes.array
 };
 
 export default ExploreMenu

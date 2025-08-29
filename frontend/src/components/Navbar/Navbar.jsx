@@ -9,7 +9,7 @@ const Navbar = ({setShowLogin}) => {
 
   const [menu, setMenu] = useState('home');
 
-  const {getTotalCartAmount, token, setToken, currentStore} = useContext(StoreContext);
+  const {getTotalCartAmount, token, setToken, currentStore, cartItems} = useContext(StoreContext);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,12 +28,14 @@ const Navbar = ({setShowLogin}) => {
     const storeMatch = location.pathname.match(/^\/loja\/([^/]+)$/);
     
     if (storeMatch) {
-      // Se estamos em uma página de loja, rolar para o topo mantendo a mesma loja
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Se estamos em uma página de loja, navegar para a página da loja (cardápio)
+      const storeSlug = storeMatch[1];
+      navigate(`/loja/${storeSlug}`);
       setMenu('home');
     } else {
-      // Se não estamos em uma página de loja, recarregar para ativar o redirecionamento automático
-      window.location.reload();
+      // Se não estamos em uma página de loja, navegar para a página inicial
+      navigate('/');
+      setMenu('home');
     }
   }
 
@@ -45,12 +47,14 @@ const Navbar = ({setShowLogin}) => {
     const storeMatch = location.pathname.match(/^\/loja\/([^/]+)$/);
     
     if (storeMatch) {
-      // Se estamos em uma página de loja, rolar para o topo mantendo a mesma loja
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Se estamos em uma página de loja, navegar para a página da loja (cardápio)
+      const storeSlug = storeMatch[1];
+      navigate(`/loja/${storeSlug}`);
       setMenu('home');
     } else {
-      // Se não estamos em uma página de loja, recarregar para ativar o redirecionamento automático
-      window.location.reload();
+      // Se não estamos em uma página de loja, navegar para a página inicial
+      navigate('/');
+      setMenu('home');
     }
   }
 

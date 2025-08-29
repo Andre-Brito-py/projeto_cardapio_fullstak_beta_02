@@ -10,7 +10,7 @@ const Verify = () => {
     const [searchParams] = useSearchParams();
     const success = searchParams.get("success")
     const orderId = searchParams.get("orderId")
-    const {url} = useContext(StoreContext);
+    const {url, token} = useContext(StoreContext);
     const navigate = useNavigate();
 
     const verifyPayment = async () => {
@@ -21,7 +21,20 @@ const Verify = () => {
             });
             
             if (response.data.success) {
-                navigate('/myorders');
+                // Limpar carrinho do localStorage para usuários não autenticados
+                if (!token) {
+                    localStorage.removeItem('cartItems');
+                    console.log('🛒 Verify: Carrinho limpo do localStorage após pagamento bem-sucedido');
+                }
+                
+                // Redirecionar baseado no status de autenticação
+                if (token) {
+                    navigate('/myorders');
+                } else {
+                    // Para usuários não autenticados, redirecionar para home com mensagem de sucesso
+                    alert('Pedido realizado com sucesso! Você receberá atualizações por email.');
+                    navigate('/');
+                }
             } else {
                 console.error('Erro na verificação do pagamento:', response.data.message);
                 alert(response.data.message || 'Erro na verificação do pagamento.');

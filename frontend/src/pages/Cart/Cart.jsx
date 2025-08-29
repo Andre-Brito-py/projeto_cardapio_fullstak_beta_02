@@ -7,7 +7,27 @@ import SEO from '../../components/SEO/SEO';
 
 const Cart = () => {
 
-  const {cartItems, food_list, removeFromCart, getTotalCartAmount, url, token} = useContext(StoreContext);
+  const {food_list, cartItems, removeFromCart, getTotalCartAmount, url, token, currentStore, fetchFoodList} = useContext(StoreContext);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+
+  // Garantir que temos a lista completa de produtos para renderizar o carrinho
+  useEffect(() => {
+    const loadProductsIfNeeded = async () => {
+      // Se não temos produtos ou temos poucos produtos, carregar a lista completa
+      if (!food_list || food_list.length === 0) {
+        setIsLoadingProducts(true);
+        try {
+          await fetchFoodList();
+        } catch (error) {
+          console.error('Erro ao carregar produtos para o carrinho:', error);
+        } finally {
+          setIsLoadingProducts(false);
+        }
+      }
+    };
+    
+    loadProductsIfNeeded();
+  }, [food_list, fetchFoodList]);
  
   const [deliveryType, setDeliveryType] = useState('delivery'); // 'delivery' or 'pickup'
   const [deliveryAddress, setDeliveryAddress] = useState({
@@ -19,23 +39,26 @@ const Cart = () => {
 
   const navigate = useNavigate();
   const { 
-    fee: deliveryFee, 
-    distance, 
-    duration, 
-    isCalculating: loading, 
-    error, 
-    warning,
+    deliveryData,
     calculateDeliveryFee, 
-    resetCalculation 
+    resetDeliveryData 
   } = useDeliveryCalculation(url);
+
+  const deliveryFee = deliveryData?.fee || 0;
+  const distance = deliveryData?.distance;
+  const duration = deliveryData?.duration;
+  const loading = deliveryData?.isCalculating || false;
+  const error = deliveryData?.error;
+  const warning = deliveryData?.warning;
 
   // Calculate delivery fee when address changes
   useEffect(() => {
     if (deliveryType === 'delivery' && deliveryAddress.street && deliveryAddress.city && deliveryAddress.state && deliveryAddress.zipCode) {
-      const fullAddress = `${deliveryAddress.street}, ${deliveryAddress.city}, ${deliveryAddress.state}, ${deliveryAddress.zipCode}`;
-      calculateDeliveryFee(fullAddress);
+      calculateDeliveryFee(deliveryAddress);
     }
   }, [deliveryAddress, deliveryType, calculateDeliveryFee]);
+
+
 
   const handleAddressChange = (field, value) => {
     setDeliveryAddress(prev => ({
@@ -58,6 +81,14 @@ const Cart = () => {
       return;
     }
     navigate('/order');
+  };
+
+  const handleContinueShopping = () => {
+    if (currentStore && currentStore.slug) {
+      navigate(`/loja/${currentStore.slug}`); // Navega para a página inicial da loja
+    } else {
+      navigate(-1); // Fallback: volta para a página anterior
+    }
   };
 
 
@@ -237,7 +268,16 @@ const Cart = () => {
               <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+(deliveryType === 'delivery' ? deliveryFee : 0)).toFixed(2)}</b>
             </div> 
           </div>
-          <button onClick={handleProceedToCheckout}>FINALIZAR PEDIDO</button>
+          <div className="cart-buttons">
+            <button className="continue-shopping-btn" onClick={handleContinueShopping}>
+              <span className="btn-icon">🛒</span>
+              CONTINUAR COMPRANDO
+            </button>
+            <button className="checkout-btn" onClick={handleProceedToCheckout}>
+              <span className="btn-icon">✓</span>
+              FINALIZAR PEDIDO
+            </button>
+          </div>
         </div>
         <div className="cart-promocode">
           <div>

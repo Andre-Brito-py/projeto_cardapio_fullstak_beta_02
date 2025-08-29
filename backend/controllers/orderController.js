@@ -82,10 +82,7 @@ const placeOrder = async (req, res) =>{
 
         await newOrder.save();
         
-        // Limpar carrinho apenas se o usuário estiver autenticado
-        if (req.body.userId) {
-            await userModel.findByIdAndUpdate(req.body.userId,{cartData:{}});
-        }
+        // Não limpar carrinho aqui - será limpo apenas após confirmação do pagamento
 
         const line_items = req.body.items.map((item)=>{
             // Calcular preço total do item incluindo extras
@@ -157,7 +154,8 @@ const placeOrder = async (req, res) =>{
 
         res.json({success:true, session_url:session.url})
     } catch (error) {
-        res.json({success:false, message:"Error"})
+        console.log('Error in placeOrder:', error);
+        res.json({success:false, message:"Error", details: error.message})
     }
 }
 
@@ -190,6 +188,11 @@ const verifyOrder = async (req, res) =>{
                     { code: order.couponCode },
                     { $inc: { usedCount: 1 } }
                 );
+            }
+            
+            // Limpar carrinho apenas após confirmação do pagamento
+            if (order.userId) {
+                await userModel.findByIdAndUpdate(order.userId, {cartData:{}});
             }
             
             res.json({success:true, message:"Paid"})

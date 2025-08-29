@@ -75,11 +75,17 @@ const PlaceOrder = ({ setShowLogin }) => {
 
     try {
       const subtotal = getTotalCartAmount();
+      // Enviar token apenas se disponível para validação de cupom
+      const headers = {};
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+      
       const response = await axios.post(`${url}/api/coupons/validate`, {
         code: couponCode.toUpperCase(),
         orderValue: subtotal
       }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers
       });
 
       if (response.data.success) {
@@ -118,8 +124,32 @@ const PlaceOrder = ({ setShowLogin }) => {
     }
   };
 
+  // Função para validar email
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const placeOrder = async (event) => {
     event.preventDefault();
+    
+    // Validação adicional de email para pedidos sem login
+    if (!token && !validateEmail(data.email)) {
+      alert('Por favor, insira um endereço de email válido. Precisamos dele para enviar atualizações sobre seu pedido.');
+      return;
+    }
+    
+    // Validação adicional para pedidos sem login
+    if (!token) {
+      if (!data.firstName.trim() || !data.lastName.trim()) {
+        alert('Por favor, preencha seu nome completo.');
+        return;
+      }
+      if (!data.phone.trim()) {
+        alert('Por favor, informe seu telefone para contato sobre o pedido.');
+        return;
+      }
+    }
     
     try {
       let orderItems = [];
@@ -156,8 +186,14 @@ const PlaceOrder = ({ setShowLogin }) => {
         discountAmount: couponDiscount
       };
 
+      // Enviar token apenas se disponível (usuário logado)
+      const headers = {};
+      if (token) {
+        headers.token = token;
+      }
+      
       const response = await axios.post(`${url}/api/order/place`, orderData, {
-        headers: { token }
+        headers
       });
       
       if(response.data.success) {
@@ -175,11 +211,18 @@ const PlaceOrder = ({ setShowLogin }) => {
 
   const navigate = useNavigate();
 
+  // Verificar se carrinho está vazio após sincronização
   useEffect(() => {
-    if(getTotalCartAmount()===0){
-      navigate('/cart')
-    }
-  }, [])
+    // Aguardar um pouco para garantir que a sincronização aconteceu
+    const timeoutId = setTimeout(() => {
+      if(getTotalCartAmount() === 0){
+        console.log('🛒 PlaceOrder: Carrinho vazio, redirecionando para /cart');
+        navigate('/cart');
+      }
+    }, 500); // Aguardar 500ms para sincronização
+    
+    return () => clearTimeout(timeoutId);
+  }, [getTotalCartAmount, navigate])
 
   useEffect(() => {
     if (paymentMethod === 'pix') {
@@ -388,6 +431,59 @@ const PlaceOrder = ({ setShowLogin }) => {
         </div>
       </div>
       <div className="place-order-right">
+        {/* Cart Items Section */}
+        <div className="cart-items-section">
+          <h2>Seus Itens</h2>
+          <div className="cart-items-list">
+            {Object.keys(cartItems).map((cartKey, index) => {
+              const cartItem = cartItems[cartKey];
+              if (cartItem && cartItem.quantity > 0) {
+                const item = food_list.find(product => product._id === cartItem.itemId);
+                if (item) {
+                  let itemPrice = item.price;
+                  if (cartItem.extras && cartItem.extras.length > 0) {
+                    cartItem.extras.forEach(extra => {
+                      itemPrice += extra.price;
+                    });
+                  }
+                  return (
+                    <div key={cartKey} className="cart-item-summary">
+                      <div className="item-image">
+                        <img src={url + '/images/' + item.image} alt={item.name} />
+                      </div>
+                      <div className="item-details">
+                        <h4>{item.name}</h4>
+                        {cartItem.extras && cartItem.extras.length > 0 && (
+                          <div className="item-extras">
+                            <strong>Extras:</strong> {cartItem.extras.map((extra, idx) => (
+                              <span key={`${cartKey}-extra-${idx}`}>+ {extra.name} (R$ {extra.price.toFixed(2)}){idx < cartItem.extras.length - 1 ? ', ' : ''}</span>
+                            ))}
+                          </div>
+                        )}
+                        {cartItem.observations && (
+                          <div className="item-observations">
+                            <strong>Obs:</strong> {cartItem.observations}
+                          </div>
+                        )}
+                        {cartItem.includeDisposables && (
+                          <div className="item-disposables">
+                            ✓ Inclui descartáveis
+                          </div>
+                        )}
+                        <div className="item-quantity-price">
+                          <span className="quantity">Qtd: {cartItem.quantity}</span>
+                          <span className="price">R$ {(itemPrice * cartItem.quantity).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+              }
+              return null;
+            })}
+          </div>
+        </div>
+
         {/* Coupon Section */}
         <div className="coupon-section">
           <h3>Cupom de Desconto</h3>

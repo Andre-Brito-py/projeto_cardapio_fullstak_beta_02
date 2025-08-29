@@ -11,6 +11,7 @@ import Verify from './pages/Verify/Verify';
 import MyOrders from './pages/MyOrders/MyOrders';
 import ProductDetail from './pages/ProductDetail/ProductDetail';
 import StoreHome from './pages/StoreHome/StoreHome';
+import CartDebug from './components/CartDebug/CartDebug';
 
 const App = () => {
 
@@ -28,6 +29,7 @@ const App = () => {
           <Route path='/verify' element={<Verify />} />
           <Route path='/myorders' element={<MyOrders />} />
           <Route path='/product/:id' element={<ProductDetail />} />
+          <Route path='/debug-cart' element={<CartDebug />} />
         </Routes>
       </div>
       <Footer />

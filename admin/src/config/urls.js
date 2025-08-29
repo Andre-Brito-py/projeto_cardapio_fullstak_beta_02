@@ -5,7 +5,7 @@ const URLS = {
   // URLs de desenvolvimento
   FRONTEND_URL: 'http://localhost:5173',
   ADMIN_URL: 'http://localhost:5174',
-  BACKEND_URL: 'http://localhost:4000',
+  BACKEND_URL: 'http://localhost:4001',
   
   // URLs de produção (para quando a aplicação for para produção)
   PRODUCTION: {

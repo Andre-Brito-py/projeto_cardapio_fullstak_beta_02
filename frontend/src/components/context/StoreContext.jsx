@@ -10,9 +10,22 @@ const StoreContext = createContext(null);
  * @param {Object} props - Propriedades do componente
  */
 const StoreContextProvider = (props) => {
+    // Função para inicializar carrinho do localStorage
+    const getInitialCart = () => {
+        try {
+            const localCart = localStorage.getItem("cartItems");
+            if (localCart && localCart !== 'null' && localCart !== 'undefined') {
+                return JSON.parse(localCart);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar localStorage:', error);
+        }
+        return {};
+    };
+    
     // Estados do contexto
-    const [cartItems, setCartItems] = useState({}); // Itens do carrinho
-    const url = "http://localhost:4000"; // URL da API
+    const [cartItems, setCartItems] = useState(() => getInitialCart()); // Itens do carrinho
+    const url = "http://localhost:4001"; // URL da API
     const [token, setToken] = useState(""); // Token de autenticação
     const [food_list, setFoodList] = useState([]); // Lista de comidas disponíveis
     const [currentStore, setCurrentStore] = useState(null); // Loja atual selecionada
@@ -31,47 +44,43 @@ const StoreContextProvider = (props) => {
         const extrasKey = extras.length > 0 ? JSON.stringify(extras.sort((a, b) => a.name.localeCompare(b.name))) : '';
         const cartKey = extrasKey ? `${itemId}_${btoa(extrasKey)}` : itemId;
         
-        // Update cart items using functional update
-         setCartItems(prevCartItems => {
-             let newCartItems;
-             if (!prevCartItems[cartKey]) {
-                 newCartItems = { 
-                     ...prevCartItems, 
-                     [cartKey]: { 
-                         quantity: 1, 
-                         itemId: itemId, 
-                         extras: extras,
-                         observations: observations,
-                         includeDisposables: includeDisposables
-                     } 
-                 };
-             } else {
-                 newCartItems = { 
-                     ...prevCartItems, 
-                     [cartKey]: { 
-                         ...prevCartItems[cartKey], 
-                         quantity: prevCartItems[cartKey].quantity + 1,
-                         observations: observations || prevCartItems[cartKey].observations,
-                         includeDisposables: includeDisposables !== undefined ? includeDisposables : prevCartItems[cartKey].includeDisposables
-                     } 
-                 };
-             }
-             
-             // Salvar no localStorage imediatamente se usuário não estiver autenticado
-             if (!token) {
-                 localStorage.setItem('cartItems', JSON.stringify(newCartItems));
-             }
-             
-             return newCartItems;
-         });
+        setCartItems(prevCartItems => {
+            let newCartItems;
+            if (!prevCartItems[cartKey]) {
+                newCartItems = { 
+                    ...prevCartItems, 
+                    [cartKey]: { 
+                        quantity: 1, 
+                        itemId: itemId, 
+                        extras: extras,
+                        observations: observations,
+                        includeDisposables: includeDisposables
+                    } 
+                };
+            } else {
+                newCartItems = { 
+                    ...prevCartItems, 
+                    [cartKey]: { 
+                        ...prevCartItems[cartKey], 
+                        quantity: prevCartItems[cartKey].quantity + 1,
+                        observations: observations || prevCartItems[cartKey].observations,
+                        includeDisposables: includeDisposables !== undefined ? includeDisposables : prevCartItems[cartKey].includeDisposables
+                    } 
+                };
+            }
+            
+            // Sempre salvar no localStorage para usuários não autenticados
+            if (!token) {
+                localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+            }
+            
+            return newCartItems;
+        });
         
         // Enviar para backend se usuário estiver autenticado
         if (token) {
             try {
-                const response = await axios.post(url+'/api/cart/add',{itemId, extras, observations, includeDisposables},{headers:{token}});
-                if (response.data.success) {
-                    // Item adicionado com sucesso no backend
-                }
+                await axios.post(url+'/api/cart/add',{itemId, extras, observations, includeDisposables},{headers:{token}});
             } catch (error) {
                 console.error('Erro ao salvar no backend:', error);
             }
@@ -93,7 +102,7 @@ const StoreContextProvider = (props) => {
                 }
             }
             
-            // Salvar no localStorage imediatamente se usuário não estiver autenticado
+            // Sempre salvar no localStorage para usuários não autenticados
             if (!token) {
                 localStorage.setItem('cartItems', JSON.stringify(newCartItems));
             }
@@ -104,10 +113,7 @@ const StoreContextProvider = (props) => {
         // Enviar para backend se usuário estiver autenticado
         if (token && itemId) {
             try {
-                const response = await axios.post(url+'/api/cart/remove',{itemId, extras},{headers:{token}});
-                if (response.data.success) {
-                    // Item removido com sucesso
-                }
+                await axios.post(url+'/api/cart/remove',{itemId, extras},{headers:{token}});
             } catch (error) {
                 console.error('Erro ao remover item do carrinho:', error);
             }
@@ -192,106 +198,38 @@ const StoreContextProvider = (props) => {
         // Não limpar o carrinho ao trocar de loja para manter os itens
     }, []);
 
-    const loadCartData = useCallback(async (token) =>{
-        try {
-            const response = await axios.post(url+"/api/cart/get",{},{headers:{token}});
-            setCartItems(response.data.cartData || {});
-        } catch (error) {
-            console.error('Erro ao carregar carrinho do backend:', error);
-            setCartItems({});
-        }
-    }, [url]);
-
-    // Função para sincronizar carrinho local com backend após login
-    const syncCartWithBackend = useCallback(async (newToken) => {
-        try {
-            const localCart = localStorage.getItem("cartItems");
-            if (localCart && localCart !== 'null' && localCart !== 'undefined') {
-                const parsedLocalCart = JSON.parse(localCart);
-                
-                // Se há itens no carrinho local, sincronizar com backend
-                if (Object.keys(parsedLocalCart).length > 0) {
-                    // Primeiro, obter carrinho do backend
-                    const backendResponse = await axios.post(url+"/api/cart/get",{},{headers:{token: newToken}});
-                    let backendCart = backendResponse.data.cartData || {};
-                    
-                    // Mesclar carrinho local com backend
-                    for (const cartKey in parsedLocalCart) {
-                        const localItem = parsedLocalCart[cartKey];
-                        if (backendCart[cartKey]) {
-                            // Item já existe no backend, somar quantidades
-                            backendCart[cartKey].quantity += localItem.quantity;
-                            // Manter observações mais recentes (local)
-                            if (localItem.observations) {
-                                backendCart[cartKey].observations = localItem.observations;
-                            }
-                            if (localItem.includeDisposables !== undefined) {
-                                backendCart[cartKey].includeDisposables = localItem.includeDisposables;
-                            }
-                        } else {
-                            // Item não existe no backend, adicionar
-                            backendCart[cartKey] = localItem;
-                        }
-                        
-                        // Enviar cada item para o backend
-                        for (let i = 0; i < localItem.quantity; i++) {
-                            await axios.post(url+'/api/cart/add',{
-                                itemId: localItem.itemId,
-                                extras: localItem.extras || [],
-                                observations: localItem.observations || '',
-                                includeDisposables: localItem.includeDisposables || false
-                            },{headers:{token: newToken}});
-                        }
-                    }
-                    
-                    // Limpar carrinho local após sincronização
-                    localStorage.removeItem("cartItems");
-                    
-                    // Recarregar carrinho do backend para garantir consistência
-                    await loadCartData(newToken);
-                } else {
-                    // Não há itens locais, apenas carregar do backend
-                    await loadCartData(newToken);
-                }
-            } else {
-                // Não há carrinho local, apenas carregar do backend
-                await loadCartData(newToken);
-            }
-        } catch (error) {
-            console.error('Erro ao sincronizar carrinho:', error);
-            // Em caso de erro, carregar apenas do backend
-            await loadCartData(newToken);
-        }
-    }, [url, loadCartData]);
-
-    // Efeito para detectar mudanças no token e sincronizar carrinho
+    // Efeito para detectar mudanças no token
     useEffect(() => {
         if (token) {
-            syncCartWithBackend(token);
+            // Carregar carrinho do backend quando usuário faz login
+            const loadCartFromBackend = async () => {
+                try {
+                    const response = await axios.post(url+"/api/cart/get",{},{headers:{token}});
+                    setCartItems(response.data.cartData || {});
+                } catch (error) {
+                    console.error('Erro ao carregar carrinho do backend:', error);
+                }
+            };
+            loadCartFromBackend();
         }
-    }, [token, syncCartWithBackend]);
+        // Não limpar o carrinho quando não há token - manter localStorage
+    }, [token, url]);
 
+    // Efeito para sincronizar com localStorage quando não há token
+    useEffect(() => {
+        if (!token && Object.keys(cartItems).length > 0) {
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        }
+    }, [cartItems, token]);
+
+    // Efeito para carregamento inicial
     useEffect(() => {
         async function loadData() {
             await fetchFoodList();
-            const storedToken = localStorage.getItem("token");
             
+            const storedToken = localStorage.getItem("token");
             if (storedToken) {
                 setToken(storedToken);
-                // A sincronização será feita pelo useEffect do token
-            } else {
-                try {
-                    const localCart = localStorage.getItem("cartItems");
-                    if (localCart && localCart !== 'null' && localCart !== 'undefined') {
-                        const parsedCart = JSON.parse(localCart);
-                        setCartItems(parsedCart);
-                    } else {
-                        setCartItems({});
-                    }
-                } catch (error) {
-                    console.error('Erro ao ler localStorage:', error);
-                    setCartItems({});
-                }
             }
         }
         loadData();
@@ -315,8 +253,9 @@ const StoreContextProvider = (props) => {
         setAllStores,
         loadStoreData,
         loadAllStores,
-        clearStoreData
-    }), [food_list, cartItems, addToCart, removeFromCart, getTotalCartAmount, url, token, currentStore, storeMenu, allStores, loadStoreData, loadAllStores, clearStoreData]);
+        clearStoreData,
+        fetchFoodList
+    }), [food_list, cartItems, addToCart, removeFromCart, getTotalCartAmount, url, token, currentStore, storeMenu, allStores, loadStoreData, loadAllStores, clearStoreData, fetchFoodList]);
 
     return (
         <StoreContext.Provider value={contextValue}>

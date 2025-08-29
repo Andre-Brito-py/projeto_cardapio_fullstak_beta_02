@@ -10,16 +10,17 @@ const FoodDisplay = ({category, foods}) => {
     // Use foods prop if provided, otherwise fallback to food_list from context
     const displayFoods = foods || food_list;
     
+    const filteredFoods = displayFoods.filter(item => {
+        return category==='' || category==='Todos' || category==='All' || category===item.category;
+    });
+    
   return (
     <div className='food-display' id='food-display'>
         <h2>Pratos principais perto de você</h2>
         <div className="food-display-list">
-            {displayFoods.map((item, index) => {
-              if(category==='Todos' || category==='All' || category===item.category){
+            {filteredFoods.map((item, index) => {
                 return <FoodItem key={index} id={item._id} name={item.name} description={item.description} price={item.price} image={item.image} extras={item.extras || []}/>
-              }
-              return null;
-                            })}
+            })}
         </div>
         {displayFoods.length === 0 && (
             <div className="food-display-empty">

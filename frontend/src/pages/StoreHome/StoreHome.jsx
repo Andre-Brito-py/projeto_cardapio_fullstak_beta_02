@@ -12,7 +12,7 @@ import './StoreHome.css';
 const StoreHome = () => {
     const { storeSlug } = useParams();
     const { currentStore, storeMenu, loadStoreData, clearStoreData } = useContext(StoreContext);
-    const [category, setCategory] = useState("Todos");
+    const [category, setCategory] = useState(""); // Deixar vazio para permitir que ExploreMenu defina automaticamente
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -35,6 +35,8 @@ const StoreHome = () => {
             setLoading(false);
         }
     };
+
+
 
     useEffect(() => {
         if (storeSlug) {
@@ -149,7 +151,7 @@ const StoreHome = () => {
                     <ExploreMenu 
                         category={category} 
                         setCategory={setCategory}
-                        categories={storeMenu.categories}
+                        categories={storeMenu.categories.length > 0 ? storeMenu.categories : null}
                     />
                     
                     {/* Exibição de produtos */}

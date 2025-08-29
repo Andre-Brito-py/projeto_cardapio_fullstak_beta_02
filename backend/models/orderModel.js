@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const orderSchema = new mongoose.Schema({
-    userId:{type:String, required: true},
+    userId:{type:String, required: false}, // Opcional para permitir pedidos sem login
     storeId:{type:mongoose.Schema.Types.ObjectId, ref:'Store', required: true},
     items:{type:Array, required: true},
     amount:{type:Number, required: true},
