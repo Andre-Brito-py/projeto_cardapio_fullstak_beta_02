@@ -15,6 +15,7 @@ import ProductDetail from './pages/ProductDetail/ProductDetail';
 import StoreHome from './pages/StoreHome/StoreHome';
 import CartDebug from './components/CartDebug/CartDebug';
 import WaiterOrderPage from './pages/WaiterOrderPage/WaiterOrderPage';
+import CustomerInfo from './pages/CustomerInfo/CustomerInfo';
 
 const App = () => {
 
@@ -34,6 +35,7 @@ const App = () => {
           <Route path='/product/:id' element={<ProductDetail />} />
           <Route path='/debug-cart' element={<CartDebug />} />
           <Route path='/waiter-order/:storeId' element={<WaiterOrderPage />} />
+          <Route path='/customer-info' element={<CustomerInfo />} />
         </Routes>
       </div>
       <Footer />

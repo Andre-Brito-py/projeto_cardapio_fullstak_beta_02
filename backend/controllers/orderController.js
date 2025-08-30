@@ -63,7 +63,24 @@ const placeOrder = async (req, res) =>{
             items: req.body.items,
             amount: finalAmount,
             address: req.body.address,
-            orderType: req.body.orderType || 'delivery',
+            orderType: req.body.orderType || req.body.deliveryType || 'delivery',
+            customerId: req.body.customerId || null, // Referência ao cliente
+            customerInfo: req.body.customerInfo || null, // Informações do cliente para backup
+            // Dados de frete do Google Maps
+            shipping: req.body.shippingData ? {
+                fee: req.body.deliveryFee || 0,
+                distance: req.body.shippingData.distanceKm,
+                duration: req.body.shippingData.durationMinutes,
+                calculatedBy: req.body.shippingData.calculatedBy || 'manual',
+                googleMapsData: req.body.shippingData.calculatedBy === 'google_maps' ? {
+                    distance: req.body.shippingData.distance,
+                    duration: req.body.shippingData.duration,
+                    status: req.body.shippingData.status
+                } : null
+            } : {
+                fee: req.body.deliveryFee || 0,
+                calculatedBy: 'manual'
+            },
             ...couponData
         };
         

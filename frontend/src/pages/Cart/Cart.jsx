@@ -71,11 +71,13 @@ const Cart = () => {
       alert('Seu carrinho está vazio. Adicione itens antes de finalizar o pedido.');
       return;
     }
-    if (deliveryType === 'delivery' && (!deliveryAddress.street || !deliveryAddress.city || !deliveryAddress.state || !deliveryAddress.zipCode)) {
-      alert('Por favor, preencha o endereço de entrega completo.');
-      return;
+    // Salvar informações de entrega no localStorage para usar depois
+    localStorage.setItem('deliveryType', deliveryType);
+    if (deliveryType === 'delivery') {
+      localStorage.setItem('deliveryAddress', JSON.stringify(deliveryAddress));
     }
-    navigate('/order');
+    // Redirecionar para página de informações do cliente
+    navigate('/customer-info');
   };
 
   const handleContinueShopping = () => {

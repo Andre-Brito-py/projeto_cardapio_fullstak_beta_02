@@ -260,10 +260,12 @@ const getPublicStores = async (req, res) => {
     try {
         const stores = await Store.find({ 
             status: 'active',
-            'subscription.status': { $in: ['active', 'trial'] }
+            'subscription.status': { $in: ['active', 'trial'] },
+            // Filtrar lojas de teste
+            name: { $not: /teste|test/i }
         })
         .select('name slug description logo domain customization settings.restaurantAddress')
-        .sort({ createdAt: -1 });
+        .sort({ name: 1 }); // Ordenar por nome alfabeticamente
         
         res.json({ 
             success: true, 

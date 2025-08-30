@@ -10,12 +10,16 @@ import useDeliveryCalculation from '../../hooks/useDeliveryCalculation';
 const PlaceOrder = ({ setShowLogin }) => {
   const {getTotalCartAmount, token, food_list, cartItems, url} = useContext(StoreContext);
   const { deliveryData, calculateDeliveryFee } = useDeliveryCalculation(url);
+  const navigate = useNavigate();
 
   const [data, setData] = useState({
     firstName:"",
     lastName:"",
     email:"",
     street:"",
+    number:"",
+    complement:"",
+    neighborhood:"",
     city:"",
     state:"",
     zipcode:"",
@@ -23,6 +27,7 @@ const PlaceOrder = ({ setShowLogin }) => {
     phone:""
   });
 
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('cartao');
   const [cardType, setCardType] = useState('credito');
   const [pixKey, setPixKey] = useState('');
@@ -35,6 +40,12 @@ const PlaceOrder = ({ setShowLogin }) => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponError, setCouponError] = useState('');
+  
+  // Shipping states
+  const [shippingFee, setShippingFee] = useState(0);
+  const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingError, setShippingError] = useState('');
+  const [shippingData, setShippingData] = useState(null);
 
   const handleChange = (event) => {
         const name = event.target.name;
@@ -125,6 +136,56 @@ const PlaceOrder = ({ setShowLogin }) => {
     }
   };
 
+  // Função para calcular frete usando Google Maps API
+  const calculateShippingFee = async () => {
+    if (deliveryType !== 'delivery') {
+      setShippingFee(0);
+      setShippingData(null);
+      return;
+    }
+
+    if (!data.street || !data.number || !data.neighborhood || !data.city || !data.state || !data.zipcode) {
+      return; // Não calcular se campos obrigatórios estão vazios
+    }
+
+    setShippingLoading(true);
+    setShippingError('');
+
+    try {
+      const address = {
+        street: data.street,
+        number: data.number,
+        complement: data.complement,
+        neighborhood: data.neighborhood,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipcode
+      };
+
+      const response = await axios.post(`${url}/api/shipping/calculate`, {
+        address: address
+      });
+
+      if (response.data.success) {
+        setShippingFee(response.data.fee);
+        setShippingData(response.data.shippingData);
+        setShippingError('');
+      } else {
+        setShippingError(response.data.message || 'Erro ao calcular frete');
+        setShippingFee(0);
+        setShippingData(null);
+      }
+    } catch (error) {
+      console.error('Erro ao calcular frete:', error);
+      setShippingError('Erro ao calcular frete. Usando taxa padrão.');
+      // Fallback para taxa de entrega padrão
+      setShippingFee(deliveryData?.fee || 5);
+      setShippingData(null);
+    } finally {
+      setShippingLoading(false);
+    }
+  };
+
   // Função para validar email
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -174,7 +235,7 @@ const PlaceOrder = ({ setShowLogin }) => {
         }
       });
       
-      const deliveryFee = deliveryType === 'delivery' ? deliveryData.fee : 0;
+      const deliveryFee = deliveryType === 'delivery' ? shippingFee : 0;
       const finalAmount = getTotalCartAmount() + deliveryFee - couponDiscount;
       
       let orderData = {
@@ -183,8 +244,15 @@ const PlaceOrder = ({ setShowLogin }) => {
         amount: finalAmount,
         deliveryType: deliveryType,
         deliveryFee: deliveryFee,
+        shippingData: shippingData, // Dados do Google Maps
         couponCode: appliedCoupon?.code || null,
-        discountAmount: couponDiscount
+        discountAmount: couponDiscount,
+        customerId: selectedCustomer?._id || null,
+        customerInfo: selectedCustomer ? {
+          name: selectedCustomer.name,
+          phone: selectedCustomer.phone,
+          address: selectedCustomer.address
+        } : null
       };
 
       // Enviar token apenas se disponível (usuário logado)
@@ -210,7 +278,57 @@ const PlaceOrder = ({ setShowLogin }) => {
     }
   }
 
-  const navigate = useNavigate();
+  // Carregar informações do cliente e configurações de entrega
+  useEffect(() => {
+    const customerData = localStorage.getItem('selectedCustomer');
+    const savedDeliveryType = localStorage.getItem('deliveryType');
+    const savedDeliveryAddress = localStorage.getItem('deliveryAddress');
+    
+    if (!customerData) {
+      // Se não há cliente selecionado, redirecionar para seleção de cliente
+      navigate('/customer-info');
+      return;
+    }
+    
+    try {
+      const customer = JSON.parse(customerData);
+      setSelectedCustomer(customer);
+      
+      // Preencher dados do formulário com informações do cliente
+      setData({
+        firstName: customer.name.split(' ')[0] || '',
+        lastName: customer.name.split(' ').slice(1).join(' ') || '',
+        email: customer.email || '',
+        street: customer.address?.street || '',
+        city: customer.address?.city || '',
+        state: customer.address?.state || '',
+        zipcode: customer.address?.zipCode || '',
+        country: customer.address?.country || 'Brasil',
+        phone: customer.phone || ''
+      });
+      
+      // Configurar tipo de entrega
+      if (savedDeliveryType) {
+        setDeliveryType(savedDeliveryType);
+      }
+      
+      // Se for entrega e há endereço salvo, usar esse endereço
+      if (savedDeliveryType === 'delivery' && savedDeliveryAddress) {
+        const deliveryAddr = JSON.parse(savedDeliveryAddress);
+        setData(prev => ({
+          ...prev,
+          street: deliveryAddr.street || prev.street,
+          city: deliveryAddr.city || prev.city,
+          state: deliveryAddr.state || prev.state,
+          zipcode: deliveryAddr.zipCode || prev.zipcode,
+          country: deliveryAddr.country || prev.country
+        }));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados do cliente:', error);
+      navigate('/customer-info');
+    }
+  }, [navigate]);
 
   // Verificar se carrinho está vazio após sincronização
   useEffect(() => {
@@ -223,7 +341,7 @@ const PlaceOrder = ({ setShowLogin }) => {
     }, 500); // Aguardar 500ms para sincronização
     
     return () => clearTimeout(timeoutId);
-  }, [getTotalCartAmount, navigate])
+  }, [getTotalCartAmount, navigate]);
 
   useEffect(() => {
     if (paymentMethod === 'pix') {
@@ -233,17 +351,12 @@ const PlaceOrder = ({ setShowLogin }) => {
 
   // Calcular taxa de entrega quando endereço mudar
   useEffect(() => {
-    if (deliveryType === 'delivery' && data.street && data.city && data.state) {
-      const address = {
-        street: data.street,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipcode,
-        country: data.country || 'Brasil'
-      };
-      calculateDeliveryFee(address);
-    }
-  }, [data.street, data.city, data.state, data.zipcode, data.country, deliveryType, calculateDeliveryFee]);
+    const timeoutId = setTimeout(() => {
+      calculateShippingFee();
+    }, 1000); // Debounce de 1 segundo para evitar muitas chamadas
+
+    return () => clearTimeout(timeoutId);
+  }, [data.street, data.number, data.neighborhood, data.city, data.state, data.zipcode, deliveryType]);
 
   return (
     <>
@@ -288,14 +401,19 @@ const PlaceOrder = ({ setShowLogin }) => {
                 <input required name='lastName' onChange={handleChange} value={data.lastName} type="text" placeholder='Sobrenome'/>
         </div>
         <input required name='email' onChange={handleChange} value={data.email} type="email" placeholder='Endereço de email'/>
-                <input required name='street' onChange={handleChange} value={data.street} type="text" placeholder='Rua'/>
+                <div className="multi-fields">
+          <input required name='street' onChange={handleChange} value={data.street} type="text" placeholder='Rua' style={{flex: '2'}}/>
+          <input required name='number' onChange={handleChange} value={data.number} type="text" placeholder='Número' style={{flex: '1'}}/>
+        </div>
+        <input name='complement' onChange={handleChange} value={data.complement} type="text" placeholder='Complemento (opcional)'/>
+        <input required name='neighborhood' onChange={handleChange} value={data.neighborhood} type="text" placeholder='Bairro'/>
         <div className="multi-fields">
           <input required name='city' onChange={handleChange} value={data.city}  type="text" placeholder='Cidade'/>
-                <input required name='state' onChange={handleChange} value={data.state} type="text" placeholder='Estado'/>
+          <input required name='state' onChange={handleChange} value={data.state} type="text" placeholder='Estado'/>
         </div>
         <div className="multi-fields">
           <input required name='zipcode' onChange={handleChange} value={data.zipcode} type="text" placeholder='CEP'/>
-                <input required name='country' onChange={handleChange} value={data.country} type="text" placeholder='País'/>
+          <input required name='country' onChange={handleChange} value={data.country} type="text" placeholder='País'/>
         </div>
         <input required name='phone' onChange={handleChange} value={data.phone} type="text" placeholder='Telefone' />
         
@@ -457,7 +575,10 @@ const PlaceOrder = ({ setShowLogin }) => {
                         {cartItem.extras && cartItem.extras.length > 0 && (
                           <div className="item-extras">
                             <strong>Extras:</strong> {cartItem.extras.map((extra, idx) => (
-                              <span key={`${cartKey}-extra-${idx}`}>+ {extra.name} (R$ {extra.price.toFixed(2)}){idx < cartItem.extras.length - 1 ? ', ' : ''}</span>
+                              <span key={`${cartKey}-extra-${idx}`}>
+                                + {extra.name} (R$ {extra.price.toFixed(2)})
+                                {idx < cartItem.extras.length - 1 ? ', ' : ''}
+                              </span>
                             ))}
                           </div>
                         )}
@@ -548,21 +669,24 @@ const PlaceOrder = ({ setShowLogin }) => {
             <div className="cart-total-detail">
               <p>{deliveryType === 'delivery' ? 'Taxa de Entrega' : 'Taxa de Serviço'}</p>
               <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                <p>R$ {getTotalCartAmount()===0?0:(deliveryType === 'delivery' ? deliveryData.fee : 0).toFixed(2)}</p>
-                {deliveryType === 'delivery' && deliveryData.isCalculating && (
+                <p>R$ {getTotalCartAmount() === 0 ? '0.00' : (deliveryType === 'delivery' ? shippingFee : 0).toFixed(2)}</p>
+                {deliveryType === 'delivery' && shippingLoading && (
                   <span style={{fontSize: '12px', color: '#666'}}>Calculando...</span>
                 )}
               </div>
             </div>
-            {deliveryType === 'delivery' && deliveryData.distance && (
+            {deliveryType === 'delivery' && shippingData && (
               <div className="delivery-info" style={{fontSize: '12px', color: '#666', margin: '8px 0'}}>
-                <p>📍 Distância: {deliveryData.distance.text}</p>
-                <p>⏱️ Tempo estimado: {deliveryData.duration.text}</p>
+                <p>📍 Distância: {shippingData.distance?.text || `${shippingData.distanceKm} km`}</p>
+                <p>⏱️ Tempo estimado: {shippingData.duration?.text || `${shippingData.durationMinutes} min`}</p>
+                {shippingData.calculatedBy === 'google_maps' && (
+                  <p>🗺️ Calculado via Google Maps</p>
+                )}
               </div>
             )}
-            {deliveryType === 'delivery' && deliveryData.error && (
+            {deliveryType === 'delivery' && shippingError && (
               <div className="delivery-error" style={{fontSize: '12px', color: '#ff6b35', margin: '8px 0'}}>
-                <p>⚠️ {deliveryData.error}</p>
+                <p>⚠️ {shippingError}</p>
               </div>
             )}
             {appliedCoupon && (
@@ -577,7 +701,7 @@ const PlaceOrder = ({ setShowLogin }) => {
             <hr />
             <div className="cart-total-detail">
               <b>Total</b>
-              <b>R$ {getTotalCartAmount()===0?0:(getTotalCartAmount()+(deliveryType === 'delivery' ? deliveryData.fee : 0)-couponDiscount).toFixed(2)}</b>
+              <b>R$ {getTotalCartAmount() === 0 ? '0.00' : (getTotalCartAmount() + (deliveryType === 'delivery' ? deliveryData.fee : 0) - couponDiscount).toFixed(2)}</b>
             </div> 
           </div>
           <button type='submit'>PROSSEGUIR PARA PAGAMENTO</button>

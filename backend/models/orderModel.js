@@ -9,6 +9,9 @@ const orderSchema = new mongoose.Schema({
     status:{type:String, default:"Food Processing"},
     date:{type:Date, default:Date.now()},
     payment:{type:Boolean, default:false},
+    // Campos relacionados ao cliente
+    customerId:{type:mongoose.Schema.Types.ObjectId, ref:'Customer', required: false}, // Referência ao cliente
+    customerInfo:{type:Object, required: false}, // Informações do cliente para backup
     // Campos relacionados à mesa
     tableId:{type:mongoose.Schema.Types.ObjectId, ref:'Table', required: false},
     tableNumber:{type:String, required: false}, // Número da mesa para fácil identificação
@@ -18,7 +21,36 @@ const orderSchema = new mongoose.Schema({
     couponCode:{type:String, required: false}, // Código do cupom aplicado
     discountAmount:{type:Number, default: 0}, // Valor do desconto aplicado
     originalAmount:{type:Number, required: false}, // Valor original antes do desconto
-    couponId:{type:mongoose.Schema.Types.ObjectId, ref:'Coupon', required: false} // Referência ao cupom usado
+    couponId:{type:mongoose.Schema.Types.ObjectId, ref:'Coupon', required: false}, // Referência ao cupom usado
+    // Campos relacionados ao garçom
+    waiterToken:{type:String, required: false}, // Token do garçom que fez o pedido
+    isWaiterOrder:{type:Boolean, default: false}, // Indica se o pedido foi feito por um garçom
+    paymentMethod:{type:String, required: false}, // Método de pagamento
+    notes:{type:String, required: false}, // Observações do pedido
+    // Campos relacionados ao frete
+    shipping: {
+        fee: {
+            type: Number,
+            default: 0
+        },
+        distance: {
+            type: Number, // Distância em quilômetros
+            required: false
+        },
+        duration: {
+            type: Number, // Duração em minutos
+            required: false
+        },
+        calculatedBy: {
+            type: String,
+            enum: ['google_maps', 'manual', 'zone'],
+            required: false
+        },
+        googleMapsData: {
+            type: Object, // Dados completos da resposta do Google Maps
+            required: false
+        }
+    }
 })
 
 const orderModel = mongoose.models.order || mongoose.model("order", orderSchema)

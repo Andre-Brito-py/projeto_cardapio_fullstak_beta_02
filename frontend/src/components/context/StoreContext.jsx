@@ -32,6 +32,7 @@ const StoreContextProvider = (props) => {
     const [currentStore, setCurrentStore] = useState(null); // Loja atual selecionada
     const [storeMenu, setStoreMenu] = useState({ categories: [], foods: [] }); // Menu da loja atual
     const [allStores, setAllStores] = useState([]); // Lista de todas as lojas disponíveis
+    const [storeId, setStoreId] = useState(null); // ID da loja atual
 
     /**
      * Função para adicionar item ao carrinho
@@ -157,6 +158,7 @@ const StoreContextProvider = (props) => {
             
             if (storeResponse.data.success) {
                 setCurrentStore(storeResponse.data.store);
+                setStoreId(storeResponse.data.store._id);
             }
             
             if (menuResponse.data.success) {
@@ -252,11 +254,13 @@ const StoreContextProvider = (props) => {
         setStoreMenu,
         allStores,
         setAllStores,
+        storeId,
+        setStoreId,
         loadStoreData,
         loadAllStores,
         clearStoreData,
         fetchFoodList
-    }), [food_list, cartItems, addToCart, removeFromCart, getTotalCartAmount, url, token, currentStore, storeMenu, allStores, loadStoreData, loadAllStores, clearStoreData, fetchFoodList]);
+    }), [food_list, cartItems, addToCart, removeFromCart, getTotalCartAmount, url, token, currentStore, storeMenu, allStores, storeId, loadStoreData, loadAllStores, clearStoreData, fetchFoodList]);
 
     return (
         <StoreContext.Provider value={contextValue}>

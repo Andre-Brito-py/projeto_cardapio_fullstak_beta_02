@@ -19,6 +19,7 @@ import StoreManagement from './pages/SuperAdmin/StoreManagement/StoreManagement'
 import SystemSettings from './pages/SuperAdmin/SystemSettings/SystemSettings';
 import StoreLinks from './pages/StoreLinks/StoreLinks';
 import WaiterManagement from './pages/WaiterManagement/WaiterManagement';
+import Customers from './pages/Customers/Customers';
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -128,6 +129,7 @@ const App = () => {
           <Route path='/banners' element={<Banners url={url}/>} />
           <Route path='/tables' element={<Tables url={url}/>} />
           <Route path='/coupons' element={<Coupons url={url}/>} />
+          <Route path='/customers' element={<Customers url={url} token={token}/>} />
           <Route path='/waiter-management' element={<WaiterManagement url={url}/>} />
           <Route path='/bluetooth-print' element={<BluetoothPrint url={url} token={token}/>} />
           

@@ -145,6 +145,13 @@ class BluetoothPrintService {
         
         receipt += LINE + '\n';
         
+        // Observações gerais do pedido
+        if (order.notes && order.notes.trim()) {
+            receipt += BOLD_ON + 'OBSERVACOES DO PEDIDO:\n' + BOLD_OFF;
+            receipt += `${order.notes.trim()}\n`;
+            receipt += LINE + '\n';
+        }
+        
         // Total
         receipt += BOLD_ON;
         receipt += `SUBTOTAL: R$ ${(order.amount - 2).toFixed(2)}\n`;

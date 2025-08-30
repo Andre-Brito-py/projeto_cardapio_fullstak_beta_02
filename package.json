@@ -16,7 +16,7 @@
     "setup": "npm run setup-project && npm run install:all && node backend/createAdmin.js",
     "start": "npm run dev:all",
     "postinstall": "npm run setup-project"
-  }
+  },
   "keywords": [
     "food-delivery",
     "restaurant",

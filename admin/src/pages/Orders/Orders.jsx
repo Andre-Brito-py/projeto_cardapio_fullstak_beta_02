@@ -12,7 +12,12 @@ const Orders = ({url, token}) => {
   const [printingOrder, setPrintingOrder] = useState(null)
 
   const fetchAllOrders = async () =>{
-    const response = await axios.get(url+"/api/order/list");
+    const response = await axios.get(url+"/api/order/list", {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'store-slug': 'loja-de-teste-gar-om'
+      }
+    });
     if(response.data.success){
       setOrders(response.data.data);
       console.log(response.data.data);
@@ -25,6 +30,11 @@ const Orders = ({url, token}) => {
     const response = await axios.post(url+"/api/order/status",{
       orderId,
       status:event.target.value
+    }, {
+      headers: { 
+        'Authorization': `Bearer ${token}`,
+        'store-slug': 'loja-de-teste-gar-om'
+      }
     })
     if(response.data.success){
       await fetchAllOrders();
@@ -75,19 +85,26 @@ const Orders = ({url, token}) => {
               </p>
               <p className="order-item-name">{order.address.firstName + " "+order.address.lastName}</p>
               
+              {/* Informações sobre quem fez o pedido */}
+              {order.isWaiterOrder && (
+                <div className="order-waiter-info">
+                  <p className="waiter-indicator">👨‍💼 Pedido feito pelo Garçom</p>
+                </div>
+              )}
+              
               {/* Informações da Mesa */}
-              {order.tableNumber && (
+              {(order.tableId || order.tableNumber || order.orderType === 'dine_in') && (
                 <div className="order-table-info">
-                  <p className="table-indicator">🍽️ Mesa {order.tableNumber}</p>
-                  {order.tableName && order.tableName !== `Mesa ${order.tableNumber}` && (
-                    <p className="table-name">({order.tableName})</p>
+                  <p className="table-indicator">🍽️ Mesa {order.tableId?.tableNumber || order.tableNumber || 'N/A'}</p>
+                  {order.tableId?.displayName && order.tableId.displayName !== `Mesa ${order.tableId.tableNumber}` && (
+                    <p className="table-name">({order.tableId.displayName})</p>
                   )}
                   <span className="order-type-badge dine-in">Consumo no Local</span>
                 </div>
               )}
               
               {/* Endereço de Entrega (apenas para delivery) */}
-              {!order.tableNumber && order.address && (
+              {!order.tableId && !order.tableNumber && order.orderType !== 'dine_in' && order.address && (
                 <div className="order-item-address">
                   <p>{order.address.state + ","}</p>
                   <p>{order.address.city+" ,"+ order.address.state+" ,"+order.address.country+" ,"+order.address.zipcode}</p>
@@ -97,8 +114,15 @@ const Orders = ({url, token}) => {
               )}
               
               {/* Telefone para pedidos de mesa */}
-              {order.tableNumber && order.address?.phone && (
+              {(order.tableId || order.tableNumber || order.orderType === 'dine_in') && order.address?.phone && (
                 <p className='order-item-phone'>📞 {order.address.phone}</p>
+              )}
+              
+              {/* Observações do Pedido */}
+              {order.notes && (
+                <div className="order-notes-display">
+                  <p className="order-notes-text">📝 <strong>Obs:</strong> {order.notes}</p>
+                </div>
               )}
             </div>
             <p>Itmes: {order.items.length}</p>

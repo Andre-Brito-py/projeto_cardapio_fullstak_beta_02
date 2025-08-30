@@ -245,3 +245,44 @@
         width: 100%;
     }
 }
+
+/* Estilos para informações do garçom */
+.order-waiter-info {
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+    border-radius: var(--radius-md);
+    border-left: 4px solid #2196f3;
+}
+
+.waiter-indicator {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: #1976d2;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.waiter-indicator::before {
+    content: '👨‍💼';
+    font-size: 16px;
+}
+
+/* Estilos para observações do pedido */
+.order-notes-display {
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: linear-gradient(135deg, #fff3e0, #fce4ec);
+    border-radius: var(--radius-md);
+    border-left: 4px solid #ff9800;
+}
+
+.order-notes-text {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: #e65100;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+}

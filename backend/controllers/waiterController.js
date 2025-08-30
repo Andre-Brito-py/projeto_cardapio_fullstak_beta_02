@@ -122,7 +122,8 @@ const placeWaiterOrder = async (req, res) => {
             paymentMethod: 'Dinheiro', // Padrão para pedidos de garçom
             notes: notes || '',
             orderType: 'dine_in', // Pedido para consumo no local
-            waiterToken: req.waiter.token
+            waiterToken: req.waiter.token,
+            isWaiterOrder: true // Marcar como pedido do garçom
         });
 
         await newOrder.save();
