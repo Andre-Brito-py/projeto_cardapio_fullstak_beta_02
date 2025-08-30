@@ -5,6 +5,7 @@ import {
     getSystemStats,
     getAllStores,
     updateStoreStatus,
+    updateStore,
     createSuperAdmin,
     loginSuperAdmin,
     getPublicStores,
@@ -44,6 +45,7 @@ systemRouter.get('/stats', getSystemStats);
 // Gerenciamento de lojas
 systemRouter.get('/stores', getAllStores);
 systemRouter.post('/stores', createStore);
+systemRouter.put('/stores/:storeId', updateStore);
 systemRouter.put('/stores/:storeId/status', updateStoreStatus);
 systemRouter.put('/stores/:storeId/subscription', updateSubscription);
 systemRouter.delete('/stores/:storeId', deleteStore);

@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar/Navbar';
 import { Route, Routes } from 'react-router-dom';
 import Home from './pages/Home/Home';
@@ -12,6 +14,7 @@ import MyOrders from './pages/MyOrders/MyOrders';
 import ProductDetail from './pages/ProductDetail/ProductDetail';
 import StoreHome from './pages/StoreHome/StoreHome';
 import CartDebug from './components/CartDebug/CartDebug';
+import WaiterInterface from './pages/WaiterInterface/WaiterInterface';
 
 const App = () => {
 
@@ -30,9 +33,11 @@ const App = () => {
           <Route path='/myorders' element={<MyOrders />} />
           <Route path='/product/:id' element={<ProductDetail />} />
           <Route path='/debug-cart' element={<CartDebug />} />
+          <Route path='/waiter/:storeId' element={<WaiterInterface />} />
         </Routes>
       </div>
       <Footer />
+      <ToastContainer />
     </HelmetProvider>
   );
 };

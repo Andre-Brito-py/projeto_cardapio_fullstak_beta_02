@@ -18,11 +18,12 @@ import BluetoothPrint from './components/BluetoothPrint/BluetoothPrint';
 import StoreManagement from './pages/SuperAdmin/StoreManagement/StoreManagement';
 import SystemSettings from './pages/SuperAdmin/SystemSettings/SystemSettings';
 import StoreLinks from './pages/StoreLinks/StoreLinks';
+import WaiterManagement from './pages/WaiterManagement/WaiterManagement';
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
-  const url = 'http://localhost:4001';
+  const url = 'http://localhost:4000';
   const [token, setToken] = useState('');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [showSuperAdminLogin, setShowSuperAdminLogin] = useState(false);
@@ -127,6 +128,7 @@ const App = () => {
           <Route path='/banners' element={<Banners url={url}/>} />
           <Route path='/tables' element={<Tables url={url}/>} />
           <Route path='/coupons' element={<Coupons url={url}/>} />
+          <Route path='/waiter-management' element={<WaiterManagement url={url}/>} />
           <Route path='/bluetooth-print' element={<BluetoothPrint url={url} token={token}/>} />
           
           {/* Rota padrão */}

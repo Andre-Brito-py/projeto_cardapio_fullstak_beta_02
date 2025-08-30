@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import './Header.css'
 import { StoreContext } from '../context/StoreContext'
 import { useNavigate } from 'react-router-dom'
@@ -103,7 +103,7 @@ const Header = () => {
     if (url) {
       fetchBanners();
     }
-  }, [url]);
+  }, [url, fetchBanners]);
 
 
 

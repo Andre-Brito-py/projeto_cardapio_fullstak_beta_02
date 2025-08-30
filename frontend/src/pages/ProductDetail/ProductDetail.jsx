@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import './ProductDetail.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StoreContext } from '../../components/context/StoreContext';
-import { assets } from '../../assets/assets';
+
 import axios from 'axios';
 import SEO from '../../components/SEO/SEO';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addToCart, url, cartItems } = useContext(StoreContext);
+    const { addToCart, url } = useContext(StoreContext);
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [selectedExtras, setSelectedExtras] = useState([]);

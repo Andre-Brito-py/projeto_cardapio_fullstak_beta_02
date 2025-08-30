@@ -39,11 +39,15 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.add_icon} alt="" />
           <p>Cupons</p>
         </NavLink>
+        <NavLink to='/waiter-management' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>Garçom</p>
+        </NavLink>
         <NavLink to='/settings' className="sidebar-option" onClick={onClose}>
           <img src={assets.add_icon} alt="" />
           <p>Settings</p>
         </NavLink>
-        <NavLink to='/store-links' className={({isActive})=>isActive?"active":""} onClick={onClose}>
+        <NavLink to='/store-links' className="sidebar-option" onClick={onClose}>
            <img src={assets.parcel_icon} alt="" />
            <p>Links da Loja</p>
          </NavLink>

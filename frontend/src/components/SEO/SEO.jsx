@@ -1,5 +1,5 @@
-import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import PropTypes from 'prop-types';
 
 const SEO = ({ 
   title = 'Food Delivery', 
@@ -76,6 +76,18 @@ const SEO = ({
       </script>
     </Helmet>
   );
+};
+
+SEO.propTypes = {
+  title: PropTypes.string,
+  description: PropTypes.string,
+  keywords: PropTypes.string,
+  image: PropTypes.string,
+  url: PropTypes.string,
+  type: PropTypes.string,
+  storeName: PropTypes.string,
+  storeDescription: PropTypes.string,
+  storeImage: PropTypes.string
 };
 
 export default SEO;

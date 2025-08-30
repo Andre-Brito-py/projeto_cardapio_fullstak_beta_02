@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from 'react'
+import { useState, useEffect, useRef, useContext, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import './ExploreMenu.css'
 import axios from 'axios'
@@ -17,7 +17,7 @@ const ExploreMenu = ({category, setCategory, categories: propCategories}) => {
     const [scrollLeft, setScrollLeft] = useState(0);
     const scrollContainerRef = useRef(null);
 
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -35,7 +35,7 @@ const ExploreMenu = ({category, setCategory, categories: propCategories}) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [url]);
 
     const checkScrollButtons = () => {
         if (scrollContainerRef.current) {
@@ -88,7 +88,7 @@ const ExploreMenu = ({category, setCategory, categories: propCategories}) => {
                 fetchCategories();
             }
         }
-    }, [url, propCategories]);
+    }, [url, propCategories, fetchCategories]);
 
     useEffect(() => {
         checkScrollButtons();

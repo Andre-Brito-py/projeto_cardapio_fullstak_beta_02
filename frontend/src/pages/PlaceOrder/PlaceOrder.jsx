@@ -1,4 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useCallback } from 'react'
+import PropTypes from 'prop-types'
 import './PlaceOrder.css'
 import { StoreContext } from '../../components/context/StoreContext'
 import axios from 'axios'
@@ -41,7 +42,7 @@ const PlaceOrder = ({ setShowLogin }) => {
         setData(data => ({...data, [name]: value}));
     }
 
-  const fetchPixKey = async () => {
+  const fetchPixKey = useCallback(async () => {
     try {
       const response = await axios.get(`${url}/api/settings/pix-key`);
       if (response.data.success) {
@@ -51,7 +52,7 @@ const PlaceOrder = ({ setShowLogin }) => {
       console.error('Erro ao buscar chave PIX:', error);
       setPixKey('Erro ao carregar chave PIX');
     }
-  };
+  }, [url]);
 
   const copyPixKey = async () => {
     try {
@@ -228,7 +229,7 @@ const PlaceOrder = ({ setShowLogin }) => {
     if (paymentMethod === 'pix') {
       fetchPixKey();
     }
-  }, [paymentMethod]);
+  }, [paymentMethod, fetchPixKey]);
 
   // Calcular taxa de entrega quando endereço mudar
   useEffect(() => {
@@ -435,7 +436,7 @@ const PlaceOrder = ({ setShowLogin }) => {
         <div className="cart-items-section">
           <h2>Seus Itens</h2>
           <div className="cart-items-list">
-            {Object.keys(cartItems).map((cartKey, index) => {
+            {Object.keys(cartItems).map((cartKey) => {
               const cartItem = cartItems[cartKey];
               if (cartItem && cartItem.quantity > 0) {
                 const item = food_list.find(product => product._id === cartItem.itemId);
@@ -586,5 +587,9 @@ const PlaceOrder = ({ setShowLogin }) => {
     </>  
   )
 }
+
+PlaceOrder.propTypes = {
+  setShowLogin: PropTypes.func.isRequired
+};
 
 export default PlaceOrder

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import './Cart.css'
 import { StoreContext } from '../../components/context/StoreContext'
 import { useNavigate } from 'react-router-dom';
@@ -8,20 +8,16 @@ import SEO from '../../components/SEO/SEO';
 const Cart = () => {
 
   const {food_list, cartItems, removeFromCart, getTotalCartAmount, url, token, currentStore, fetchFoodList} = useContext(StoreContext);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
 
   // Garantir que temos a lista completa de produtos para renderizar o carrinho
   useEffect(() => {
     const loadProductsIfNeeded = async () => {
       // Se não temos produtos ou temos poucos produtos, carregar a lista completa
       if (!food_list || food_list.length === 0) {
-        setIsLoadingProducts(true);
         try {
           await fetchFoodList();
         } catch (error) {
           console.error('Erro ao carregar produtos para o carrinho:', error);
-        } finally {
-          setIsLoadingProducts(false);
         }
       }
     };
@@ -40,8 +36,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const { 
     deliveryData,
-    calculateDeliveryFee, 
-    resetDeliveryData 
+    calculateDeliveryFee
   } = useDeliveryCalculation(url);
 
   const deliveryFee = deliveryData?.fee || 0;
@@ -111,7 +106,7 @@ const Cart = () => {
         </div>
         <br />
         <hr />
-        {Object.keys(cartItems).map((cartKey, index) => {
+        {Object.keys(cartItems).map((cartKey) => {
           const cartItem = cartItems[cartKey];
           if (cartItem && cartItem.quantity > 0) {
             const item = food_list.find(product => product._id === cartItem.itemId);

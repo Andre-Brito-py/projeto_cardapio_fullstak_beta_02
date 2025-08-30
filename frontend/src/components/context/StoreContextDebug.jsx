@@ -1,4 +1,5 @@
-import React, { createContext, useEffect, useState, useMemo, useCallback } from "react";
+import { createContext, useEffect, useState, useMemo, useCallback } from "react";
+import PropTypes from 'prop-types';
 import axios from "axios";
 
 export const StoreContext = createContext(null);
@@ -377,5 +378,8 @@ const StoreContextProvider = (props) => {
     )
 }
 
+StoreContextProvider.propTypes = {
+    children: PropTypes.node.isRequired
+};
+
 export default StoreContextProvider;
-export { StoreContext };

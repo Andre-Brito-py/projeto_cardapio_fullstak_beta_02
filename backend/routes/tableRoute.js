@@ -23,8 +23,9 @@ import {
 
 const tableRouter = express.Router();
 
-// Rota pública para obter mesa pelo QR code (sem autenticação)
+// Rotas públicas (sem autenticação)
 tableRouter.get('/qr/:qrCode', getTableByQRCode);
+tableRouter.get('/public/:storeId', identifyStore, addStoreContext, listTables);
 
 // Middleware para identificar a loja em todas as rotas abaixo
 tableRouter.use(identifyStore);

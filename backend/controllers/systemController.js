@@ -333,6 +333,74 @@ const resetSuperAdminPassword = async (req, res) => {
     }
 };
 
+// Atualizar dados da loja
+const updateStore = async (req, res) => {
+    try {
+        const { storeId } = req.params;
+        const updateData = req.body;
+
+        // Verificar se a loja existe
+        const store = await Store.findById(storeId);
+        if (!store) {
+            return res.status(404).json({
+                success: false,
+                message: "Loja não encontrada"
+            });
+        }
+
+        // Se a senha do proprietário foi fornecida, criptografá-la
+        if (updateData.ownerPassword) {
+            const salt = await bcrypt.genSalt(10);
+            updateData.ownerPassword = await bcrypt.hash(updateData.ownerPassword, salt);
+        }
+
+        // Atualizar dados da loja
+        const updatedStore = await Store.findByIdAndUpdate(
+            storeId,
+            {
+                $set: {
+                    name: updateData.name,
+                    description: updateData.description,
+                    'settings.restaurantAddress': updateData.restaurantAddress,
+                    'subscription.plan': updateData.subscriptionPlan,
+                    'settings.language': updateData.language,
+                    'settings.currency': updateData.currency,
+                    'settings.timezone': updateData.timezone,
+                    updatedAt: new Date()
+                }
+            },
+            { new: true, runValidators: true }
+        );
+
+        // Atualizar dados do proprietário se fornecidos
+        if (updateData.ownerName || updateData.ownerEmail || updateData.ownerPassword) {
+            const ownerUpdateData = {};
+            if (updateData.ownerName) ownerUpdateData.name = updateData.ownerName;
+            if (updateData.ownerEmail) ownerUpdateData.email = updateData.ownerEmail;
+            if (updateData.ownerPassword) ownerUpdateData.password = updateData.ownerPassword;
+
+            await userModel.findByIdAndUpdate(
+                store.owner,
+                { $set: ownerUpdateData },
+                { new: true, runValidators: true }
+            );
+        }
+
+        res.json({
+            success: true,
+            message: "Loja atualizada com sucesso",
+            data: updatedStore
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao atualizar loja"
+        });
+    }
+};
+
 // Excluir loja e todos os dados relacionados
 const deleteStore = async (req, res) => {
     console.log('=== FUNÇÃO DELETE STORE CHAMADA ===');
@@ -407,6 +475,7 @@ export {
     getSystemStats,
     getAllStores,
     updateStoreStatus,
+    updateStore,
     createSuperAdmin,
     loginSuperAdmin,
     getPublicStores,

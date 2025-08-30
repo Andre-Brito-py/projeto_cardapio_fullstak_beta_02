@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import PropTypes from 'prop-types'
 import './Navbar.css'
 import { assets } from './../../assets/assets';
@@ -9,7 +9,7 @@ const Navbar = ({setShowLogin}) => {
 
   const [menu, setMenu] = useState('home');
 
-  const {getTotalCartAmount, token, setToken, currentStore, cartItems} = useContext(StoreContext);
+  const {getTotalCartAmount, token, setToken} = useContext(StoreContext);
 
   const navigate = useNavigate();
   const location = useLocation();

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useCallback, useMemo, memo } from 'react'
+import { useContext, useCallback, memo } from 'react'
 import PropTypes from 'prop-types'
 import './FoodItem.css'
 import { assets } from '../../assets/assets'
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const FoodItem = memo(({id,name,price,description,image,extras = []}) => {
 
-    const {cartItems,addToCart,removeFromCart,url} = useContext(StoreContext);
+    const {cartItems,removeFromCart,url} = useContext(StoreContext);
     const navigate = useNavigate();
 
     

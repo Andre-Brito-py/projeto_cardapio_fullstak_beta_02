@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './StoreManagement.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { SUPPORTED_LANGUAGES, SUPPORTED_CURRENCIES, getRegionalDefaults } from '../../../constants/localization';
 
 const StoreManagement = ({ url, token }) => {
   const [stores, setStores] = useState([]);
@@ -18,7 +19,10 @@ const StoreManagement = ({ url, token }) => {
     ownerName: '',
     ownerEmail: '',
     ownerPassword: '',
-    subscriptionPlan: 'Básico'
+    subscriptionPlan: 'Básico',
+    language: 'pt-BR',
+    currency: 'BRL',
+    timezone: 'America/Sao_Paulo'
   });
 
   
@@ -48,6 +52,24 @@ const StoreManagement = ({ url, token }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Função para atualizar configurações regionais quando o idioma muda
+  const handleLanguageChange = (e) => {
+    const selectedLanguage = e.target.value;
+    const regionalDefaults = getRegionalDefaults(selectedLanguage);
+    
+    setFormData(prev => ({
+      ...prev,
+      language: selectedLanguage,
+      currency: regionalDefaults.currency,
+      timezone: regionalDefaults.timezone
+    }));
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   useEffect(() => {
     fetchStores();
   }, []);
@@ -72,41 +94,34 @@ const StoreManagement = ({ url, token }) => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const response = await axios.post(`${url}/api/system/stores`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      let response;
+      
+      if (editingStore) {
+        // Editando loja existente
+        response = await axios.put(`${url}/api/system/stores/${editingStore._id}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        // Criando nova loja
+        response = await axios.post(`${url}/api/system/stores`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
       
       if (response.data.success) {
-        toast.success('Loja criada com sucesso!');
-        setShowForm(false);
-        setFormData({
-          name: '',
-          description: '',
-          restaurantAddress: '',
-          ownerName: '',
-          ownerEmail: '',
-          ownerPassword: '',
-          subscriptionPlan: 'Básico'
-        });
+        toast.success(editingStore ? 'Loja atualizada com sucesso!' : 'Loja criada com sucesso!');
+        resetForm();
         fetchStores();
       } else {
-        toast.error(response.data.message || 'Erro ao criar loja');
+        toast.error(response.data.message || (editingStore ? 'Erro ao atualizar loja' : 'Erro ao criar loja'));
       }
     } catch (error) {
-      console.error('Erro ao criar loja:', error);
+      console.error(editingStore ? 'Erro ao atualizar loja:' : 'Erro ao criar loja:', error);
       toast.error('Erro ao conectar com o servidor');
     } finally {
       setLoading(false);
@@ -116,13 +131,16 @@ const StoreManagement = ({ url, token }) => {
   const handleEdit = (store) => {
     setEditingStore(store);
     setFormData({
-      name: store.name,
-      domain: store.domain,
+      name: store.name || '',
       description: store.description || '',
-      address: store.address || '',
-      phone: store.phone || '',
-      email: store.email || '',
-      isActive: store.isActive
+      restaurantAddress: store.restaurantAddress || store.address || '',
+      ownerName: store.ownerName || '',
+      ownerEmail: store.ownerEmail || store.email || '',
+      ownerPassword: '', // Não pré-preencher senha por segurança
+      subscriptionPlan: store.subscriptionPlan || 'Básico',
+      language: store.language || 'pt-BR',
+      currency: store.currency || 'BRL',
+      timezone: store.timezone || 'America/Sao_Paulo'
     });
     setShowForm(true);
   };
@@ -240,12 +258,15 @@ const StoreManagement = ({ url, token }) => {
   const resetForm = () => {
     setFormData({
       name: '',
-      domain: '',
       description: '',
-      address: '',
-      phone: '',
-      email: '',
-      isActive: true
+      restaurantAddress: '',
+      ownerName: '',
+      ownerEmail: '',
+      ownerPassword: '',
+      subscriptionPlan: 'Básico',
+      language: 'pt-BR',
+      currency: 'BRL',
+      timezone: 'America/Sao_Paulo'
     });
     setEditingStore(null);
     setShowForm(false);
@@ -345,6 +366,40 @@ const StoreManagement = ({ url, token }) => {
                   <option value='Premium'>Premium</option>
                   <option value='Enterprise'>Enterprise</option>
                 </select>
+              </div>
+              
+              <div className='form-group'>
+                <label>Idioma da Loja *</label>
+                <select
+                  name='language'
+                  value={formData.language}
+                  onChange={handleLanguageChange}
+                  required
+                >
+                  {SUPPORTED_LANGUAGES.map(lang => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.flag} {lang.name}
+                    </option>
+                  ))}
+                </select>
+                <small>O idioma será usado na interface da loja e comunicações com clientes</small>
+              </div>
+              
+              <div className='form-group'>
+                <label>Moeda da Loja *</label>
+                <select
+                  name='currency'
+                  value={formData.currency}
+                  onChange={handleInputChange}
+                  required
+                >
+                  {SUPPORTED_CURRENCIES.map(currency => (
+                    <option key={currency.code} value={currency.code}>
+                      {currency.symbol} {currency.name} ({currency.code})
+                    </option>
+                  ))}
+                </select>
+                <small>A moeda será usada para preços e transações na loja</small>
               </div>
               
               <div className='form-actions'>

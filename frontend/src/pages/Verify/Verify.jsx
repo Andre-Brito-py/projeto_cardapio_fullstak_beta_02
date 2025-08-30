@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import { useContext, useEffect, useCallback } from 'react'
 import './Verify.css'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { StoreContext } from './../../components/context/StoreContext';
@@ -13,7 +13,7 @@ const Verify = () => {
     const {url, token} = useContext(StoreContext);
     const navigate = useNavigate();
 
-    const verifyPayment = async () => {
+    const verifyPayment = useCallback(async () => {
         try {
             const response = await axios.post(`${url}/api/order/verify`, {
                 success, 
@@ -46,11 +46,11 @@ const Verify = () => {
             alert(errorMessage);
             navigate('/');
         }
-    }
+    }, [url, success, orderId, token, navigate])
 
     useEffect(() => {
         verifyPayment();
-    }, [])
+    }, [verifyPayment])
    
   return (
     <div className='verify'>

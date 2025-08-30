@@ -1,4 +1,5 @@
-import React, { useContext, useState, useCallback, memo } from 'react'
+import { useContext, useState, useCallback, memo } from 'react'
+import PropTypes from 'prop-types'
 import './LoginPopup.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from './../context/StoreContext';
@@ -162,5 +163,9 @@ const LoginPopup = memo(({setShowLogin}) => {
 })
 
 LoginPopup.displayName = 'LoginPopup';
+
+LoginPopup.propTypes = {
+  setShowLogin: PropTypes.func.isRequired
+};
 
 export default LoginPopup

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { StoreContext } from '../../components/context/StoreContext';
 import FoodDisplay from '../../components/FoodDisplay/FoodDisplay';
@@ -17,7 +17,7 @@ const StoreHome = () => {
     const [error, setError] = useState(null);
 
     // Carregar dados da loja
-    const handleLoadStoreData = async () => {
+    const handleLoadStoreData = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -34,7 +34,7 @@ const StoreHome = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [loadStoreData, storeSlug]);
 
 
 
@@ -47,7 +47,7 @@ const StoreHome = () => {
         return () => {
             clearStoreData();
         };
-    }, [storeSlug]);
+    }, [storeSlug, handleLoadStoreData, clearStoreData]);
 
     // Aplicar customização da loja
     useEffect(() => {

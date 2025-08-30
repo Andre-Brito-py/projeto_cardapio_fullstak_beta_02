@@ -15,7 +15,10 @@ const createStore = async (req, res) => {
             ownerName,
             ownerEmail,
             ownerPassword,
-            subscriptionPlan = 'Básico'
+            subscriptionPlan = 'Básico',
+            language = 'pt-BR',
+            currency = 'BRL',
+            timezone = 'America/Sao_Paulo'
         } = req.body;
         
         // Verificar se o email do proprietário já existe
@@ -56,6 +59,9 @@ const createStore = async (req, res) => {
             },
             settings: {
                 restaurantAddress,
+                currency,
+                language,
+                timezone,
                 deliveryZones: [
                     {
                         name: 'Zona Principal',
@@ -144,7 +150,7 @@ const getStore = async (req, res) => {
             return res.json({ success: false, message: "Loja não encontrada" });
         }
         
-        res.json({ success: true, data: store });
+        res.json({ success: true, store: store });
     } catch (error) {
         console.log('Erro em getStore:', error);
         res.json({ success: false, message: "Erro ao obter dados da loja" });

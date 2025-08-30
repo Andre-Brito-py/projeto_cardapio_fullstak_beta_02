@@ -1,5 +1,6 @@
 // Importações necessárias
 import { createContext, useEffect, useState, useMemo, useCallback } from "react";
+import PropTypes from 'prop-types';
 import axios from 'axios';
 
 // Criação do contexto da loja
@@ -25,7 +26,7 @@ const StoreContextProvider = (props) => {
     
     // Estados do contexto
     const [cartItems, setCartItems] = useState(() => getInitialCart()); // Itens do carrinho
-    const url = "http://localhost:4001"; // URL da API
+    const url = "http://localhost:4000"; // URL da API
     const [token, setToken] = useState(""); // Token de autenticação
     const [food_list, setFoodList] = useState([]); // Lista de comidas disponíveis
     const [currentStore, setCurrentStore] = useState(null); // Loja atual selecionada
@@ -263,6 +264,10 @@ const StoreContextProvider = (props) => {
         </StoreContext.Provider>
     )
 }
+
+StoreContextProvider.propTypes = {
+    children: PropTypes.node.isRequired
+};
 
 export default StoreContextProvider;
 export { StoreContext };
