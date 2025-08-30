@@ -71,6 +71,40 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **Git** (para clonar o repositório)
 - **Conta no Stripe** (opcional, para pagamentos)
 
+### ⚡ Configuração Automática (Recomendado)
+
+**1. Clone o repositório:**
+```bash
+git clone https://github.com/seu-usuario/projeto_cardapio_fullstak_beta_02.git
+cd projeto_cardapio_fullstak_beta_02
+```
+
+**2. Execute o setup automático:**
+```bash
+npm run setup
+```
+
+Este comando irá:
+- ✅ Criar arquivos `.env` com configurações corretas
+- ✅ Instalar todas as dependências
+- ✅ Configurar URLs automaticamente
+- ✅ Criar usuário Super Admin
+- ✅ Validar configurações
+
+**3. Inicie o projeto:**
+```bash
+# Windows PowerShell
+.\start-project.ps1
+
+# Windows Batch
+start-project.bat
+
+# Manual (3 terminais)
+npm run dev:all
+```
+
+### 🔧 Configuração Manual (Avançado)
+
 ### 1. Clone o Repositório
 ```bash
 git clone https://github.com/seu-usuario/projeto_cardapio_fullstak_beta_02.git
@@ -130,7 +164,26 @@ node createAdmin.js
 
 ## 🚀 Como Executar o Projeto
 
-### Execução Completa (3 terminais)
+### 🎯 Inicialização Rápida (Recomendado)
+
+**Para Windows:**
+1. **Abra o PowerShell como Administrador**
+2. **Execute o script de inicialização:**
+```powershell
+# Navegar para o diretório do projeto
+cd "C:\caminho\para\Full-Stack-Food-Delivery-Web-Application"
+
+# Executar script de inicialização (instala dependências e inicia tudo)
+.\start-project.ps1
+```
+
+**Ou use o arquivo .bat:**
+```cmd
+# Duplo clique no arquivo ou execute:
+start-project.bat
+```
+
+### 🔧 Execução Manual (3 terminais)
 
 **Terminal 1 - Backend:**
 ```bash
@@ -150,7 +203,14 @@ cd admin
 npm run dev
 ```
 
-### Verificação de Funcionamento
+### ✅ Verificação de Funcionamento
+
+**Execute o health check:**
+```powershell
+.\health-check.ps1
+```
+
+**Verificação manual:**
 1. **Backend**: Deve mostrar "Server started on http://localhost:4000" e "DB Connected Successfully"
 2. **Frontend**: Deve estar disponível em http://localhost:5173
 3. **Admin Panel**: Deve estar disponível em http://localhost:5175
@@ -171,10 +231,82 @@ npm run dev
 
 ## 🌐 URLs de Acesso
 
-- **🛒 Frontend (Clientes)**: http://localhost:5173
-- **👑 Super Admin Panel**: http://localhost:5175
-- **🔧 Store Admin Panel**: http://localhost:5175 (mesmo painel, diferentes permissões)
+- **🛒 Frontend (Clientes)**: http://localhost:5174
+- **🏪 Admin Panel (Lojas)**: http://localhost:5173
 - **🔌 Backend API**: http://localhost:4000
+
+### ⚠️ IMPORTANTE: Configuração de URLs
+
+**O sistema utiliza configuração centralizada de URLs para garantir que os links sejam gerados corretamente:**
+
+#### 📋 Configurações Padrão
+- **Frontend (Cliente/Garçom)**: Porta 5174
+- **Admin (Painel Administrativo)**: Porta 5173
+- **Backend (API)**: Porta 4000
+
+#### 🔧 Arquivos de Configuração
+- `backend/config/urls.js` - Configuração centralizada do backend
+- `admin/src/config/urls.js` - Configuração do painel administrativo
+- `.env` - Variáveis de ambiente (criado automaticamente)
+
+#### ✅ Validação de URLs
+```bash
+# Validar se todas as URLs estão corretas
+npm run validate-urls
+
+# Reconfigurar URLs se necessário
+npm run setup-project
+```
+
+#### 🚨 Problemas Comuns
+- **Link da loja abrindo painel admin**: URLs trocadas
+- **QR Code da mesa não funcionando**: Configuração incorreta
+- **Garçom não consegue acessar**: Token ou URL inválida
+
+**Solução**: Execute `npm run setup-project` para reconfigurar automaticamente.
+
+## 🔧 Scripts Utilitários
+
+### 🚀 Inicialização Automática
+- **start-project.ps1**: Script PowerShell completo com verificações
+- **start-project.bat**: Script batch simples para Windows
+- **health-check.ps1**: Verificação de saúde de todos os serviços
+- **setup-test-data.js**: Criação de dados de teste
+
+### 🛠️ Resolução de Problemas
+
+#### ❌ Erro: "Loja não encontrada"
+**Solução:**
+```bash
+# Execute o script de criação de dados de teste
+node setup-test-data.js
+```
+
+#### ❌ Links gerando URL incorreta
+**Causa:** Configuração de URL incorreta
+**Solução:** Os links são gerados automaticamente usando:
+- Frontend (clientes): `http://localhost:5173/loja/{slug}`
+- Admin (lojas): `http://localhost:5174`
+
+#### ❌ Serviços não iniciam
+**Soluções:**
+1. Verificar se o MongoDB está rodando
+2. Verificar se as portas estão livres (4000, 5173, 5174)
+3. Executar `health-check.ps1` para diagnóstico
+4. Reinstalar dependências: `npm install` em cada pasta
+
+#### ❌ Erro de conexão com banco
+**Soluções:**
+1. Verificar se o MongoDB está rodando: `mongod --version`
+2. Verificar conexão: `mongo mongodb://localhost:27017/food-del`
+3. Reiniciar o serviço do MongoDB
+
+### 📋 Dados de Teste Padrão
+Após executar `setup-test-data.js`:
+- **Loja:** Loja Teste - Food Delivery
+- **Slug:** loja-teste
+- **URL:** http://localhost:5173/loja/loja-teste
+- **Admin:** admin@loja-teste.com / admin123
 
 ## 📱 Guia de Uso
 

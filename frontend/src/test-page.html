@@ -13,7 +13,7 @@
         // Simular o teste da API
         async function testAPI() {
             try {
-                const response = await fetch('http://localhost:4001/api/category/active');
+                const response = await fetch('http://localhost:4000/api/category/active');
                 const data = await response.json();
                 
                 console.log('Categorias encontradas:', data.data);
@@ -34,7 +34,7 @@
                 }
                 
                 // Testar produtos
-                const foodResponse = await fetch('http://localhost:4001/api/store/public/loja-de-bolo/menu');
+                const foodResponse = await fetch('http://localhost:4000/api/store/public/loja-de-bolo/menu');
                 const foodData = await foodResponse.json();
                 
                 console.log('Produtos da loja:', foodData.data.foods);

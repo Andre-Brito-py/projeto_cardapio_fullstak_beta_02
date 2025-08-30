@@ -4,7 +4,7 @@ const axios = require('axios');
 async function testCartSyncIssue() {
     console.log('🧪 Testando problema de sincronização do carrinho\n');
     
-    const API_BASE = 'http://localhost:4001';
+    const API_BASE = 'http://localhost:4000';
     
     try {
         // 1. Buscar produtos disponíveis

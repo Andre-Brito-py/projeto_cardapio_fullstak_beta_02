@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Correção do Link do Garçom</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success { background: rgba(76, 175, 80, 0.3); border-left: 4px solid #4CAF50; }
+        .warning { background: rgba(255, 193, 7, 0.3); border-left: 4px solid #FFC107; }
+        .error { background: rgba(244, 67, 54, 0.3); border-left: 4px solid #F44336; }
+        .info { background: rgba(33, 150, 243, 0.3); border-left: 4px solid #2196F3; }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        .btn-primary { background: rgba(76, 175, 80, 0.6); border-color: #4CAF50; }
+        .btn-danger { background: rgba(244, 67, 54, 0.6); border-color: #F44336; }
+        .btn-warning { background: rgba(255, 193, 7, 0.6); border-color: #FFC107; }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Correção do Link do Garçom</h1>
+            <p>Ferramenta para resolver problemas de redirecionamento</p>
+        </div>
+
+        <div class="status info">
+            <strong>📋 Status:</strong> Investigando problema de redirecionamento do link do garçom
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Testes Automáticos</h3>
+            <p>Clique nos botões abaixo para testar diferentes cenários:</p>
+            
+            <button class="btn btn-primary" onclick="testDirectLink()">🎯 Teste Direto - Interface do Garçom</button>
+            <button class="btn btn-warning" onclick="clearCacheAndTest()">🧹 Limpar Cache + Teste</button>
+            <button class="btn btn-danger" onclick="forceRedirect()">🚀 Forçar Redirecionamento</button>
+            
+            <div id="results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Links de Teste Manual</h3>
+            <p>Use estes links em <strong>janelas anônimas/privadas</strong>:</p>
+            
+            <div class="code">
+                <strong>Interface do Garçom:</strong><br>
+                <a href="http://localhost:5173/waiter/loja-teste?token=test" target="_blank" class="btn">http://localhost:5173/waiter/loja-teste?token=test</a>
+            </div>
+            
+            <div class="code">
+                <strong>Painel Admin:</strong><br>
+                <a href="http://localhost:5174/waiter-management" target="_blank" class="btn">http://localhost:5174/waiter-management</a>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Diagnóstico do Sistema</h3>
+            <button class="btn" onclick="runDiagnostics()">🔍 Executar Diagnóstico</button>
+            <div id="diagnostics"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🛠️ Soluções Rápidas</h3>
+            <div class="status warning">
+                <strong>⚠️ Se o problema persistir:</strong>
+                <ol>
+                    <li>Feche TODAS as abas do navegador</li>
+                    <li>Abra uma janela anônima/privada</li>
+                    <li>Acesse: <code>http://localhost:5174/waiter-management</code></li>
+                    <li>Gere um novo link do garçom</li>
+                    <li>Teste o link na mesma janela anônima</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function testDirectLink() {
+            addResult('🎯 Testando link direto...', 'info');
+            
+            // Limpa storage local
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                addResult('✅ Cache local limpo', 'success');
+            } catch (e) {
+                addResult('⚠️ Não foi possível limpar cache local', 'warning');
+            }
+            
+            // Abre link em nova janela
+            setTimeout(() => {
+                const waiterWindow = window.open('http://localhost:5173/waiter/loja-teste?token=test', '_blank');
+                if (waiterWindow) {
+                    addResult('🚀 Janela do garçom aberta. Verifique se carregou corretamente.', 'success');
+                } else {
+                    addResult('❌ Falha ao abrir janela. Verifique se o popup foi bloqueado.', 'error');
+                }
+            }, 1000);
+        }
+
+        function clearCacheAndTest() {
+            addResult('🧹 Limpando cache e dados...', 'info');
+            
+            // Limpa todos os dados possíveis
+            try {
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Tenta limpar cookies (limitado por segurança)
+                document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                });
+                
+                addResult('✅ Dados locais limpos', 'success');
+                
+                // Força reload da página atual
+                setTimeout(() => {
+                    addResult('🔄 Recarregando página...', 'info');
+                    window.location.reload(true);
+                }, 2000);
+                
+            } catch (e) {
+                addResult('⚠️ Limpeza parcial realizada: ' + e.message, 'warning');
+            }
+        }
+
+        function forceRedirect() {
+            addResult('🚀 Forçando redirecionamento...', 'info');
+            
+            // Limpa tudo primeiro
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Força redirecionamento direto
+            setTimeout(() => {
+                window.location.href = 'http://localhost:5173/waiter/loja-teste?token=test&force=' + Date.now();
+            }, 1000);
+        }
+
+        function runDiagnostics() {
+            const diagnostics = document.getElementById('diagnostics');
+            diagnostics.innerHTML = '';
+            
+            const addDiagnostic = (message, type = 'info') => {
+                const div = document.createElement('div');
+                div.className = `status ${type}`;
+                div.innerHTML = message;
+                diagnostics.appendChild(div);
+            };
+            
+            addDiagnostic('🔍 Executando diagnóstico...', 'info');
+            
+            // Verifica URL atual
+            addDiagnostic(`📍 URL Atual: ${window.location.href}`, 'info');
+            
+            // Verifica localStorage
+            const localStorageSize = JSON.stringify(localStorage).length;
+            addDiagnostic(`💾 LocalStorage: ${localStorageSize} caracteres`, localStorageSize > 1000 ? 'warning' : 'success');
+            
+            // Verifica sessionStorage
+            const sessionStorageSize = JSON.stringify(sessionStorage).length;
+            addDiagnostic(`🗂️ SessionStorage: ${sessionStorageSize} caracteres`, sessionStorageSize > 1000 ? 'warning' : 'success');
+            
+            // Verifica cookies
+            const cookieCount = document.cookie.split(';').length;
+            addDiagnostic(`🍪 Cookies: ${cookieCount} itens`, cookieCount > 10 ? 'warning' : 'success');
+            
+            // Testa conectividade
+            Promise.all([
+                fetch('http://localhost:5173').then(() => '✅ Frontend (5173)').catch(() => '❌ Frontend (5173)'),
+                fetch('http://localhost:5174').then(() => '✅ Admin (5174)').catch(() => '❌ Admin (5174)'),
+                fetch('http://localhost:4000').then(() => '✅ Backend (4000)').catch(() => '❌ Backend (4000)')
+            ]).then(results => {
+                results.forEach(result => {
+                    addDiagnostic(`🌐 ${result}`, result.includes('✅') ? 'success' : 'error');
+                });
+            });
+        }
+
+        // Executa diagnóstico automático ao carregar
+        window.onload = function() {
+            setTimeout(runDiagnostics, 1000);
+        };
+    </script>
+</body>
+</html>

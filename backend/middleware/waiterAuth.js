@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import storeModel from '../models/storeModel.js';
+import { FRONTEND_URL, getWaiterLink } from '../config/urls.js';
 
 // Middleware para autenticação de garçom
 const waiterAuth = async (req, res, next) => {
@@ -28,7 +29,7 @@ const waiterAuth = async (req, res, next) => {
 
             // Verificar se a loja existe e está ativa
             const store = await storeModel.findById(decoded.storeId);
-            if (!store || !store.isActive) {
+            if (!store || store.status !== 'active') {
                 return res.status(401).json({ 
                     success: false, 
                     message: "Loja não encontrada ou inativa" 
@@ -74,9 +75,11 @@ const generateWaiterToken = (storeId) => {
 };
 
 // Função para gerar link de acesso do garçom
-const generateWaiterLink = (storeId, baseUrl = 'http://localhost:5173') => {
+const generateWaiterLink = (storeId, baseUrl = null) => {
     const token = generateWaiterToken(storeId);
-    return `${baseUrl}/waiter/${storeId}?token=${token}`;
+    // Usar a configuração centralizada se baseUrl não for fornecida
+    const finalBaseUrl = baseUrl || FRONTEND_URL;
+    return getWaiterLink(storeId, token, finalBaseUrl);
 };
 
 export { waiterAuth, generateWaiterToken, generateWaiterLink };

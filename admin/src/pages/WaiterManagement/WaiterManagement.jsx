@@ -3,6 +3,7 @@ import './WaiterManagement.css';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { assets } from '../../assets/assets';
+import { FRONTEND_URL } from '../../config/urls';
 
 const WaiterManagement = ({ url }) => {
   const [tables, setTables] = useState([]);
@@ -41,22 +42,20 @@ const WaiterManagement = ({ url }) => {
     try {
       setIsGeneratingLink(true);
       const token = localStorage.getItem('token');
-      const baseUrl = window.location.origin.replace(':5175', ':5173');
       
       const response = await axios.post(`${url}/api/waiter/generate-link`, 
-        { baseUrl },
+        { baseUrl: FRONTEND_URL },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       if (response.data.success) {
         setWaiterLink(response.data.data.accessLink);
       } else {
-        setWaiterLink(`${baseUrl}/waiter/${storeId}?token=waiter_${storeSlug}`);
+        setWaiterLink(`${FRONTEND_URL}/waiter-order/${storeId}?token=waiter_${storeSlug}`);
       }
     } catch (error) {
       console.error('Erro ao gerar link do garçom:', error);
-      const baseUrl = window.location.origin.replace(':5175', ':5173');
-      setWaiterLink(`${baseUrl}/waiter/${storeId}?token=waiter_${storeSlug}`);
+      setWaiterLink(`${FRONTEND_URL}/waiter-order/${storeId}?token=waiter_${storeSlug}`);
     } finally {
       setIsGeneratingLink(false);
     }

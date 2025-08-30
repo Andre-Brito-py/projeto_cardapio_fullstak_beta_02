@@ -8,7 +8,8 @@ import {
     getPublicStoreData,
     getPublicStoreMenu,
     updateStoreStatus,
-    updateAutoAcceptOrders
+    updateAutoAcceptOrders,
+    getPublicStoreById
 } from '../controllers/storeController.js';
 import {
     identifyStore,
@@ -24,6 +25,7 @@ const storeRouter = express.Router();
 // Rotas públicas (sem middleware de identificação)
 storeRouter.get('/public/:slug', getPublicStoreData);
 storeRouter.get('/public/:slug/menu', getPublicStoreMenu);
+storeRouter.get('/public/id/:storeId', getPublicStoreById);
 
 // Middleware para identificar a loja em todas as rotas abaixo
 storeRouter.use(identifyStore);

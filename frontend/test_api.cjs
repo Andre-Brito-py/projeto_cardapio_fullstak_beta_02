@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 async function testAPIs() {
-    const baseURL = 'http://localhost:4001/api';
+    const baseURL = 'http://localhost:4000/api';
     
     try {
         console.log('🔍 Testando APIs...');

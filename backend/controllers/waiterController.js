@@ -1,11 +1,12 @@
 import { generateWaiterToken, generateWaiterLink } from '../middleware/waiterAuth.js';
 import storeModel from '../models/storeModel.js';
 import orderModel from '../models/orderModel.js';
+import { FRONTEND_URL } from '../config/urls.js';
 
 // Gerar link de acesso para garçom
 const generateAccessLink = async (req, res) => {
     try {
-        const storeId = req.user?.storeId || req.storeId;
+        const storeId = req.storeId || req.user?.storeId?._id || req.user?.storeId;
         
         if (!storeId) {
             return res.status(400).json({ 
@@ -25,7 +26,7 @@ const generateAccessLink = async (req, res) => {
 
         // Gerar token e link
         const token = generateWaiterToken(storeId);
-        const baseUrl = req.body.baseUrl || process.env.FRONTEND_URL || 'http://localhost:5173';
+        const baseUrl = req.body.baseUrl || FRONTEND_URL;
         const accessLink = generateWaiterLink(storeId, baseUrl);
 
         res.json({
@@ -120,7 +121,7 @@ const placeWaiterOrder = async (req, res) => {
             payment: false,
             paymentMethod: 'Dinheiro', // Padrão para pedidos de garçom
             notes: notes || '',
-            orderType: 'waiter', // Identificar como pedido de garçom
+            orderType: 'dine_in', // Pedido para consumo no local
             waiterToken: req.waiter.token
         });
 

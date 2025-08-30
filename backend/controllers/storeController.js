@@ -502,6 +502,45 @@ const updateAutoAcceptOrders = async (req, res) => {
     }
 };
 
+// Obter dados públicos da loja por ID (para garçom)
+const getPublicStoreById = async (req, res) => {
+    try {
+        const { storeId } = req.params;
+        
+        const store = await Store.findOne({ 
+            _id: storeId, 
+            status: 'active',
+            'subscription.status': { $in: ['active', 'trial'] }
+        })
+        .select('name slug description logo domain customization settings');
+        
+        if (!store) {
+            return res.json({ success: false, message: "Loja não encontrada ou não está ativa" });
+        }
+        
+        res.json({ 
+            success: true, 
+            store: {
+                id: store._id,
+                name: store.name,
+                slug: store.slug,
+                description: store.description,
+                logo: store.logo,
+                address: store.settings?.restaurantAddress,
+                operatingHours: store.settings?.operatingHours,
+                deliveryZones: store.settings?.deliveryZones,
+                maxDeliveryDistance: store.settings?.maxDeliveryDistance,
+                customization: store.customization,
+                domain: store.domain?.customDomain || store.domain?.subdomain || store.slug,
+                isOpen: store.settings?.isOpen !== undefined ? store.settings.isOpen : true
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Erro ao obter dados da loja" });
+    }
+};
+
 export {
     createStore,
     getStore,
@@ -513,5 +552,6 @@ export {
     getPublicStoreData,
     getPublicStoreMenu,
     updateStoreStatus,
-    updateAutoAcceptOrders
+    updateAutoAcceptOrders,
+    getPublicStoreById
 };

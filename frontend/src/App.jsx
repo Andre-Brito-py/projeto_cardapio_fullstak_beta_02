@@ -14,7 +14,7 @@ import MyOrders from './pages/MyOrders/MyOrders';
 import ProductDetail from './pages/ProductDetail/ProductDetail';
 import StoreHome from './pages/StoreHome/StoreHome';
 import CartDebug from './components/CartDebug/CartDebug';
-import WaiterInterface from './pages/WaiterInterface/WaiterInterface';
+import WaiterOrderPage from './pages/WaiterOrderPage/WaiterOrderPage';
 
 const App = () => {
 
@@ -33,7 +33,7 @@ const App = () => {
           <Route path='/myorders' element={<MyOrders />} />
           <Route path='/product/:id' element={<ProductDetail />} />
           <Route path='/debug-cart' element={<CartDebug />} />
-          <Route path='/waiter/:storeId' element={<WaiterInterface />} />
+          <Route path='/waiter-order/:storeId' element={<WaiterOrderPage />} />
         </Routes>
       </div>
       <Footer />

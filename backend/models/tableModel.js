@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { getTableQRLink } from '../config/urls.js';
 
 const tableSchema = new mongoose.Schema({
   storeId: {
@@ -60,7 +61,7 @@ tableSchema.methods.generateQRCodeUrl = function() {
   // URL que será acessada quando o QR code for escaneado
   // Incluirá o ID da mesa e da loja para identificação
   const storeId = this.storeId.toString ? this.storeId.toString() : this.storeId;
-  return `${process.env.FRONTEND_URL || 'http://localhost:5173'}/menu/${storeId}?table=${this._id}`;
+  return getTableQRLink(storeId, this._id);
 };
 
 // Método para verificar se a mesa está ativa

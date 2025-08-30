@@ -37,9 +37,9 @@ const StoreLinks = ({ url }) => {
       const data = await response.json();
       
       if (data.success) {
-        setStoreData(data.data);
+        setStoreData(data.store);
         // Gerar o link automaticamente quando os dados da loja são carregados
-        generateStoreLink(data.data);
+        generateStoreLink(data.store);
       } else {
         console.error('Erro ao buscar dados da loja:', data.message);
         toast.error(data.message || 'Erro ao carregar dados da loja');
@@ -54,7 +54,7 @@ const StoreLinks = ({ url }) => {
 
   const generateStoreLink = (store) => {
     if (store && store.slug) {
-      // Usar a URL correta do frontend (cliente) - porta 5173
+      // Usar a URL correta do frontend (cliente) - porta 5174
       const link = `${FRONTEND_URL}/loja/${store.slug}`;
       setGeneratedLink(link);
       

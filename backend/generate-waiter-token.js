@@ -20,8 +20,8 @@ const generateWaiterToken = (storeId) => {
 // Gerar token para a loja de teste
 const storeId = '676b4b7b8b8b8b8b8b8b8b8b'; // ID da loja de teste
 const token = generateWaiterToken(storeId);
-const baseUrl = 'http://localhost:5173';
-const waiterLink = `${baseUrl}/waiter/${storeId}?token=${token}`;
+const baseUrl = 'http://localhost:5174';
+const waiterLink = `${baseUrl}/waiter-order/${storeId}?token=${token}`;
 
 console.log('Token JWT gerado:', token);
 console.log('Link do garçom:', waiterLink);
