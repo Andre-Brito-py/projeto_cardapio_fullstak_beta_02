@@ -11,6 +11,11 @@ const SuperAdminSidebar = ({ isOpen, onClose }) => {
       
       <div className={`super-admin-sidebar ${isOpen ? 'open' : ''}`}>
         <div className='super-admin-sidebar-options'>
+          <NavLink to='/super-admin/dashboard' className='super-admin-sidebar-option' onClick={onClose}>
+            <img src={assets.add_icon} alt='Dashboard' />
+            <p>Dashboard</p>
+          </NavLink>
+          
           <NavLink to='/super-admin/stores' className='super-admin-sidebar-option' onClick={onClose}>
             <img src={assets.order_icon} alt='Lojas' />
             <p>Gerenciar Lojas</p>

@@ -17,9 +17,13 @@ import Coupons from './pages/Coupons/Coupons';
 import BluetoothPrint from './components/BluetoothPrint/BluetoothPrint';
 import StoreManagement from './pages/SuperAdmin/StoreManagement/StoreManagement';
 import SystemSettings from './pages/SuperAdmin/SystemSettings/SystemSettings';
+import Analytics from './pages/SuperAdmin/Analytics/Analytics';
+import UserManagement from './pages/SuperAdmin/UserManagement/UserManagement';
+import SuperAdminDashboard from './pages/SuperAdmin/Dashboard/SuperAdminDashboard';
 import StoreLinks from './pages/StoreLinks/StoreLinks';
 import WaiterManagement from './pages/WaiterManagement/WaiterManagement';
 import Customers from './pages/Customers/Customers';
+import InPersonSales from './pages/InPersonSales/InPersonSales';
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -115,8 +119,11 @@ const App = () => {
         )}
         <Routes>
           {/* Rotas do Super Admin */}
+          <Route path='/super-admin/dashboard' element={<SuperAdminDashboard url={url} token={token}/>} />
           <Route path='/super-admin/stores' element={<StoreManagement url={url} token={token}/>} />
           <Route path='/super-admin/system-settings' element={<SystemSettings url={url} token={token}/>} />
+          <Route path='/super-admin/analytics' element={<Analytics url={url} token={token}/>} />
+          <Route path='/super-admin/users' element={<UserManagement url={url} token={token}/>} />
           <Route path='/store-links' element={<StoreLinks url={url} token={token}/>} />
           
           {/* Rotas normais do admin */}
@@ -131,6 +138,7 @@ const App = () => {
           <Route path='/coupons' element={<Coupons url={url}/>} />
           <Route path='/customers' element={<Customers url={url} token={token}/>} />
           <Route path='/waiter-management' element={<WaiterManagement url={url}/>} />
+          <Route path='/in-person-sales' element={<InPersonSales url={url} token={token}/>} />
           <Route path='/bluetooth-print' element={<BluetoothPrint url={url} token={token}/>} />
           
           {/* Rota padrão */}

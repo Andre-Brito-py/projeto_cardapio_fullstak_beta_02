@@ -20,6 +20,7 @@ import couponRouter from './routes/couponRoute.js';
 import waiterRouter from './routes/waiterRoute.js';
 import customerRouter from './routes/customerRoute.js';
 import shippingRouter from './routes/shippingRoute.js';
+import inPersonSaleRouter from './routes/inPersonSaleRoute.js';
 
 // Utilitários
 import 'dotenv/config';
@@ -44,6 +45,7 @@ app.use('/api/coupons', couponRouter); // Rotas para gerenciamento de cupons
 app.use('/api/waiter', waiterRouter); // Rotas para funcionalidades do garçom
 app.use('/api/customers', customerRouter); // Rotas para gerenciamento de clientes
 app.use('/api/shipping', shippingRouter); // Rotas para cálculo de frete
+app.use('/api/in-person-sales', inPersonSaleRouter); // Rotas para vendas presenciais
 
 // Rotas existentes (mantidas para compatibilidade)
 app.use('/api/food', foodRouter); // Rotas para gerenciamento de comidas

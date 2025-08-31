@@ -471,6 +471,271 @@ const deleteStore = async (req, res) => {
     }
 };
 
+// Listar todos os usuários
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await userModel.find({})
+            .select('-password')
+            .populate('storeId', 'name')
+            .sort({ createdAt: -1 });
+        
+        res.json({
+            success: true,
+            users: users
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao buscar usuários"
+        });
+    }
+};
+
+// Criar novo usuário
+const createUser = async (req, res) => {
+    try {
+        const { name, email, password, role, isActive, storeId } = req.body;
+        
+        // Verificar se o email já existe
+        const existingUser = await userModel.findOne({ email });
+        if (existingUser) {
+            return res.json({
+                success: false,
+                message: "Email já está em uso"
+            });
+        }
+        
+        // Validar role
+        const validRoles = ['customer', 'admin', 'superadmin'];
+        if (!validRoles.includes(role)) {
+            return res.json({
+                success: false,
+                message: "Role inválido"
+            });
+        }
+        
+        // Se for admin, verificar se storeId foi fornecido
+        if (role === 'admin' && !storeId) {
+            return res.json({
+                success: false,
+                message: "StoreId é obrigatório para administradores"
+            });
+        }
+        
+        // Criptografar senha
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        // Criar usuário
+        const userData = {
+            name,
+            email,
+            password: hashedPassword,
+            role,
+            isActive: isActive !== undefined ? isActive : true
+        };
+        
+        if (role === 'admin' && storeId) {
+            userData.storeId = storeId;
+        }
+        
+        const newUser = new userModel(userData);
+        await newUser.save();
+        
+        // Remover senha da resposta
+        const userResponse = newUser.toObject();
+        delete userResponse.password;
+        
+        res.json({
+            success: true,
+            message: "Usuário criado com sucesso",
+            user: userResponse
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao criar usuário"
+        });
+    }
+};
+
+// Atualizar usuário
+const updateUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { name, email, password, role, isActive, storeId } = req.body;
+        
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.json({
+                success: false,
+                message: "Usuário não encontrado"
+            });
+        }
+        
+        // Verificar se o email já existe (exceto para o próprio usuário)
+        if (email && email !== user.email) {
+            const existingUser = await userModel.findOne({ email, _id: { $ne: userId } });
+            if (existingUser) {
+                return res.json({
+                    success: false,
+                    message: "Email já está em uso"
+                });
+            }
+        }
+        
+        // Atualizar campos
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (role) {
+            const validRoles = ['customer', 'admin', 'superadmin'];
+            if (!validRoles.includes(role)) {
+                return res.json({
+                    success: false,
+                    message: "Role inválido"
+                });
+            }
+            user.role = role;
+        }
+        if (isActive !== undefined) user.isActive = isActive;
+        
+        // Se for admin, definir storeId
+        if (role === 'admin' && storeId) {
+            user.storeId = storeId;
+        } else if (role !== 'admin') {
+            user.storeId = undefined;
+        }
+        
+        // Atualizar senha se fornecida
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+        
+        await user.save();
+        
+        // Remover senha da resposta
+        const userResponse = user.toObject();
+        delete userResponse.password;
+        
+        res.json({
+            success: true,
+            message: "Usuário atualizado com sucesso",
+            user: userResponse
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao atualizar usuário"
+        });
+    }
+};
+
+// Deletar usuário
+const deleteUser = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.json({
+                success: false,
+                message: "Usuário não encontrado"
+            });
+        }
+        
+        // Não permitir deletar super admin
+        if (user.role === 'superadmin') {
+            return res.json({
+                success: false,
+                message: "Não é possível deletar um Super Admin"
+            });
+        }
+        
+        await userModel.findByIdAndDelete(userId);
+        
+        res.json({
+            success: true,
+            message: "Usuário deletado com sucesso"
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao deletar usuário"
+        });
+    }
+};
+
+// Alterar status do usuário
+const updateUserStatus = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { isActive } = req.body;
+        
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.json({
+                success: false,
+                message: "Usuário não encontrado"
+            });
+        }
+        
+        user.isActive = isActive;
+        await user.save();
+        
+        res.json({
+             success: true,
+             message: `Usuário ${isActive ? 'ativado' : 'desativado'} com sucesso`
+         });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao alterar status do usuário"
+        });
+    }
+};
+
+// Resetar senha do usuário
+const resetUserPassword = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.json({
+                success: false,
+                message: "Usuário não encontrado"
+            });
+        }
+        
+        // Gerar nova senha aleatória
+        const newPassword = Math.random().toString(36).slice(-8);
+        
+        // Criptografar nova senha
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        
+        await user.save();
+        
+        res.json({
+            success: true,
+            message: "Senha resetada com sucesso",
+            newPassword: newPassword
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Erro ao resetar senha"
+        });
+    }
+};
+
 export {
     getSystemSettings,
     updateSystemSettings,
@@ -483,5 +748,11 @@ export {
     getPublicStores,
     checkSuperAdmin,
     resetSuperAdminPassword,
-    deleteStore
+    deleteStore,
+    getAllUsers,
+    createUser,
+    updateUser,
+    deleteUser,
+    updateUserStatus,
+    resetUserPassword
 };

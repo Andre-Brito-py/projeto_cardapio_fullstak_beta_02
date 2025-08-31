@@ -213,26 +213,26 @@ npm run dev
 **Verificação manual:**
 1. **Backend**: Deve mostrar "Server started on http://localhost:4000" e "DB Connected Successfully"
 2. **Frontend**: Deve estar disponível em http://localhost:5173
-3. **Admin Panel**: Deve estar disponível em http://localhost:5175
+3. **Admin Panel**: Deve estar disponível em http://localhost:5174
 
 ## 🔑 Credenciais de Acesso
 
 ### Super Administrador (Gestão Multi-Tenant)
 - **Email**: superadmin@fooddelivery.com
 - **Senha**: superadmin123
-- **URL**: http://localhost:5175
+- **URL**: http://localhost:5174
 
 ### Administrador de Loja
 *Criado pelo Super Admin através do painel de gestão de lojas*
-- **URL**: http://localhost:5175
+- **URL**: http://localhost:5174
 - **Credenciais**: Definidas durante a criação da loja
 
 *⚠️ **IMPORTANTE**: Altere as credenciais padrão após o primeiro login!*
 
 ## 🌐 URLs de Acesso
 
-- **🛒 Frontend (Clientes)**: http://localhost:5174
-- **🏪 Admin Panel (Lojas)**: http://localhost:5173
+- **🛒 Frontend (Clientes)**: http://localhost:5173
+- **🏪 Admin Panel (Lojas)**: http://localhost:5174
 - **🔌 Backend API**: http://localhost:4000
 
 ### ⚠️ IMPORTANTE: Configuração de URLs
@@ -240,8 +240,8 @@ npm run dev
 **O sistema utiliza configuração centralizada de URLs para garantir que os links sejam gerados corretamente:**
 
 #### 📋 Configurações Padrão
-- **Frontend (Cliente/Garçom)**: Porta 5174
-- **Admin (Painel Administrativo)**: Porta 5173
+- **Frontend (Cliente/Garçom)**: Porta 5173
+- **Admin (Painel Administrativo)**: Porta 5174
 - **Backend (API)**: Porta 4000
 
 #### 🔧 Arquivos de Configuração

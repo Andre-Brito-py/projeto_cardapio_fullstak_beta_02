@@ -11,7 +11,13 @@ import {
     getPublicStores,
     checkSuperAdmin,
     resetSuperAdminPassword,
-    deleteStore
+    deleteStore,
+    getAllUsers,
+    createUser,
+    updateUser,
+    deleteUser,
+    updateUserStatus,
+    resetUserPassword
 } from '../controllers/systemController.js';
 import {
     createStore,
@@ -49,5 +55,13 @@ systemRouter.put('/stores/:storeId', updateStore);
 systemRouter.put('/stores/:storeId/status', updateStoreStatus);
 systemRouter.put('/stores/:storeId/subscription', updateSubscription);
 systemRouter.delete('/stores/:storeId', deleteStore);
+
+// Gerenciamento de usuários
+systemRouter.get('/users', getAllUsers);
+systemRouter.post('/users', createUser);
+systemRouter.put('/users/:userId', updateUser);
+systemRouter.put('/users/:userId/status', updateUserStatus);
+systemRouter.post('/users/:userId/reset-password', resetUserPassword);
+systemRouter.delete('/users/:userId', deleteUser);
 
 export default systemRouter;

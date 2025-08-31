@@ -6,12 +6,28 @@ import { SUPPORTED_LANGUAGES, SUPPORTED_CURRENCIES, getRegionalDefaults } from '
 
 const StoreManagement = ({ url, token }) => {
   const [stores, setStores] = useState([]);
+  const [filteredStores, setFilteredStores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingStore, setEditingStore] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [storeToDelete, setStoreToDelete] = useState(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [planFilter, setPlanFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [storeStats, setStoreStats] = useState({
+    total: 0,
+    active: 0,
+    suspended: 0,
+    pending: 0,
+    totalRevenue: 0,
+    avgRevenuePerStore: 0
+  });
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -73,6 +89,87 @@ const StoreManagement = ({ url, token }) => {
   useEffect(() => {
     fetchStores();
   }, []);
+
+  // Filtrar e ordenar lojas
+  useEffect(() => {
+    let filtered = [...stores];
+
+    // Aplicar filtro de busca
+    if (searchTerm) {
+      filtered = filtered.filter(store => 
+        store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        store.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        store.ownerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Aplicar filtro de status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(store => store.status === statusFilter);
+    }
+
+    // Aplicar filtro de plano
+    if (planFilter !== 'all') {
+      filtered = filtered.filter(store => 
+        (store.subscription?.plan || store.subscriptionPlan) === planFilter
+      );
+    }
+
+    // Aplicar ordenação
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'ownerName':
+          aValue = a.ownerName.toLowerCase();
+          bValue = b.ownerName.toLowerCase();
+          break;
+        case 'status':
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        case 'plan':
+          aValue = a.subscription?.plan || a.subscriptionPlan;
+          bValue = b.subscription?.plan || b.subscriptionPlan;
+          break;
+        case 'createdAt':
+        default:
+          aValue = new Date(a.createdAt);
+          bValue = new Date(b.createdAt);
+          break;
+      }
+
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+    setFilteredStores(filtered);
+  }, [stores, searchTerm, statusFilter, planFilter, sortBy, sortOrder]);
+
+  // Calcular estatísticas
+  useEffect(() => {
+    const stats = {
+      total: stores.length,
+      active: stores.filter(s => s.status === 'active').length,
+      suspended: stores.filter(s => s.status === 'suspended').length,
+      pending: stores.filter(s => s.status === 'pending').length,
+      totalRevenue: stores.reduce((sum, store) => sum + (store.totalRevenue || 0), 0),
+      avgRevenuePerStore: 0
+    };
+    
+    if (stats.total > 0) {
+      stats.avgRevenuePerStore = stats.totalRevenue / stats.total;
+    }
+    
+    setStoreStats(stats);
+  }, [stores]);
 
   const fetchStores = async () => {
     setLoading(true);
@@ -272,17 +369,161 @@ const StoreManagement = ({ url, token }) => {
     setShowForm(false);
   };
 
+  // Funções utilitárias
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value || 0);
+  };
+
+  const exportToCSV = () => {
+    const headers = ['Nome', 'Proprietário', 'Email', 'Status', 'Plano', 'Data de Criação'];
+    const csvContent = [
+      headers.join(','),
+      ...filteredStores.map(store => [
+        `"${store.name}"`,
+        `"${store.ownerName}"`,
+        `"${store.ownerEmail}"`,
+        `"${store.status}"`,
+        `"${store.subscription?.plan || store.subscriptionPlan}"`,
+        `"${new Date(store.createdAt).toLocaleDateString('pt-BR')}"`
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `lojas_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
+
+  // Paginação
+  const totalPages = Math.ceil(filteredStores.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentStores = filteredStores.slice(startIndex, endIndex);
+
+  const goToPage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
   return (
     <div className='store-management'>
       <div className='store-management-header'>
-        <h2>Gerenciamento de Lojas</h2>
-        <button 
-          className='add-store-btn'
-          onClick={() => setShowForm(true)}
-          disabled={loading}
-        >
-          + Nova Loja
-        </button>
+        <div className='header-content'>
+          <h2>Gerenciamento de Lojas</h2>
+          <div className='header-actions'>
+            <button 
+              className='export-btn'
+              onClick={exportToCSV}
+              disabled={loading}
+            >
+              📊 Exportar CSV
+            </button>
+            <button 
+              className='add-store-btn'
+              onClick={() => setShowForm(true)}
+              disabled={loading}
+            >
+              + Nova Loja
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Estatísticas */}
+      <div className='store-stats'>
+        <div className='stat-card'>
+          <div className='stat-icon'>🏪</div>
+          <div className='stat-content'>
+            <h3>{storeStats.total}</h3>
+            <p>Total de Lojas</p>
+          </div>
+        </div>
+        <div className='stat-card active'>
+          <div className='stat-icon'>✅</div>
+          <div className='stat-content'>
+            <h3>{storeStats.active}</h3>
+            <p>Lojas Ativas</p>
+          </div>
+        </div>
+        <div className='stat-card suspended'>
+          <div className='stat-icon'>⏸️</div>
+          <div className='stat-content'>
+            <h3>{storeStats.suspended}</h3>
+            <p>Lojas Suspensas</p>
+          </div>
+        </div>
+        <div className='stat-card pending'>
+          <div className='stat-icon'>⏳</div>
+          <div className='stat-content'>
+            <h3>{storeStats.pending}</h3>
+            <p>Lojas Pendentes</p>
+          </div>
+        </div>
+        <div className='stat-card revenue'>
+          <div className='stat-icon'>💰</div>
+          <div className='stat-content'>
+            <h3>{formatCurrency(storeStats.totalRevenue)}</h3>
+            <p>Receita Total</p>
+          </div>
+        </div>
+        <div className='stat-card avg-revenue'>
+          <div className='stat-icon'>📈</div>
+          <div className='stat-content'>
+            <h3>{formatCurrency(storeStats.avgRevenuePerStore)}</h3>
+            <p>Receita Média/Loja</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros e Busca */}
+      <div className='store-filters'>
+        <div className='search-box'>
+          <input
+            type='text'
+            placeholder='Buscar por nome, proprietário ou email...'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className='filter-group'>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value='all'>Todos os Status</option>
+            <option value='active'>Ativas</option>
+            <option value='suspended'>Suspensas</option>
+            <option value='pending'>Pendentes</option>
+          </select>
+          <select
+            value={planFilter}
+            onChange={(e) => setPlanFilter(e.target.value)}
+          >
+            <option value='all'>Todos os Planos</option>
+            <option value='Básico'>Básico</option>
+            <option value='Premium'>Premium</option>
+            <option value='Enterprise'>Enterprise</option>
+          </select>
+        </div>
+        <div className='results-info'>
+          Mostrando {currentStores.length} de {filteredStores.length} lojas
+        </div>
       </div>
 
       {showForm && (
@@ -455,65 +696,152 @@ const StoreManagement = ({ url, token }) => {
       <div className='stores-list'>
         {loading && <div className='loading'>Carregando...</div>}
         
-        {!loading && stores.length === 0 && (
-          <div className='no-stores'>Nenhuma loja encontrada</div>
+        {!loading && filteredStores.length === 0 && (
+          <div className='no-stores'>
+            {stores.length === 0 ? 'Nenhuma loja encontrada' : 'Nenhuma loja corresponde aos filtros aplicados'}
+          </div>
         )}
         
-        {!loading && stores.length > 0 && (
-          <table className='stores-table'>
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Proprietário</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Plano</th>
-                <th>Criada em</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stores.map(store => (
-                <tr key={store._id} className={store.status !== 'active' ? 'inactive' : ''}>
-                  <td>{store.name}</td>
-                  <td>{store.ownerName}</td>
-                  <td>{store.ownerEmail}</td>
-                  <td>
-                    <span className={`status ${store.status === 'active' ? 'active' : 'inactive'}`}>
-                      {store.status === 'active' ? 'Ativa' : 
-                       store.status === 'suspended' ? 'Suspensa' :
-                       store.status === 'pending' ? 'Pendente' : 'Inativa'}
-                    </span>
-                  </td>
-                  <td>{store.subscription?.plan || store.subscriptionPlan}</td>
-                  <td>{new Date(store.createdAt).toLocaleDateString('pt-BR')}</td>
-                  <td className='actions'>
-                    <button 
-                      className='edit-btn'
-                      onClick={() => handleEdit(store)}
-                      disabled={loading}
-                    >
-                      Editar
-                    </button>
-                    <button 
-                      className={`toggle-btn ${store.status === 'active' ? 'active' : 'inactive'}`}
-                      onClick={() => toggleStoreStatus(store._id, store.status)}
-                      disabled={loading}
-                    >
-                      {store.status === 'active' ? 'Desativar' : 'Ativar'}
-                    </button>
-                    <button 
-                      className='delete-btn'
-                      onClick={() => handleDelete(store._id)}
-                      disabled={loading}
-                    >
-                      Excluir
-                    </button>
-                  </td>
+        {!loading && filteredStores.length > 0 && (
+          <>
+            <table className='stores-table'>
+              <thead>
+                <tr>
+                  <th 
+                    className={`sortable ${sortBy === 'name' ? `sorted-${sortOrder}` : ''}`}
+                    onClick={() => handleSort('name')}
+                  >
+                    Nome {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th 
+                    className={`sortable ${sortBy === 'ownerName' ? `sorted-${sortOrder}` : ''}`}
+                    onClick={() => handleSort('ownerName')}
+                  >
+                    Proprietário {sortBy === 'ownerName' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th>Email</th>
+                  <th 
+                    className={`sortable ${sortBy === 'status' ? `sorted-${sortOrder}` : ''}`}
+                    onClick={() => handleSort('status')}
+                  >
+                    Status {sortBy === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th 
+                    className={`sortable ${sortBy === 'plan' ? `sorted-${sortOrder}` : ''}`}
+                    onClick={() => handleSort('plan')}
+                  >
+                    Plano {sortBy === 'plan' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th 
+                    className={`sortable ${sortBy === 'createdAt' ? `sorted-${sortOrder}` : ''}`}
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    Criada em {sortBy === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}
+                  </th>
+                  <th>Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentStores.map(store => (
+                  <tr key={store._id} className={store.status !== 'active' ? 'inactive' : ''}>
+                    <td>
+                      <div className='store-info'>
+                        <strong>{store.name}</strong>
+                        {store.description && <small>{store.description}</small>}
+                      </div>
+                    </td>
+                    <td>{store.ownerName}</td>
+                    <td>{store.ownerEmail}</td>
+                    <td>
+                      <span className={`status ${store.status}`}>
+                        {store.status === 'active' ? '✅ Ativa' : 
+                         store.status === 'suspended' ? '⏸️ Suspensa' :
+                         store.status === 'pending' ? '⏳ Pendente' : '❌ Inativa'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`plan ${(store.subscription?.plan || store.subscriptionPlan).toLowerCase()}`}>
+                        {store.subscription?.plan || store.subscriptionPlan}
+                      </span>
+                    </td>
+                    <td>{new Date(store.createdAt).toLocaleDateString('pt-BR')}</td>
+                    <td className='actions'>
+                      <button 
+                        className='edit-btn'
+                        onClick={() => handleEdit(store)}
+                        disabled={loading}
+                        title='Editar loja'
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        className={`toggle-btn ${store.status === 'active' ? 'active' : 'inactive'}`}
+                        onClick={() => toggleStoreStatus(store._id, store.status)}
+                        disabled={loading}
+                        title={store.status === 'active' ? 'Desativar loja' : 'Ativar loja'}
+                      >
+                        {store.status === 'active' ? '⏸️' : '▶️'}
+                      </button>
+                      <button 
+                        className='delete-btn'
+                        onClick={() => handleDelete(store._id)}
+                        disabled={loading}
+                        title='Excluir loja'
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Paginação */}
+            {totalPages > 1 && (
+              <div className='pagination'>
+                <button 
+                  onClick={() => goToPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className='pagination-btn'
+                >
+                  ← Anterior
+                </button>
+                
+                <div className='pagination-info'>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => goToPage(pageNum)}
+                        className={`pagination-btn ${currentPage === pageNum ? 'active' : ''}`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                <button 
+                  onClick={() => goToPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className='pagination-btn'
+                >
+                  Próxima →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

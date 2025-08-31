@@ -16,8 +16,8 @@ const __dirname = path.dirname(__filename);
 
 // Configurações padrão
 const DEFAULT_CONFIG = {
-  FRONTEND_URL: 'http://localhost:5174',
-  ADMIN_URL: 'http://localhost:5173',
+  FRONTEND_URL: 'http://localhost:5173',
+  ADMIN_URL: 'http://localhost:5174',
   BACKEND_URL: 'http://localhost:4000',
   MONGO_URI: 'mongodb://localhost:27017/food-delivery',
   JWT_SECRET: 'your-super-secret-jwt-key-here-' + Math.random().toString(36).substring(7)
