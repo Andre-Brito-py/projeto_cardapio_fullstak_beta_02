@@ -43,26 +43,21 @@ const StoreManagement = ({ url, token }) => {
 
   
   useEffect(() => {
-    console.log('🔍 StoreManagement montado - verificando elementos que podem bloquear cliques');
-    
+    // Component mounted - checking for UI blocking elements
     const checkForBlockingElements = () => {
       const backdrop = document.querySelector('.sidebar-backdrop');
       const overlay = document.querySelector('.store-form-overlay');
       
-      console.log('📊 Estado dos elementos:');
-      console.log('  - Sidebar backdrop:', backdrop ? 'Presente' : 'Ausente');
-      console.log('  - Store form overlay:', overlay ? 'Presente' : 'Ausente');
-      
+      // Check if elements might be blocking interactions
       if (backdrop) {
         const backdropStyles = getComputedStyle(backdrop);
-        console.log('  - Backdrop visível:', backdropStyles.display !== 'none');
-        console.log('  - Backdrop z-index:', backdropStyles.zIndex);
+        // Handle backdrop visibility if needed
       }
     };
     
     checkForBlockingElements();
     
-    // Verificar novamente após um pequeno delay
+    // Check again after a small delay
     const timer = setTimeout(checkForBlockingElements, 1000);
     
     return () => clearTimeout(timer);
@@ -252,19 +247,10 @@ const StoreManagement = ({ url, token }) => {
   };
 
   const confirmDelete = async () => {
-    console.log('=== INICIANDO EXCLUSÃO ===');
-    console.log('URL:', `${url}/api/system/stores/${storeToDelete._id}`);
-    console.log('Token:', token ? 'Token presente' : 'Token ausente');
-    console.log('Store ID:', storeToDelete._id);
-    
     try {
       const response = await axios.delete(`${url}/api/system/stores/${storeToDelete._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
-      console.log('=== RESPOSTA DO SERVIDOR ===');
-      console.log('Status:', response.status);
-      console.log('Data:', response.data);
 
       if (response.data.success) {
         toast.success('Loja excluída com sucesso!');
@@ -273,15 +259,10 @@ const StoreManagement = ({ url, token }) => {
         setDeleteConfirmText('');
         fetchStores(); // Recarregar a lista
       } else {
-        console.log('Erro do servidor:', response.data.message);
         toast.error(response.data.message || 'Erro ao excluir loja');
       }
     } catch (error) {
-      console.error('=== ERRO COMPLETO ===');
-      console.error('Error object:', error);
-      console.error('Response:', error.response);
-      console.error('Response data:', error.response?.data);
-      console.error('Response status:', error.response?.status);
+      console.error('Erro ao excluir loja:', error);
       
       if (error.response?.data?.message) {
         toast.error(error.response.data.message);
@@ -298,10 +279,10 @@ const StoreManagement = ({ url, token }) => {
   };
 
   const toggleStoreStatus = async (storeId, currentStatus) => {
-    console.log('🔄 toggleStoreStatus chamado:', { storeId, currentStatus, token: token ? 'presente' : 'ausente' });
-    
-    if (!token) {
-      console.error('❌ Token não encontrado!');
+        // Toggle store status function called
+        
+        if (!token) {
+      console.error('Token não encontrado');
       toast.error('Token de autenticação não encontrado. Faça login novamente.');
       return;
     }
@@ -309,37 +290,21 @@ const StoreManagement = ({ url, token }) => {
     setLoading(true);
     try {
       const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
-      console.log('📊 Alterando status de', currentStatus, 'para', newStatus);
       
       const requestUrl = `${url}/api/system/stores/${storeId}/status`;
       const requestData = { status: newStatus };
       const requestHeaders = { Authorization: `Bearer ${token}` };
       
-      console.log('🌐 Fazendo requisição:', {
-        url: requestUrl,
-        data: requestData,
-        headers: { ...requestHeaders, Authorization: 'Bearer [HIDDEN]' }
-      });
-      
       const response = await axios.put(requestUrl, requestData, { headers: requestHeaders });
-      
-      console.log('✅ Resposta recebida:', response.data);
       
       if (response.data.success) {
         toast.success(`Loja ${newStatus === 'active' ? 'ativada' : 'desativada'} com sucesso!`);
-        console.log('🔄 Recarregando lista de lojas...');
         fetchStores();
       } else {
-        console.error('❌ Erro na resposta:', response.data.message);
         toast.error(response.data.message || 'Erro ao atualizar status');
       }
     } catch (error) {
-      console.error('❌ Erro ao atualizar status:', error);
-      console.error('📋 Detalhes do erro:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status
-      });
+      console.error('Erro ao atualizar status da loja:', error);
       
       if (error.response?.data?.message) {
         toast.error(error.response.data.message);
@@ -347,7 +312,6 @@ const StoreManagement = ({ url, token }) => {
         toast.error('Erro ao atualizar status da loja');
       }
     } finally {
-      console.log('🏁 toggleStoreStatus finalizado');
       setLoading(false);
     }
   };

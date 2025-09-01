@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 
 const systemSettingsSchema = new mongoose.Schema({
+  // Google Maps API
   googleMapsApiKey: {
     type: String,
-    required: true,
     trim: true
+  },
+  googleMapsEnabled: {
+    type: Boolean,
+    default: false
   },
   systemName: {
     type: String,
@@ -56,6 +60,39 @@ const systemSettingsSchema = new mongoose.Schema({
     fromEmail: String,
     fromName: String
   },
+  // Asaas API
+  asaasApiKey: {
+    type: String,
+    trim: true
+  },
+  asaasEnvironment: {
+    type: String,
+    enum: ['sandbox', 'production'],
+    default: 'sandbox'
+  },
+  asaasEnabled: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Configurações de frete
+  shippingEnabled: {
+    type: Boolean,
+    default: true
+  },
+  freeShippingMinValue: {
+    type: Number,
+    default: 50
+  },
+  baseShippingCost: {
+    type: Number,
+    default: 5
+  },
+  costPerKm: {
+    type: Number,
+    default: 2
+  },
+  
   paymentSettings: {
     stripePublicKey: String,
     stripeSecretKey: String,

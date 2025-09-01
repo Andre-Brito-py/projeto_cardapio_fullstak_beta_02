@@ -171,7 +171,7 @@ const placeOrder = async (req, res) =>{
 
         res.json({success:true, session_url:session.url})
     } catch (error) {
-        console.log('Error in placeOrder:', error);
+        console.error('Erro ao criar pedido:', error);
         res.json({success:false, message:"Error", details: error.message})
     }
 }
@@ -218,7 +218,7 @@ const verifyOrder = async (req, res) =>{
             res.json({success:false, message:"Not Paid"})
         }
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao verificar pedido:', error);
         res.json({success:false, message:"Error"})
     }
 }
@@ -229,7 +229,7 @@ const userOrders = async (req,res) => {
         const orders = await orderModel.find({userId:req.body.userId})
         res.json({success:true, data:orders})
     } catch (error) {
-        console.log(error)
+        console.error('Erro ao buscar pedidos do usuário:', error);
         res.json({success:false, message:"Error"})
     }
 }
@@ -246,7 +246,7 @@ const listOrders = async (req,res) =>{
         .sort({ date: -1 });
     res.json({success:true, data:orders})
    } catch (error) {
-        console.log(error);
+        console.error('Erro ao listar pedidos:', error);
         res.json({success:false, message:"Error"})  
    } 
 }

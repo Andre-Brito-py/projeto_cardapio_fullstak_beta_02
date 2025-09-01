@@ -51,7 +51,7 @@ const identifyStore = async (req, res, next) => {
         
         next();
     } catch (error) {
-        console.log('Erro no middleware de identificação de loja:', error);
+        // Erro no middleware de identificação de loja
         next();
     }
 };
@@ -111,8 +111,8 @@ const checkPlanLimits = (type) => {
             req.planLimits = limits;
             next();
         } catch (error) {
-            console.log('Erro ao verificar limites do plano:', error);
-            res.status(500).json({ success: false, message: "Erro interno do servidor" });
+            // Erro ao verificar limites do plano
+            res.status(500).json({ success: false, message: "Erro ao verificar limites do plano" });
         }
     };
 };
@@ -120,23 +120,23 @@ const checkPlanLimits = (type) => {
 // Middleware de autenticação com suporte a multi-tenancy
 const authMultiTenant = async (req, res, next) => {
     try {
-        console.log('AuthMultiTenant - Headers:', req.headers.authorization);
+        // Verificar headers de autenticação
         const token = req.headers.authorization?.split(' ')[1];
         
         if (!token) {
-            console.log('AuthMultiTenant - Token não fornecido');
+            // Token não fornecido
             return res.status(401).json({ success: false, message: "Token não fornecido" });
         }
         
-        console.log('AuthMultiTenant - Verificando token:', token.substring(0, 20) + '...');
+        // Verificando token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('AuthMultiTenant - Token decodificado:', decoded);
+        // Token decodificado
         
         const user = await userModel.findById(decoded.id).populate('storeId');
-        console.log('AuthMultiTenant - Usuário encontrado:', user ? { id: user._id, role: user.role, isActive: user.isActive } : 'null');
+        // Usuário encontrado
         
         if (!user || !user.isActive) {
-            console.log('AuthMultiTenant - Usuário não encontrado ou inativo');
+            // Usuário não encontrado ou inativo
             return res.status(401).json({ success: false, message: "Usuário não encontrado ou inativo" });
         }
         
@@ -158,10 +158,10 @@ const authMultiTenant = async (req, res, next) => {
             }
         }
         
-        console.log('AuthMultiTenant - Autenticação bem-sucedida para:', user.role);
+        // Autenticação bem-sucedida
         next();
     } catch (error) {
-        console.log('Erro na autenticação multi-tenant:', error);
+        // Erro na autenticação multi-tenant
         res.status(401).json({ success: false, message: "Token inválido" });
     }
 };

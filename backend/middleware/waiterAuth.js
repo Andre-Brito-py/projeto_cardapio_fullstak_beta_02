@@ -53,10 +53,10 @@ const waiterAuth = async (req, res, next) => {
             });
         }
     } catch (error) {
-        console.log('Erro no middleware de autenticação do garçom:', error);
+        // Erro no middleware de autenticação do garçom
         return res.status(500).json({ 
             success: false, 
-            message: "Erro interno do servidor" 
+            message: "Erro na autenticação do garçom" 
         });
     }
 };

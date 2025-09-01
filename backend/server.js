@@ -22,6 +22,10 @@ import customerRouter from './routes/customerRoute.js';
 import shippingRouter from './routes/shippingRoute.js';
 import inPersonSaleRouter from './routes/inPersonSaleRoute.js';
 
+import productSuggestionRouter from './routes/productSuggestionRoute.js';
+import asaasRouter from './routes/asaasRoutes.js';
+import apiRouter from './routes/apiRoutes.js';
+
 // Utilitários
 import 'dotenv/config';
 
@@ -46,6 +50,10 @@ app.use('/api/waiter', waiterRouter); // Rotas para funcionalidades do garçom
 app.use('/api/customers', customerRouter); // Rotas para gerenciamento de clientes
 app.use('/api/shipping', shippingRouter); // Rotas para cálculo de frete
 app.use('/api/in-person-sales', inPersonSaleRouter); // Rotas para vendas presenciais
+
+app.use('/api/product-suggestions', productSuggestionRouter); // Rotas para sugestões de produtos
+app.use('/api/asaas', asaasRouter); // Rotas para integração com Asaas
+app.use('/api/system/api', apiRouter); // Rotas para gerenciamento de APIs
 
 // Rotas existentes (mantidas para compatibilidade)
 app.use('/api/food', foodRouter); // Rotas para gerenciamento de comidas

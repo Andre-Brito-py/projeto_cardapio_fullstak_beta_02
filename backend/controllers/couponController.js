@@ -60,7 +60,7 @@ const createCoupon = async (req, res) => {
         await newCoupon.save();
         res.json({ success: true, message: "Cupom criado com sucesso", data: newCoupon });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao criar cupom:', error);
         res.json({ success: false, message: "Erro ao criar cupom" });
     }
 };
@@ -91,7 +91,7 @@ const listCoupons = async (req, res) => {
 
         res.json({ success: true, data: coupons });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao listar cupons:', error);
         res.json({ success: false, message: "Erro ao listar cupons" });
     }
 };
@@ -111,7 +111,7 @@ const getCoupon = async (req, res) => {
 
         res.json({ success: true, data: coupon });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao buscar cupom:', error);
         res.json({ success: false, message: "Erro ao buscar cupom" });
     }
 };
@@ -158,7 +158,7 @@ const updateCoupon = async (req, res) => {
 
         res.json({ success: true, message: "Cupom atualizado com sucesso", data: updatedCoupon });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar cupom:', error);
         res.json({ success: false, message: "Erro ao atualizar cupom" });
     }
 };
@@ -176,7 +176,7 @@ const deleteCoupon = async (req, res) => {
 
         res.json({ success: true, message: "Cupom deletado com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao deletar cupom:', error);
         res.json({ success: false, message: "Erro ao deletar cupom" });
     }
 };
@@ -275,7 +275,7 @@ const validateCoupon = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao validar cupom:', error);
         res.json({ success: false, message: "Erro ao validar cupom" });
     }
 };
@@ -302,7 +302,7 @@ const toggleCouponStatus = async (req, res) => {
             data: updatedCoupon 
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao alterar status do cupom:', error);
         res.json({ success: false, message: "Erro ao alterar status do cupom" });
     }
 };
@@ -344,7 +344,7 @@ const getCouponStats = async (req, res) => {
         
         res.json({ success: true, data: stats });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao obter estatísticas do cupom:', error);
         res.json({ success: false, message: "Erro ao obter estatísticas do cupom" });
     }
 };

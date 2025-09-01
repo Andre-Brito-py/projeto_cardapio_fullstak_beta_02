@@ -12,7 +12,7 @@ const getSystemSettings = async (req, res) => {
         const settings = await SystemSettings.getInstance();
         res.json({ success: true, data: settings });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao obter configurações do sistema:', error);
         res.json({ success: false, message: "Erro ao obter configurações do sistema" });
     }
 };
@@ -32,7 +32,7 @@ const updateSystemSettings = async (req, res) => {
         await settings.save();
         res.json({ success: true, message: "Configurações atualizadas com sucesso", data: settings });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar configurações do sistema:', error);
         res.json({ success: false, message: "Erro ao atualizar configurações" });
     }
 };
@@ -86,7 +86,7 @@ const getSystemStats = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao obter estatísticas do sistema:', error);
         res.json({ success: false, message: "Erro ao obter estatísticas" });
     }
 };
@@ -128,7 +128,7 @@ const getAllStores = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao listar lojas:', error);
         res.json({ success: false, message: "Erro ao listar lojas" });
     }
 };
@@ -166,7 +166,7 @@ const updateStoreStatus = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar status da loja:', error);
         res.json({ success: false, message: "Erro ao atualizar status da loja" });
     }
 };
@@ -205,7 +205,7 @@ const createSuperAdmin = async (req, res) => {
         
         res.json({ success: true, message: "Super Admin criado com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao criar Super Admin:', error);
         res.json({ success: false, message: "Erro ao criar Super Admin" });
     }
 };
@@ -250,7 +250,7 @@ const loginSuperAdmin = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro no login do super admin:', error);
         res.json({ success: false, message: "Erro no login" });
     }
 };
@@ -284,7 +284,7 @@ const getPublicStores = async (req, res) => {
             }))
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao listar lojas públicas:', error);
         res.json({ success: false, message: "Erro ao listar lojas públicas" });
     }
 };
@@ -306,7 +306,7 @@ const checkSuperAdmin = async (req, res) => {
             } : null
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao verificar super admin:', error);
         res.json({ success: false, message: "Erro ao verificar super admin" });
     }
 };
@@ -330,7 +330,7 @@ const resetSuperAdminPassword = async (req, res) => {
         
         res.json({ success: true, message: "Senha do Super Admin resetada com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao resetar senha:', error);
         res.json({ success: false, message: "Erro ao resetar senha" });
     }
 };
@@ -395,7 +395,7 @@ const updateStore = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar loja:', error);
         res.status(500).json({
             success: false,
             message: "Erro ao atualizar loja"
@@ -405,9 +405,7 @@ const updateStore = async (req, res) => {
 
 // Excluir loja e todos os dados relacionados
 const deleteStore = async (req, res) => {
-    console.log('=== FUNÇÃO DELETE STORE CHAMADA ===');
-    console.log('StoreId recebido:', req.params.storeId);
-    console.log('Usuário autenticado:', req.user);
+
     
     try {
         const { storeId } = req.params;
@@ -463,10 +461,10 @@ const deleteStore = async (req, res) => {
         });
 
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao excluir loja:', error);
         res.status(500).json({
             success: false,
-            message: "Erro interno do servidor"
+            message: "Erro ao excluir loja e dados relacionados"
         });
     }
 };
@@ -484,7 +482,7 @@ const getAllUsers = async (req, res) => {
             users: users
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao buscar usuários:', error);
         res.status(500).json({
             success: false,
             message: "Erro ao buscar usuários"
@@ -553,7 +551,7 @@ const createUser = async (req, res) => {
             user: userResponse
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao criar usuário:', error);
         res.status(500).json({
             success: false,
             message: "Erro ao criar usuário"
@@ -626,7 +624,7 @@ const updateUser = async (req, res) => {
             user: userResponse
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar usuário:', error);
         res.status(500).json({
             success: false,
             message: "Erro ao atualizar usuário"
@@ -662,7 +660,7 @@ const deleteUser = async (req, res) => {
             message: "Usuário deletado com sucesso"
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao deletar usuário:', error);
         res.status(500).json({
             success: false,
             message: "Erro ao deletar usuário"
@@ -692,7 +690,7 @@ const updateUserStatus = async (req, res) => {
              message: `Usuário ${isActive ? 'ativado' : 'desativado'} com sucesso`
          });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao alterar status do usuário:', error);
         res.status(500).json({
             success: false,
             message: "Erro ao alterar status do usuário"
@@ -728,7 +726,7 @@ const resetUserPassword = async (req, res) => {
             newPassword: newPassword
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao resetar senha do usuário:', error);
         res.status(500).json({
             success: false,
             message: "Erro ao resetar senha"

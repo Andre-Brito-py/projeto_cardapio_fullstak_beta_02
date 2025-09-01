@@ -15,6 +15,26 @@ const Add = ({url}) => {
         category:''
     })
     
+    // New inline addon system states
+    const [addonCategories, setAddonCategories] = useState([]);
+    const [currentAddonCategory, setCurrentAddonCategory] = useState({
+        name: '',
+        description: '',
+        maxSelection: 1,
+        isRequired: false
+    });
+    
+    // Current addons for each category
+    const [categoryAddons, setCategoryAddons] = useState({});
+    const [currentAddon, setCurrentAddon] = useState({
+        name: '',
+        price: '',
+        description: ''
+    });
+    const [selectedCategoryForAddon, setSelectedCategoryForAddon] = useState('');
+    
+    // Legacy extras system (for backward compatibility)
+    const [useOldSystem, setUseOldSystem] = useState(false);
     const [extras, setExtras] = useState([]);
     const [currentExtra, setCurrentExtra] = useState({
         name: '',
@@ -33,7 +53,8 @@ const Add = ({url}) => {
                 }
             }
         } catch (error) {
-            console.log('Erro ao carregar categorias:', error);
+            // Error loading categories, using empty array as fallback
+            setCategories([]);
             toast.error('Erro ao carregar categorias');
         }
     };
@@ -48,6 +69,83 @@ const Add = ({url}) => {
         setData(data=>({...data,[name]:value}))
     }
     
+    // Addon Category handlers
+    const onAddonCategoryChangeHandler = (event) => {
+        const name = event.target.name;
+        const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
+        setCurrentAddonCategory(prev => ({...prev, [name]: value}));
+    }
+    
+    const addAddonCategory = () => {
+        if (currentAddonCategory.name.trim()) {
+            const newCategory = {
+                id: Date.now().toString(),
+                ...currentAddonCategory,
+                maxSelection: Number(currentAddonCategory.maxSelection)
+            };
+            setAddonCategories(prev => [...prev, newCategory]);
+            setCategoryAddons(prev => ({...prev, [newCategory.id]: []}));
+            setCurrentAddonCategory({
+                name: '',
+                description: '',
+                maxSelection: 1,
+                isRequired: false
+            });
+            toast.success('Categoria de adicional criada!');
+        } else {
+            toast.error('Nome da categoria é obrigatório');
+        }
+    }
+    
+    const removeAddonCategory = (categoryId) => {
+        setAddonCategories(prev => prev.filter(cat => cat.id !== categoryId));
+        setCategoryAddons(prev => {
+            const newAddons = {...prev};
+            delete newAddons[categoryId];
+            return newAddons;
+        });
+        if (selectedCategoryForAddon === categoryId) {
+            setSelectedCategoryForAddon('');
+        }
+    }
+    
+    // Addon handlers
+    const onAddonChangeHandler = (event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setCurrentAddon(prev => ({...prev, [name]: value}));
+    }
+    
+    const addAddon = () => {
+        if (!selectedCategoryForAddon) {
+            toast.error('Selecione uma categoria primeiro');
+            return;
+        }
+        if (currentAddon.name.trim() && currentAddon.price) {
+            const newAddon = {
+                id: Date.now().toString(),
+                ...currentAddon,
+                price: Number(currentAddon.price)
+            };
+            setCategoryAddons(prev => ({
+                ...prev,
+                [selectedCategoryForAddon]: [...(prev[selectedCategoryForAddon] || []), newAddon]
+            }));
+            setCurrentAddon({ name: '', price: '', description: '' });
+            toast.success('Adicional criado!');
+        } else {
+            toast.error('Nome e preço são obrigatórios');
+        }
+    }
+    
+    const removeAddon = (categoryId, addonId) => {
+        setCategoryAddons(prev => ({
+            ...prev,
+            [categoryId]: prev[categoryId].filter(addon => addon.id !== addonId)
+        }));
+    }
+    
+    // Legacy extras handlers
     const onExtraChangeHandler = (event) => {
         const name = event.target.name;
         const value = event.target.value;
@@ -65,30 +163,19 @@ const Add = ({url}) => {
         setExtras(prev => prev.filter((_, i) => i !== index));
     }
 
+
+
     const testConnection = async () => {
-        console.log('=== TESTING CONNECTION ===');
-        console.log('URL being used:', url);
-        console.log('Full endpoint:', `${url}/api/food/test`);
         try {
-            console.log('Making request...');
             const response = await axios.post(`${url}/api/food/test`, {test: 'data'});
-            console.log('Test response:', response.data);
             toast.success('Conexão funcionando!');
         } catch (error) {
-            console.error('Test error details:', error);
-            console.error('Error message:', error.message);
-            console.error('Error response:', error.response);
             toast.error('Erro na conexão: ' + error.message);
         }
     }
 
     const onSubmitHandler = async (event) =>{
         event.preventDefault();
-        console.log('=== FORM SUBMIT HANDLER CALLED ===');
-        console.log('Form data:', data);
-        console.log('Image:', image);
-        console.log('Extras:', extras);
-        console.log('URL:', url);
         
         const formData = new FormData();
         formData.append('name', data.name)
@@ -96,19 +183,29 @@ const Add = ({url}) => {
         formData.append('price', Number(data.price))
         formData.append('category', data.category)
         formData.append('image', image)
-        formData.append('extras', JSON.stringify(extras))
         
-        console.log('Making axios request to:', `${url}/api/food/add`);
+        // Include addon system data
+        if (useOldSystem) {
+            formData.append('extras', JSON.stringify(extras))
+            formData.append('useNewSystem', false)
+        } else {
+            // New inline system
+            const addonData = {
+                categories: addonCategories,
+                addons: categoryAddons
+            };
+            formData.append('addonData', JSON.stringify(addonData))
+            formData.append('useNewSystem', true)
+        }
+        
         try {
             const token = localStorage.getItem('token');
-            console.log('Token being used:', token ? token.substring(0, 20) + '...' : 'No token found');
             
             const response = await axios.post(`${url}/api/food/add`, formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log('Response received:', response.data);
 
             if(response.data.success){
                 setData({
@@ -118,16 +215,29 @@ const Add = ({url}) => {
                     category: categories.length > 0 ? categories[0].name : ''
                 })
                 setImage(false);
+                
+                // Reset addon system
+                setAddonCategories([]);
+                setCategoryAddons({});
+                setCurrentAddonCategory({
+                    name: '',
+                    description: '',
+                    maxSelection: 1,
+                    isRequired: false
+                });
+                setCurrentAddon({ name: '', price: '', description: '' });
+                setSelectedCategoryForAddon('');
+                
+                // Reset legacy system
                 setExtras([]);
                 setCurrentExtra({ name: '', price: '', description: '' });
+                setUseOldSystem(false);
                 toast.success(response.data.message)
             }else{
                 toast.error(response.data.message)
             }
         } catch (error) {
-            console.error('Error making request:', error);
             if (error.response) {
-                console.error('Error response:', error.response.data);
                 toast.error(error.response.data.message || 'Erro ao criar produto');
             } else {
                 toast.error('Erro ao conectar com o servidor');
@@ -174,52 +284,224 @@ const Add = ({url}) => {
                 </div>
             </div>
             
-            {/* Extras Section */}
-            <div className="add-extras-section flex-col">
-                <p>Product Extras (Optional)</p>
-                
-                {/* Current extras list */}
-                {extras.length > 0 && (
-                    <div className="extras-list">
-                        <h4>Added Extras:</h4>
-                        {extras.map((extra, index) => (
-                            <div key={index} className="extra-item">
-                                <span><strong>{extra.name}</strong> - ₹{extra.price}</span>
-                                {extra.description && <span> ({extra.description})</span>}
-                                <button type="button" onClick={() => removeExtra(index)} className="remove-extra-btn">Remove</button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                
-                {/* Add new extra form */}
-                <div className="add-extra-form">
-                    <div className="extra-inputs">
+            {/* Addon System Toggle */}
+            <div className="addon-system-toggle flex-col">
+                <div className="system-choice">
+                    <label>
                         <input 
-                            type="text" 
-                            name="name" 
-                            placeholder="Extra name (e.g., Extra Cheese)" 
-                            value={currentExtra.name}
-                            onChange={onExtraChangeHandler}
+                            type="radio" 
+                            name="addonSystem"
+                            checked={!useOldSystem}
+                            onChange={() => setUseOldSystem(false)}
                         />
+                        Usar sistema de categorias de adicionais (Recomendado)
+                    </label>
+                    <label>
                         <input 
-                            type="number" 
-                            name="price" 
-                            placeholder="Price (₹)" 
-                            value={currentExtra.price}
-                            onChange={onExtraChangeHandler}
+                            type="radio" 
+                            name="addonSystem"
+                            checked={useOldSystem}
+                            onChange={() => setUseOldSystem(true)}
                         />
-                        <input 
-                            type="text" 
-                            name="description" 
-                            placeholder="Description (optional)" 
-                            value={currentExtra.description}
-                            onChange={onExtraChangeHandler}
-                        />
-                        <button type="button" onClick={addExtra} className="add-extra-btn">Add Extra</button>
-                    </div>
+                        Usar sistema antigo de extras
+                    </label>
                 </div>
             </div>
+            
+            {/* New Inline Addon Categories System */}
+            {!useOldSystem && (
+                <div className="addon-categories-system flex-col">
+                    <h3>Categorias de Adicionais</h3>
+                    
+                    {/* Add New Category Form */}
+                    <div className="add-category-form">
+                        <h4>Adicionar Nova Categoria</h4>
+                        <div className="category-form-inputs">
+                            <input 
+                                type="text" 
+                                name="name" 
+                                placeholder="Nome da categoria (ex: Coberturas, Saladas)" 
+                                value={currentAddonCategory.name}
+                                onChange={onAddonCategoryChangeHandler}
+                            />
+                            <input 
+                                type="text" 
+                                name="description" 
+                                placeholder="Descrição (opcional)" 
+                                value={currentAddonCategory.description}
+                                onChange={onAddonCategoryChangeHandler}
+                            />
+                            <div className="category-settings">
+                                <div className="setting-group">
+                                    <label>Máximo de seleções:</label>
+                                    <input 
+                                        type="number" 
+                                        name="maxSelection"
+                                        min="1" 
+                                        max="10"
+                                        value={currentAddonCategory.maxSelection}
+                                        onChange={onAddonCategoryChangeHandler}
+                                    />
+                                </div>
+                                <div className="setting-group">
+                                    <label>
+                                        <input 
+                                            type="checkbox" 
+                                            name="isRequired"
+                                            checked={currentAddonCategory.isRequired}
+                                            onChange={onAddonCategoryChangeHandler}
+                                        />
+                                        Categoria obrigatória
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="button" onClick={addAddonCategory} className="add-category-btn">
+                                Adicionar Categoria
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Display Created Categories */}
+                    {addonCategories.length > 0 && (
+                        <div className="created-categories">
+                            <h4>Categorias Criadas</h4>
+                            {addonCategories.map(category => (
+                                <div key={category.id} className="category-item">
+                                    <div className="category-header">
+                                        <div className="category-info">
+                                            <strong>{category.name}</strong>
+                                            {category.description && <span> - {category.description}</span>}
+                                            <small> (Máx: {category.maxSelection}, {category.isRequired ? 'Obrigatória' : 'Opcional'})</small>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => removeAddonCategory(category.id)}
+                                            className="remove-category-btn"
+                                        >
+                                            Remover
+                                        </button>
+                                    </div>
+                                    
+                                    {/* Display addons for this category */}
+                                    {categoryAddons[category.id] && categoryAddons[category.id].length > 0 && (
+                                        <div className="category-addons">
+                                            <strong>Adicionais:</strong>
+                                            {categoryAddons[category.id].map(addon => (
+                                                <div key={addon.id} className="addon-item">
+                                                    <span>{addon.name} - R$ {addon.price.toFixed(2)}</span>
+                                                    {addon.description && <small> ({addon.description})</small>}
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => removeAddon(category.id, addon.id)}
+                                                        className="remove-addon-btn"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    
+                    {/* Add Addons to Categories */}
+                    {addonCategories.length > 0 && (
+                        <div className="add-addon-form">
+                            <h4>Adicionar Adicionais às Categorias</h4>
+                            <div className="addon-form-inputs">
+                                <select 
+                                    value={selectedCategoryForAddon}
+                                    onChange={(e) => setSelectedCategoryForAddon(e.target.value)}
+                                >
+                                    <option value="">Selecione uma categoria</option>
+                                    {addonCategories.map(category => (
+                                        <option key={category.id} value={category.id}>
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <input 
+                                    type="text" 
+                                    name="name" 
+                                    placeholder="Nome do adicional (ex: Tomate, Calda de Morango)" 
+                                    value={currentAddon.name}
+                                    onChange={onAddonChangeHandler}
+                                />
+                                <input 
+                                    type="number" 
+                                    name="price" 
+                                    placeholder="Preço (R$)" 
+                                    step="0.01"
+                                    value={currentAddon.price}
+                                    onChange={onAddonChangeHandler}
+                                />
+                                <input 
+                                    type="text" 
+                                    name="description" 
+                                    placeholder="Descrição (opcional)" 
+                                    value={currentAddon.description}
+                                    onChange={onAddonChangeHandler}
+                                />
+                                <button type="button" onClick={addAddon} className="add-addon-btn">
+                                    Adicionar
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+            
+            {/* Legacy Extras Section */}
+            {useOldSystem && (
+                <div className="add-extras-section flex-col">
+                    <h3>Extras do Produto (Sistema Antigo)</h3>
+                    
+                    {/* Current extras list */}
+                    {extras.length > 0 && (
+                        <div className="extras-list">
+                            <h4>Extras Adicionados:</h4>
+                            {extras.map((extra, index) => (
+                                <div key={index} className="extra-item">
+                                    <span><strong>{extra.name}</strong> - R$ {extra.price}</span>
+                                    {extra.description && <span> ({extra.description})</span>}
+                                    <button type="button" onClick={() => removeExtra(index)} className="remove-extra-btn">Remover</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    
+                    {/* Add new extra form */}
+                    <div className="add-extra-form">
+                        <div className="extra-inputs">
+                            <input 
+                                type="text" 
+                                name="name" 
+                                placeholder="Nome do extra (ex: Queijo Extra)" 
+                                value={currentExtra.name}
+                                onChange={onExtraChangeHandler}
+                            />
+                            <input 
+                                type="number" 
+                                name="price" 
+                                placeholder="Preço (R$)" 
+                                step="0.01"
+                                value={currentExtra.price}
+                                onChange={onExtraChangeHandler}
+                            />
+                            <input 
+                                type="text" 
+                                name="description" 
+                                placeholder="Descrição (opcional)" 
+                                value={currentExtra.description}
+                                onChange={onExtraChangeHandler}
+                            />
+                            <button type="button" onClick={addExtra} className="add-extra-btn">Adicionar Extra</button>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             <button type='submit' className='add-btn'>ADD</button>
         </form>

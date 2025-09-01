@@ -6,20 +6,20 @@ const authMiddleware = async (req, res, next) => {
         const authHeader = req.headers.authorization;
         const tokenHeader = req.headers.token;
         
-        console.log('Headers recebidos:', req.headers);
+        // Verificar headers de autenticação
         
         let token;
         
         if (authHeader && authHeader.startsWith('Bearer ')) {
             token = authHeader.split(' ')[1];
-            console.log('Token extraído do Authorization:', token);
+            // Token extraído do Authorization
         } else if (tokenHeader) {
             token = tokenHeader;
-            console.log('Token extraído do header token:', token);
+            // Token extraído do header token
         }
         
         if (!token) {
-            console.log('Token não encontrado nos headers');
+            // Token não encontrado nos headers
             return res.status(401).json({
                 success: false, 
                 message: 'Não autorizado, faça login novamente'
@@ -27,12 +27,12 @@ const authMiddleware = async (req, res, next) => {
         }
 
         const token_decode = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('Token decodificado:', token_decode);
+        // Token decodificado com sucesso
         
         req.body.userId = token_decode.id;
         next();
     } catch (error) {
-        console.log('Erro de autenticação:', error);
+        // Erro de autenticação
         return res.status(401).json({
             success: false, 
             message: 'Token inválido ou expirado'

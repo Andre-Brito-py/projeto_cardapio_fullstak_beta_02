@@ -32,7 +32,7 @@ const addCategory = async (req, res) => {
         await category.save();
         res.json({ success: true, message: "Categoria adicionada com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao adicionar categoria:', error);
         res.json({ success: false, message: "Erro ao adicionar categoria" });
     }
 };
@@ -43,7 +43,7 @@ const listCategory = async (req, res) => {
         const categories = await categoryModel.find({});
         res.json({ success: true, data: categories });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao listar categorias:', error);
         res.json({ success: false, message: "Erro ao listar categorias" });
     }
 };
@@ -54,7 +54,7 @@ const listActiveCategories = async (req, res) => {
         const activeCategories = await categoryModel.find({ isActive: true });
         res.json({ success: true, data: activeCategories });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao listar categorias ativas:', error);
         res.json({ success: false, message: "Erro ao listar categorias ativas" });
     }
 };
@@ -72,14 +72,14 @@ const removeCategory = async (req, res) => {
         // Remover arquivo de imagem
         if (category.image) {
             fs.unlink(`uploads/${category.image}`, (err) => {
-                if (err) console.log("Erro ao deletar imagem:", err);
+                if (err) console.error('Erro ao deletar imagem:', err);
             });
         }
 
         await categoryModel.findByIdAndDelete(categoryId);
         res.json({ success: true, message: "Categoria removida com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao remover categoria:', error);
         res.json({ success: false, message: "Erro ao remover categoria" });
     }
 };
@@ -119,7 +119,7 @@ const updateCategory = async (req, res) => {
             // Remover imagem antiga
             if (category.image) {
                 fs.unlink(`uploads/${category.image}`, (err) => {
-                    if (err) console.log("Erro ao deletar imagem antiga:", err);
+                    if (err) console.error('Erro ao deletar imagem antiga:', err);
                 });
             }
             updateData.image = image_filename;
@@ -129,7 +129,7 @@ const updateCategory = async (req, res) => {
         
         res.json({ success: true, message: "Categoria atualizada com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar categoria:', error);
         res.json({ success: false, message: "Erro ao atualizar categoria" });
     }
 };

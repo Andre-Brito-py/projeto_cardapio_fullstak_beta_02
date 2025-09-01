@@ -17,7 +17,7 @@ const addBanner = async (req, res) => {
         await banner.save();
         res.json({ success: true, message: "Banner adicionado com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao adicionar banner:', error);
         res.json({ success: false, message: "Erro ao adicionar banner" });
     }
 };
@@ -28,7 +28,7 @@ const listBanners = async (req, res) => {
         const banners = await bannerModel.find({ isActive: true }).sort({ order: 1 });
         res.json({ success: true, data: banners });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao listar banners:', error);
         res.json({ success: false, message: "Erro ao listar banners" });
     }
 };
@@ -39,7 +39,7 @@ const listAllBanners = async (req, res) => {
         const banners = await bannerModel.find({}).sort({ createdAt: -1 });
         res.json({ success: true, data: banners });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao listar todos os banners:', error);
         res.json({ success: false, message: "Erro ao listar banners" });
     }
 };
@@ -58,7 +58,7 @@ const removeBanner = async (req, res) => {
         await bannerModel.findByIdAndDelete(req.body.id);
         res.json({ success: true, message: "Banner removido com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao remover banner:', error);
         res.json({ success: false, message: "Erro ao remover banner" });
     }
 };
@@ -66,7 +66,7 @@ const removeBanner = async (req, res) => {
 // Atualizar banner
 const updateBanner = async (req, res) => {
     try {
-        console.log('Dados recebidos para atualização:', req.body);
+        // Dados recebidos para atualização
         const banner = await bannerModel.findById(req.body.id);
         if (!banner) {
             return res.json({ success: false, message: "Banner não encontrado" });
@@ -80,7 +80,7 @@ const updateBanner = async (req, res) => {
             productId: req.body.productId && req.body.productId !== '' ? req.body.productId : null
         };
         
-        console.log('Dados de atualização:', updateData);
+        // Preparando dados de atualização
 
         // Se uma nova imagem foi enviada
         if (req.file) {
@@ -92,7 +92,7 @@ const updateBanner = async (req, res) => {
         await bannerModel.findByIdAndUpdate(req.body.id, updateData);
         res.json({ success: true, message: "Banner atualizado com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar banner:', error);
         res.json({ success: false, message: "Erro ao atualizar banner" });
     }
 };
@@ -108,7 +108,7 @@ const toggleBannerStatus = async (req, res) => {
         await bannerModel.findByIdAndUpdate(req.body.id, { isActive: !banner.isActive });
         res.json({ success: true, message: `Banner ${!banner.isActive ? 'ativado' : 'desativado'} com sucesso` });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao alterar status do banner:', error);
         res.json({ success: false, message: "Erro ao alterar status do banner" });
     }
 };

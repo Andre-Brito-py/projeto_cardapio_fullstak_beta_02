@@ -40,7 +40,7 @@ const generateAccessLink = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log('Erro ao gerar link de acesso:', error);
+        console.error('Erro ao gerar link de acesso:', error);
         res.status(500).json({ 
             success: false, 
             message: "Erro ao gerar link de acesso" 
@@ -71,7 +71,7 @@ const validateWaiterToken = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log('Erro ao validar token:', error);
+        console.error('Erro ao validar token:', error);
         res.status(500).json({ 
             success: false, 
             message: "Erro ao validar token" 
@@ -138,7 +138,7 @@ const placeWaiterOrder = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log('Erro ao fazer pedido:', error);
+        console.error('Erro ao fazer pedido:', error);
         res.status(500).json({ 
             success: false, 
             message: "Erro ao processar pedido" 
@@ -163,7 +163,7 @@ const getTableOrders = async (req, res) => {
             data: orders
         });
     } catch (error) {
-        console.log('Erro ao buscar pedidos da mesa:', error);
+        console.error('Erro ao buscar pedidos da mesa:', error);
         res.status(500).json({ 
             success: false, 
             message: "Erro ao buscar pedidos" 

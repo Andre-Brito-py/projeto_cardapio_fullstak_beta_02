@@ -1,5 +1,5 @@
 import express from 'express'
-import { addFood, listFood, removeFood, updateFood } from '../controllers/foodController.js'
+import { addFood, listFood, removeFood, updateFood, getFoodWithAddonsAndSuggestions, listFoodWithAddonInfo } from '../controllers/foodController.js'
 import multer from 'multer'
 import {
     identifyStore,
@@ -26,17 +26,19 @@ const upload = multer({storage:storage})
 
 // Rotas públicas (para clientes)
 foodRouter.get('/list',listFood)
+foodRouter.get('/with-addon-info', addStoreContext, listFoodWithAddonInfo)
+foodRouter.get('/:foodId/details', addStoreContext, getFoodWithAddonsAndSuggestions)
 
 // Rotas protegidas (para admins) - aplicar middlewares específicos
 foodRouter.get('/admin/list', authMultiTenant, requireStoreAdmin, addStoreContext, listFood)
+foodRouter.get('/admin/with-addon-info', authMultiTenant, requireStoreAdmin, addStoreContext, listFoodWithAddonInfo)
 foodRouter.post('/add', authMultiTenant, requireStoreAdmin, addStoreContext, upload.single('image'), addFood)
 foodRouter.post('/remove', authMultiTenant, requireStoreAdmin, addStoreContext, removeFood)
 foodRouter.put('/update', authMultiTenant, requireStoreAdmin, addStoreContext, upload.single('image'), updateFood)
 
 // Test endpoint
 foodRouter.post('/test', authMultiTenant, requireStoreAdmin, addStoreContext, (req, res) => {
-    console.log('=== TEST ENDPOINT CALLED ===');
-    console.log('Request body:', req.body);
+    // Test endpoint called
     res.json({success: true, message: 'Test endpoint working'});
 });
 

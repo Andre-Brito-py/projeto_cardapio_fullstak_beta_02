@@ -11,6 +11,7 @@ const foodSchema = new mongoose.Schema({
         ref: 'Store',
         required: false
     },
+    // Sistema antigo de extras (mantido para compatibilidade)
     extras: {
         type: [{
             name: {type: String, required: true},
@@ -19,7 +20,25 @@ const foodSchema = new mongoose.Schema({
         }],
         default: []
     },
-    isActive: {
+    // Novo sistema inline de categorias de adicionais
+    inlineAddonCategories: {
+        type: [{
+            name: {type: String, required: true},
+            description: {type: String, default: ""}
+        }],
+        default: []
+    },
+    // Adicionais organizados por categoria (novo sistema)
+    categoryAddons: {
+        type: mongoose.Schema.Types.Mixed, // Objeto com chaves sendo nomes de categorias
+        default: {}
+    },
+    // Flag para determinar qual sistema usar
+    useOldSystem: {
+        type: Boolean,
+        default: true // Por padrão usa o sistema antigo para compatibilidade
+    },
+     isActive: {
         type: Boolean,
         default: true
     },

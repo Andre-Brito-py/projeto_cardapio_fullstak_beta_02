@@ -58,7 +58,7 @@ const calculateDeliveryFee = async (req, res) => {
         console.error('Erro ao calcular taxa de entrega:', error);
         res.json({
             success: false,
-            message: "Erro interno do servidor"
+            message: "Erro ao calcular taxa de entrega"
         });
     }
 };
@@ -126,7 +126,7 @@ const checkDeliveryArea = async (req, res) => {
         console.error('Erro ao verificar área de entrega:', error);
         res.json({
             success: false,
-            message: "Erro interno do servidor",
+            message: "Erro ao verificar área de entrega",
             isDeliverable: false
         });
     }
@@ -158,7 +158,7 @@ const getDeliveryInfo = async (req, res) => {
         console.error('Erro ao obter informações de entrega:', error);
         res.json({
             success: false,
-            message: "Erro interno do servidor"
+            message: "Erro ao obter informações de entrega"
         });
     }
 };

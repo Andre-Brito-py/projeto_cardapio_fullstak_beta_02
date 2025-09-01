@@ -18,7 +18,7 @@ const getPixKey = async (req, res) => {
             pixKey: settings.pixKey
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao buscar chave PIX:', error);
         res.json({
             success: false,
             message: "Erro ao buscar chave PIX"
@@ -52,7 +52,7 @@ const updatePixKey = async (req, res) => {
             pixKey: settings.pixKey
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar chave PIX:', error);
         res.json({
             success: false,
             message: "Erro ao atualizar chave PIX"
@@ -78,7 +78,7 @@ const getSettings = async (req, res) => {
             data: settings
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao buscar configurações:', error);
         res.json({
             success: false,
             message: "Erro ao buscar configurações"
@@ -125,7 +125,7 @@ const updateBanner = async (req, res) => {
             banner: settings.banner
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar banner:', error);
         res.json({
             success: false,
             message: "Erro ao atualizar banner"
@@ -152,7 +152,7 @@ const getBanner = async (req, res) => {
             });
         }
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao buscar configurações do banner:', error);
         res.json({
             success: false,
             message: "Erro ao buscar configurações do banner"

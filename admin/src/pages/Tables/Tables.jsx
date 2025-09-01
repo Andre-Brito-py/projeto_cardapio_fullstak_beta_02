@@ -229,7 +229,6 @@ const Tables = ({ url }) => {
         toast.success(response.data.message);
         // Aqui você pode integrar com a API de impressão térmica
         // Por exemplo, enviar os dados para a impressora conectada
-        console.log('Dados para impressão térmica:', response.data.data);
       } else {
         toast.error(response.data.message);
       }
@@ -282,7 +281,6 @@ const Tables = ({ url }) => {
         toast.success(response.data.message);
         // Aqui você pode integrar com a API de impressão térmica
         // Por exemplo, enviar os dados para a impressora conectada
-        console.log('Dados para impressão térmica:', response.data.data);
       } else {
         toast.error(response.data.message);
       }

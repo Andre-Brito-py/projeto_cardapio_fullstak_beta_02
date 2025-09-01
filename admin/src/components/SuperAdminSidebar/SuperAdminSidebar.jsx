@@ -26,6 +26,11 @@ const SuperAdminSidebar = ({ isOpen, onClose }) => {
             <p>Configurações do Sistema</p>
           </NavLink>
           
+          <NavLink to='/super-admin/api-management' className='super-admin-sidebar-option' onClick={onClose}>
+            <img src={assets.add_icon} alt='APIs' />
+            <p>Gerenciar APIs</p>
+          </NavLink>
+          
           <NavLink to='/super-admin/analytics' className='super-admin-sidebar-option' onClick={onClose}>
             <img src={assets.parcel_icon} alt='Analytics' />
             <p>Analytics Global</p>
@@ -34,6 +39,11 @@ const SuperAdminSidebar = ({ isOpen, onClose }) => {
           <NavLink to='/super-admin/users' className='super-admin-sidebar-option' onClick={onClose}>
             <img src={assets.profile_image} alt='Usuários' />
             <p>Gerenciar Usuários</p>
+          </NavLink>
+          
+          <NavLink to='/super-admin/asaas' className='super-admin-sidebar-option' onClick={onClose}>
+            <img src={assets.parcel_icon} alt='Asaas Dashboard' />
+            <p>Dashboard Asaas</p>
           </NavLink>
           
           <NavLink to='/super-admin/logs' className='super-admin-sidebar-option' onClick={onClose}>

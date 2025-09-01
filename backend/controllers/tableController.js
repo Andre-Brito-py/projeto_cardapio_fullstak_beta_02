@@ -6,19 +6,14 @@ import PDFDocument from 'pdfkit';
 // Criar nova mesa
 const createTable = async (req, res) => {
     try {
-        console.log('=== CRIANDO MESA ===');
-        console.log('Body recebido:', JSON.stringify(req.body, null, 2));
-        console.log('Headers:', JSON.stringify(req.headers, null, 2));
-        console.log('Store ID:', req.storeId);
-        console.log('Store:', req.store ? { id: req.store._id, name: req.store.name } : 'null');
-        console.log('User:', req.user ? { id: req.user._id, role: req.user.role, storeId: req.user.storeId } : 'null');
+        // Debug logs removidos para produção
         
         const { tableNumber, displayName, capacity, location, notes, isActive } = req.body;
         const storeId = req.user?.storeId || req.storeId;
         
         // Validação obrigatória
         if (!tableNumber) {
-            console.log('Erro: tableNumber não fornecido');
+            // Número da mesa não fornecido
             return res.status(400).json({ 
                 success: false, 
                 message: "Número da mesa é obrigatório" 
@@ -27,7 +22,7 @@ const createTable = async (req, res) => {
         
         // Verificar se temos storeId
         if (!storeId) {
-            console.log('Erro: storeId não encontrado');
+            // Store ID não encontrado
             return res.status(400).json({ 
                 success: false, 
                 message: "Loja não identificada" 
@@ -36,12 +31,12 @@ const createTable = async (req, res) => {
         
         // Converter tableNumber para string para consistência
         const tableNumberStr = tableNumber.toString();
-        console.log('Table number convertido:', tableNumberStr);
+        // Table number convertido para string
         
         // Verificar se já existe uma mesa com este número na loja
         const existingTable = await tableModel.findOne({ storeId, tableNumber: tableNumberStr });
         if (existingTable) {
-            console.log('Erro: Mesa já existe');
+            // Mesa já existe na loja
             return res.status(400).json({ 
                 success: false, 
                 message: "Já existe uma mesa com este número" 
@@ -50,7 +45,7 @@ const createTable = async (req, res) => {
         
         // Gerar QR code único
         const qrCodeId = uuidv4();
-        console.log('QR Code gerado:', qrCodeId);
+        // QR Code gerado
         
         // Criar nova mesa
         const table = new tableModel({
@@ -67,10 +62,7 @@ const createTable = async (req, res) => {
         // Gerar URL do QR code
         table.qrCodeUrl = table.generateQRCodeUrl();
         
-        console.log('Mesa a ser salva:', JSON.stringify(table.toObject(), null, 2));
         await table.save();
-        
-        console.log('Mesa criada com sucesso:', table._id);
         
         res.json({
             success: true,
@@ -78,13 +70,7 @@ const createTable = async (req, res) => {
             data: table
         });
     } catch (error) {
-        console.error('=== ERRO DETALHADO ===');
-        console.error('Tipo do erro:', error.constructor.name);
-        console.error('Mensagem:', error.message);
-        console.error('Stack:', error.stack);
-        console.error('Código:', error.code);
-        console.error('KeyPattern:', error.keyPattern);
-        console.error('KeyValue:', error.keyValue);
+        console.error('Erro ao criar mesa:', error);
         
         // Tratar erro de duplicidade (código 11000)
         if (error.code === 11000) {
@@ -103,7 +89,7 @@ const createTable = async (req, res) => {
         
         res.status(500).json({ 
             success: false, 
-            message: "Erro interno do servidor",
+            message: "Erro ao criar mesa",
             error: error.message 
         });
     }
@@ -125,7 +111,7 @@ const listTables = async (req, res) => {
             data: tables
         });
     } catch (error) {
-        console.log('Erro ao listar mesas:', error);
+        console.error('Erro ao listar mesas:', error);
         res.json({ success: false, message: "Erro ao listar mesas" });
     }
 };
@@ -147,7 +133,7 @@ const getTable = async (req, res) => {
             data: table
         });
     } catch (error) {
-        console.log('Erro ao obter mesa:', error);
+        console.error('Erro ao obter mesa:', error);
         res.json({ success: false, message: "Erro ao obter mesa" });
     }
 };
@@ -189,7 +175,7 @@ const updateTable = async (req, res) => {
             data: table
         });
     } catch (error) {
-        console.log('Erro ao atualizar mesa:', error);
+        console.error('Erro ao atualizar mesa:', error);
         res.json({ success: false, message: "Erro ao atualizar mesa" });
     }
 };
@@ -211,7 +197,7 @@ const deleteTable = async (req, res) => {
             message: "Mesa deletada com sucesso"
         });
     } catch (error) {
-        console.log('Erro ao deletar mesa:', error);
+        console.error('Erro ao deletar mesa:', error);
         res.json({ success: false, message: "Erro ao deletar mesa" });
     }
 };
@@ -247,7 +233,7 @@ const generateQRCode = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log('Erro ao gerar QR code:', error);
+        console.error('Erro ao gerar QR code:', error);
         res.json({ success: false, message: "Erro ao gerar QR code" });
     }
 };
@@ -255,24 +241,17 @@ const generateQRCode = async (req, res) => {
 // Gerar QR codes para todas as mesas
 const generateAllQRCodes = async (req, res) => {
     try {
-        console.log('=== GERANDO QR CODES PARA TODAS AS MESAS ===');
-        console.log('User:', req.user ? { id: req.user._id, role: req.user.role, storeId: req.user.storeId } : 'null');
-        console.log('StoreId from req:', req.storeId);
-        
         const storeId = req.user?.storeId || req.storeId;
-        console.log('StoreId final:', storeId);
         
         if (!storeId) {
-            console.log('Erro: ID da loja não encontrado');
+            // ID da loja não encontrado
             return res.json({ success: false, message: "ID da loja não encontrado" });
         }
         
-        console.log('Buscando mesas ativas para a loja:', storeId);
         const tables = await tableModel.find({ storeId, isActive: true }).sort({ tableNumber: 1 });
-        console.log('Mesas encontradas:', tables.length);
         
         if (tables.length === 0) {
-            console.log('Nenhuma mesa ativa encontrada');
+            // Nenhuma mesa ativa encontrada
             return res.json({ success: false, message: "Nenhuma mesa ativa encontrada" });
         }
         
@@ -280,15 +259,10 @@ const generateAllQRCodes = async (req, res) => {
         
         for (let i = 0; i < tables.length; i++) {
             const table = tables[i];
-            console.log(`Processando mesa ${i + 1}/${tables.length}: ${table.tableNumber}`);
-            console.log('QR Code URL da mesa:', table.qrCodeUrl);
-            
             // Verificar se a mesa tem qrCodeUrl
             if (!table.qrCodeUrl) {
-                console.log('Mesa sem qrCodeUrl, gerando...');
                 table.qrCodeUrl = table.generateQRCodeUrl();
                 await table.save();
-                console.log('QR Code URL gerada:', table.qrCodeUrl);
             }
             
             const qrCodeDataURL = await QRCode.toDataURL(table.qrCodeUrl, {
@@ -300,7 +274,7 @@ const generateAllQRCodes = async (req, res) => {
                 }
             });
             
-            console.log(`QR Code gerado para mesa ${table.tableNumber}`);
+            // QR Code gerado
             
             qrCodes.push({
                 table: table,
@@ -309,17 +283,14 @@ const generateAllQRCodes = async (req, res) => {
             });
         }
         
-        console.log('QR Codes gerados com sucesso:', qrCodes.length);
+        // QR Codes gerados com sucesso
         
         res.json({
             success: true,
             data: qrCodes
         });
     } catch (error) {
-        console.error('=== ERRO DETALHADO AO GERAR QR CODES ===');
-        console.error('Tipo do erro:', error.constructor.name);
-        console.error('Mensagem:', error.message);
-        console.error('Stack:', error.stack);
+        console.error('Erro ao gerar QR codes:', error);
         res.json({ success: false, message: "Erro ao gerar QR codes" });
     }
 };
@@ -352,7 +323,7 @@ const getTableByQRCode = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log('Erro ao obter mesa por QR code:', error);
+        console.error('Erro ao obter mesa por QR code:', error);
         res.json({ success: false, message: "Erro ao obter mesa" });
     }
 };
@@ -360,33 +331,22 @@ const getTableByQRCode = async (req, res) => {
 // Imprimir QR code para mesa específica
 const printTableQRCode = async (req, res) => {
     try {
-        console.log('=== INICIANDO IMPRESSÃO DE QR CODE INDIVIDUAL ===');
         const { tableId } = req.params;
         const storeId = req.user?.storeId || req.storeId;
-        
-        console.log('Table ID:', tableId);
-        console.log('Store ID:', storeId);
         
         const table = await tableModel.findOne({ _id: tableId, storeId }).populate('storeId', 'name');
         
         if (!table) {
-            console.log('Mesa não encontrada');
             return res.json({ success: false, message: "Mesa não encontrada" });
         }
         
-        console.log('Mesa encontrada:', table.displayName);
-        
         // Verificar se a mesa tem qrCodeUrl
         if (!table.qrCodeUrl) {
-            console.log('Gerando qrCodeUrl para a mesa');
             table.qrCodeUrl = table.generateQRCodeUrl();
             await table.save();
         }
         
-        console.log('QR Code URL:', table.qrCodeUrl);
-        
         // Gerar QR code como buffer
-        console.log('Gerando QR code buffer...');
         const qrCodeBuffer = await QRCode.toBuffer(table.qrCodeUrl, {
             width: 200,
             margin: 2,
@@ -396,17 +356,12 @@ const printTableQRCode = async (req, res) => {
             }
         });
         
-        console.log('QR code buffer gerado, tamanho:', qrCodeBuffer.length);
-        
         // Criar PDF
-        console.log('Criando documento PDF...');
         const doc = new PDFDocument({ size: 'A4', margin: 50 });
         
         // Configurar headers para download do PDF
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="QR-Mesa-${table.tableNumber}.pdf"`);
-        
-        console.log('Headers configurados, iniciando pipe...');
         
         // Pipe do PDF para a resposta
         doc.pipe(res);
@@ -420,7 +375,6 @@ const printTableQRCode = async (req, res) => {
         doc.moveDown();
         
         // QR Code
-        console.log('Adicionando QR code ao PDF...');
         doc.image(qrCodeBuffer, {
             fit: [200, 200],
             align: 'center',
@@ -434,16 +388,10 @@ const printTableQRCode = async (req, res) => {
         doc.text('e fazer seu pedido diretamente do seu celular', { align: 'center' });
         
         // Finalizar PDF
-        console.log('Finalizando PDF...');
         doc.end();
         
-        console.log('PDF gerado com sucesso!');
-        
     } catch (error) {
-        console.error('=== ERRO DETALHADO AO GERAR PDF INDIVIDUAL ===');
-        console.error('Tipo do erro:', error.constructor.name);
-        console.error('Mensagem:', error.message);
-        console.error('Stack:', error.stack);
+        console.error('Erro ao gerar PDF do QR code:', error);
         
         // Verificar se a resposta já foi enviada
         if (!res.headersSent) {
@@ -455,13 +403,9 @@ const printTableQRCode = async (req, res) => {
 // Imprimir QR codes para todas as mesas
 const printAllQRCodes = async (req, res) => {
     try {
-        console.log('=== INICIANDO IMPRESSÃO DE TODOS OS QR CODES ===');
         const storeId = req.user?.storeId || req.storeId;
         
-        console.log('Store ID:', storeId);
-        
         if (!storeId) {
-            console.log('ID da loja não encontrado');
             return res.json({ success: false, message: "ID da loja não encontrado" });
         }
         
@@ -469,22 +413,16 @@ const printAllQRCodes = async (req, res) => {
             .sort({ tableNumber: 1 })
             .populate('storeId', 'name');
         
-        console.log('Mesas encontradas:', tables.length);
-        
         if (tables.length === 0) {
-            console.log('Nenhuma mesa ativa encontrada');
             return res.json({ success: false, message: "Nenhuma mesa ativa encontrada" });
         }
         
         // Criar PDF
-        console.log('Criando documento PDF...');
         const doc = new PDFDocument({ size: 'A4', margin: 50 });
         
         // Configurar headers para download do PDF
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="QR-Codes-Todas-Mesas.pdf"`);
-        
-        console.log('Headers configurados, iniciando pipe...');
         
         // Pipe do PDF para a resposta
         doc.pipe(res);
@@ -501,21 +439,20 @@ const printAllQRCodes = async (req, res) => {
         const pageWidth = doc.page.width - 100; // Margem de 50 de cada lado
         const qrsPerRow = Math.floor(pageWidth / (qrSize + spacing));
         
-        console.log('Configurações do layout:', { qrSize, spacing, pageWidth, qrsPerRow });
+        // Configurações do layout definidas
         
         for (let i = 0; i < tables.length; i++) {
             const table = tables[i];
-            console.log(`Processando mesa ${i + 1}/${tables.length}: ${table.displayName}`);
+            // Processando mesa
             
             // Verificar se a mesa tem qrCodeUrl
             if (!table.qrCodeUrl) {
-                console.log('Gerando qrCodeUrl para mesa:', table.displayName);
                 table.qrCodeUrl = table.generateQRCodeUrl();
                 await table.save();
             }
             
             // Gerar QR code como buffer
-            console.log('Gerando QR code buffer para:', table.displayName);
+            // Gerar QR code buffer
             const qrCodeBuffer = await QRCode.toBuffer(table.qrCodeUrl, {
                 width: qrSize,
                 margin: 1,
@@ -525,11 +462,10 @@ const printAllQRCodes = async (req, res) => {
                 }
             });
             
-            console.log('QR code buffer gerado, tamanho:', qrCodeBuffer.length);
+            // QR code buffer gerado
             
             // Verificar se precisa de nova página
             if (currentY + qrSize + 60 > doc.page.height - 50) {
-                console.log('Adicionando nova página');
                 doc.addPage();
                 currentY = 50;
                 currentX = 50;
@@ -548,7 +484,7 @@ const printAllQRCodes = async (req, res) => {
             });
             
             // QR Code
-            console.log('Adicionando QR code ao PDF para:', table.displayName);
+            // Adicionar QR code ao PDF
             doc.image(qrCodeBuffer, currentX, currentY + 20, {
                 width: qrSize,
                 height: qrSize
@@ -558,16 +494,10 @@ const printAllQRCodes = async (req, res) => {
         }
         
         // Finalizar PDF
-        console.log('Finalizando PDF...');
         doc.end();
         
-        console.log('PDF de todos os QR codes gerado com sucesso!');
-        
     } catch (error) {
-        console.error('=== ERRO DETALHADO AO GERAR PDF DE TODOS OS QR CODES ===');
-        console.error('Tipo do erro:', error.constructor.name);
-        console.error('Mensagem:', error.message);
-        console.error('Stack:', error.stack);
+        console.error('Erro ao gerar PDF dos QR codes:', error.message);
         
         // Verificar se a resposta já foi enviada
         if (!res.headersSent) {
@@ -579,33 +509,23 @@ const printAllQRCodes = async (req, res) => {
 // Imprimir QR code diretamente na impressora térmica (mesa específica)
 const printTableQRCodeDirect = async (req, res) => {
     try {
-        console.log('=== INICIANDO IMPRESSÃO DIRETA DE QR CODE INDIVIDUAL ===');
         const { tableId } = req.params;
         const storeId = req.user?.storeId || req.storeId;
-        
-        console.log('Table ID:', tableId);
-        console.log('Store ID:', storeId);
         
         const table = await tableModel.findOne({ _id: tableId, storeId }).populate('storeId', 'name');
         
         if (!table) {
-            console.log('Mesa não encontrada');
             return res.json({ success: false, message: "Mesa não encontrada" });
         }
         
-        console.log('Mesa encontrada:', table.displayName);
-        
         // Verificar se a mesa tem qrCodeUrl
         if (!table.qrCodeUrl) {
-            console.log('Gerando qrCodeUrl para a mesa');
             table.qrCodeUrl = table.generateQRCodeUrl();
             await table.save();
         }
         
-        console.log('QR Code URL:', table.qrCodeUrl);
-        
         // Gerar QR code como buffer
-        console.log('Gerando QR code buffer...');
+        // Gerar QR code buffer
         const qrCodeBuffer = await QRCode.toBuffer(table.qrCodeUrl, {
             width: 200,
             margin: 2,
@@ -615,7 +535,7 @@ const printTableQRCodeDirect = async (req, res) => {
             }
         });
         
-        console.log('QR code buffer gerado, tamanho:', qrCodeBuffer.length);
+        // QR code buffer gerado
         
         // Integração com o serviço de impressão térmica
         const printData = {
@@ -630,7 +550,7 @@ const printTableQRCodeDirect = async (req, res) => {
             ]
         };
         
-        console.log('Dados preparados para impressão térmica');
+        // Dados preparados para impressão térmica
         
         // Tentar imprimir via porta serial primeiro (mais comum para impressoras térmicas USB)
         try {
@@ -646,7 +566,7 @@ const printTableQRCodeDirect = async (req, res) => {
             });
             
             if (printResponse.data.success) {
-                console.log('QR code enviado para impressora térmica com sucesso');
+                // QR code enviado para impressora térmica com sucesso
                 res.json({
                     success: true,
                     message: `QR code da ${table.displayName} impresso com sucesso!`,
@@ -656,7 +576,7 @@ const printTableQRCodeDirect = async (req, res) => {
                 throw new Error(printResponse.data.message || 'Erro na impressão');
             }
         } catch (printError) {
-            console.log('Erro na impressão via serial, tentando Bluetooth...', printError.message);
+            // Erro na impressão via serial, tentando Bluetooth
             
             // Se falhar, tentar via Bluetooth
             try {
@@ -671,7 +591,7 @@ const printTableQRCodeDirect = async (req, res) => {
                 });
                 
                 if (printResponse.data.success) {
-                    console.log('QR code enviado para impressora Bluetooth com sucesso');
+                    // QR code enviado para impressora Bluetooth com sucesso
                     res.json({
                         success: true,
                         message: `QR code da ${table.displayName} impresso via Bluetooth!`,
@@ -681,7 +601,7 @@ const printTableQRCodeDirect = async (req, res) => {
                     throw new Error(printResponse.data.message || 'Erro na impressão Bluetooth');
                 }
             } catch (bluetoothError) {
-                console.log('Erro na impressão via Bluetooth:', bluetoothError.message);
+                // Erro na impressão via Bluetooth
                 
                 // Se ambos falharem, retornar os dados para o frontend lidar
                 res.json({
@@ -693,13 +613,10 @@ const printTableQRCodeDirect = async (req, res) => {
             }
         }
         
-        console.log('Impressão direta de QR code concluída!');
+
         
     } catch (error) {
-        console.error('=== ERRO DETALHADO AO IMPRIMIR QR CODE DIRETAMENTE ===');
-        console.error('Tipo do erro:', error.constructor.name);
-        console.error('Mensagem:', error.message);
-        console.error('Stack:', error.stack);
+        console.error('Erro ao imprimir QR code diretamente:', error.message);
         
         res.status(500).json({ success: false, message: "Erro ao imprimir QR code diretamente" });
     }
@@ -708,13 +625,9 @@ const printTableQRCodeDirect = async (req, res) => {
 // Imprimir QR codes diretamente na impressora térmica (todas as mesas)
 const printAllQRCodesDirect = async (req, res) => {
     try {
-        console.log('=== INICIANDO IMPRESSÃO DIRETA DE TODOS OS QR CODES ===');
         const storeId = req.user?.storeId || req.storeId;
         
-        console.log('Store ID:', storeId);
-        
         if (!storeId) {
-            console.log('ID da loja não encontrado');
             return res.json({ success: false, message: "ID da loja não encontrado" });
         }
         
@@ -722,10 +635,9 @@ const printAllQRCodesDirect = async (req, res) => {
             .sort({ tableNumber: 1 })
             .populate('storeId', 'name');
         
-        console.log('Mesas encontradas:', tables.length);
+        // Mesas encontradas
         
         if (tables.length === 0) {
-            console.log('Nenhuma mesa ativa encontrada');
             return res.json({ success: false, message: "Nenhuma mesa ativa encontrada" });
         }
         
@@ -733,17 +645,16 @@ const printAllQRCodesDirect = async (req, res) => {
         
         for (let i = 0; i < tables.length; i++) {
             const table = tables[i];
-            console.log(`Processando mesa ${i + 1}/${tables.length}: ${table.displayName}`);
+            // Processando mesa
             
             // Verificar se a mesa tem qrCodeUrl
             if (!table.qrCodeUrl) {
-                console.log('Gerando qrCodeUrl para mesa:', table.displayName);
                 table.qrCodeUrl = table.generateQRCodeUrl();
                 await table.save();
             }
             
             // Gerar QR code como buffer
-            console.log('Gerando QR code buffer para:', table.displayName);
+            // Gerar QR code buffer
             const qrCodeBuffer = await QRCode.toBuffer(table.qrCodeUrl, {
                 width: 200,
                 margin: 1,
@@ -753,7 +664,7 @@ const printAllQRCodesDirect = async (req, res) => {
                 }
             });
             
-            console.log('QR code buffer gerado, tamanho:', qrCodeBuffer.length);
+            // QR code buffer gerado
             
             const tableData = {
                 type: 'qr_code',
@@ -770,7 +681,7 @@ const printAllQRCodesDirect = async (req, res) => {
             printDataArray.push(tableData);
         }
         
-        console.log('Dados preparados para impressão térmica de todas as mesas');
+        // Dados preparados para impressão térmica de todas as mesas
         
         // Tentar imprimir todas as mesas via impressora térmica
         let successCount = 0;
@@ -793,12 +704,12 @@ const printAllQRCodesDirect = async (req, res) => {
                 if (printResponse.data.success) {
                     successCount++;
                     results.push({ table: tableData.tableName, status: 'success', method: 'serial' });
-                    console.log(`QR code da ${tableData.tableName} impresso com sucesso via serial`);
+                    // QR code impresso com sucesso via serial
                 } else {
                     throw new Error(printResponse.data.message || 'Erro na impressão serial');
                 }
             } catch (serialError) {
-                console.log(`Erro na impressão serial para ${tableData.tableName}, tentando Bluetooth...`);
+                // Erro na impressão serial, tentando Bluetooth
                 
                 // Tentar via Bluetooth se serial falhar
                 try {
@@ -815,14 +726,14 @@ const printAllQRCodesDirect = async (req, res) => {
                     if (printResponse.data.success) {
                         successCount++;
                         results.push({ table: tableData.tableName, status: 'success', method: 'bluetooth' });
-                        console.log(`QR code da ${tableData.tableName} impresso com sucesso via Bluetooth`);
+                        // QR code impresso com sucesso via Bluetooth
                     } else {
                         throw new Error(printResponse.data.message || 'Erro na impressão Bluetooth');
                     }
                 } catch (bluetoothError) {
                     errorCount++;
                     results.push({ table: tableData.tableName, status: 'error', error: bluetoothError.message });
-                    console.log(`Erro na impressão da ${tableData.tableName}:`, bluetoothError.message);
+                    // Erro na impressão via Bluetooth
                 }
             }
         }
@@ -842,13 +753,10 @@ const printAllQRCodesDirect = async (req, res) => {
             warning: errorCount > 0 ? 'Algumas impressões falharam. Verifique a conexão da impressora.' : null
         });
         
-        console.log('Impressão direta de todos os QR codes concluída!');
+
         
     } catch (error) {
-        console.error('=== ERRO DETALHADO AO IMPRIMIR TODOS OS QR CODES DIRETAMENTE ===');
-        console.error('Tipo do erro:', error.constructor.name);
-        console.error('Mensagem:', error.message);
-        console.error('Stack:', error.stack);
+        console.error('Erro ao imprimir todos os QR codes diretamente:', error.message);
         
         res.status(500).json({ success: false, message: "Erro ao imprimir QR codes diretamente" });
     }

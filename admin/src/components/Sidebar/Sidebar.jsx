@@ -23,6 +23,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.add_icon} alt="" />
           <p>Categories</p>
         </NavLink>
+
         <NavLink to='/banners' className="sidebar-option" onClick={onClose}>
           <img src={assets.add_icon} alt="" />
           <p>Banners</p>

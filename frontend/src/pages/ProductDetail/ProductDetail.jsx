@@ -18,10 +18,14 @@ const ProductDetail = () => {
     const [error, setError] = useState(null);
     const [observations, setObservations] = useState('');
     const [includeDisposables, setIncludeDisposables] = useState(false);
+    const [addonCategories, setAddonCategories] = useState([]);
+    const [addons, setAddons] = useState([]);
+    const [selectedAddons, setSelectedAddons] = useState([]);
+    const [productSuggestions, setProductSuggestions] = useState([]);
     
 
 
-    // Fetch product details
+    // Fetch product details and addon data
     useEffect(() => {
         const fetchProduct = async () => {
             if (!id) {
@@ -31,10 +35,10 @@ const ProductDetail = () => {
             }
             
             try {
-                const response = await axios.get(`${url}/api/food/list`);
+                const productResponse = await axios.get(`${url}/api/food/list`);
                 
-                if (response.data.success) {
-                    const foundProduct = response.data.data.find(item => {
+                if (productResponse.data.success) {
+                    const foundProduct = productResponse.data.data.find(item => {
                         return item._id.toString() === id.toString();
                     });
                     
@@ -44,6 +48,18 @@ const ProductDetail = () => {
                         const price = parseFloat(foundProduct.price) || 0;
                         setTotalPrice(price);
                         setError(null);
+                        
+                        // Fetch product suggestions if the product uses new addon system
+                        if (!foundProduct.useOldSystem) {
+                            try {
+                                const suggestionsResponse = await axios.get(`${url}/api/product-suggestions/${id}`);
+                                if (suggestionsResponse.data.success) {
+                                    setProductSuggestions(suggestionsResponse.data.suggestions);
+                                }
+                            } catch (error) {
+                                // No suggestions found for this product
+                            }
+                        }
                     } else {
                         setError(`Produto com ID ${id} não encontrado`);
                     }
@@ -61,16 +77,27 @@ const ProductDetail = () => {
         fetchProduct();
     }, [id, url]);
 
-    // Calculate total price when quantity or extras change
+    // Calculate total price when quantity, extras, or addons change
     useEffect(() => {
         if (product) {
             const basePrice = (parseFloat(product.price) || 0) * quantity;
-            const extrasPrice = selectedExtras.reduce((total, extra) => {
-                return total + ((parseFloat(extra.price) || 0) * quantity);
-            }, 0);
+            
+            let extrasPrice = 0;
+            if (product.useOldSystem) {
+                // Sistema antigo - usar extras
+                extrasPrice = selectedExtras.reduce((total, extra) => {
+                    return total + ((parseFloat(extra.price) || 0) * quantity);
+                }, 0);
+            } else {
+                // Novo sistema inline - usar adicionais
+                extrasPrice = selectedAddons.reduce((total, addon) => {
+                    return total + ((parseFloat(addon.price) || 0) * quantity);
+                }, 0);
+            }
+            
             setTotalPrice(basePrice + extrasPrice);
         }
-    }, [product, quantity, selectedExtras]);
+    }, [product, quantity, selectedExtras, selectedAddons]);
 
     const handleExtraChange = (extra, isChecked) => {
         if (isChecked) {
@@ -80,12 +107,42 @@ const ProductDetail = () => {
         }
     };
 
+    const handleInlineAddonChange = (categoryName, addon, isChecked) => {
+        if (isChecked) {
+            setSelectedAddons(prev => [...prev, { ...addon, categoryName }]);
+        } else {
+            setSelectedAddons(prev => prev.filter(item => 
+                !(item.name === addon.name && item.categoryName === categoryName)
+            ));
+        }
+    };
+
+    const getSelectedAddonsForInlineCategory = (categoryName) => {
+        return selectedAddons.filter(addon => addon.categoryName === categoryName);
+    };
+
+    const isInlineAddonSelected = (categoryName, addon) => {
+        return selectedAddons.some(selected => 
+            selected.name === addon.name && selected.categoryName === categoryName
+        );
+    };
+
 
 
     const handleFinishOrder = async () => {
+        let allExtras = [];
+        
+        if (product.useOldSystem) {
+            // Sistema antigo - usar apenas extras
+            allExtras = selectedExtras;
+        } else {
+            // Novo sistema inline - usar apenas adicionais
+            allExtras = selectedAddons;
+        }
+        
         // Add to cart with the specified quantity, extras, observations and disposables
         for (let i = 0; i < quantity; i++) {
-            await addToCart(product._id, selectedExtras, observations, includeDisposables);
+            await addToCart(product._id, allExtras, observations, includeDisposables);
         }
         
         // Navigate directly to cart
@@ -93,9 +150,12 @@ const ProductDetail = () => {
     };
 
     const handleContinueShopping = async () => {
+        // Combine legacy extras with new addons
+        const allExtras = [...selectedExtras, ...selectedAddons];
+        
         // Add to cart with the specified quantity, extras, observations and disposables
         for (let i = 0; i < quantity; i++) {
-            await addToCart(product._id, selectedExtras, observations, includeDisposables);
+            await addToCart(product._id, allExtras, observations, includeDisposables);
         }
         
         // Navigate back to store page
@@ -181,7 +241,8 @@ const ProductDetail = () => {
                             </div>
                         </div>
                         
-                        {product.extras && product.extras.length > 0 && (
+                        {/* Legacy extras system */}
+                        {product.useOldSystem && product.extras && product.extras.length > 0 && (
                             <div className="extras-section">
                                 <h3>Adicionais:</h3>
                                 <div className="extras-list">
@@ -196,6 +257,73 @@ const ProductDetail = () => {
                                                 <span className="extra-name">{extra.name}</span>
                                                 <span className="extra-price">+ R$ {(parseFloat(extra.price) || 0).toFixed(2)}</span>
                                             </label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* New inline addon categories system */}
+                        {!product.useOldSystem && product.inlineAddonCategories && product.inlineAddonCategories.length > 0 && (
+                            <div className="addon-categories-section">
+                                <h3>Personalize seu pedido:</h3>
+                                {product.inlineAddonCategories.map((category, categoryIndex) => {
+                                    const categoryAddons = product.categoryAddons[category.name] || [];
+                                    const selectedCategoryAddons = getSelectedAddonsForInlineCategory(category.name);
+                                    
+                                    if (categoryAddons.length === 0) return null;
+                                    
+                                    return (
+                                        <div key={categoryIndex} className="addon-category">
+                                            <h4 className="category-title">
+                                                {category.name}
+                                            </h4>
+                                            {category.description && (
+                                                <p className="category-description">{category.description}</p>
+                                            )}
+                                            <div className="addons-list">
+                                                {categoryAddons.map((addon, addonIndex) => (
+                                                    <div key={addonIndex} className="addon-item">
+                                                        <label className="addon-label">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isInlineAddonSelected(category.name, addon)}
+                                                                onChange={(e) => handleInlineAddonChange(category.name, addon, e.target.checked)}
+                                                                className="addon-checkbox"
+                                                            />
+                                                            <div className="addon-content">
+                                                                <span className="addon-name">{addon.name}</span>
+                                                                {addon.description && (
+                                                                    <span className="addon-description">{addon.description}</span>
+                                                                )}
+                                                            </div>
+                                                            <span className="addon-price">+ R$ {(parseFloat(addon.price) || 0).toFixed(2)}</span>
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* Product suggestions */}
+                        {productSuggestions.length > 0 && (
+                            <div className="suggestions-section">
+                                <h3>Sugestões para você:</h3>
+                                <div className="suggestions-list">
+                                    {productSuggestions.map(suggestion => (
+                                        <div key={suggestion._id} className="suggestion-item" onClick={() => navigate(`/product/${suggestion._id}`)}>
+                                            <img 
+                                                src={`${url}/images/${suggestion.image}`} 
+                                                alt={suggestion.name}
+                                                className="suggestion-image"
+                                            />
+                                            <div className="suggestion-info">
+                                                <h4>{suggestion.name}</h4>
+                                                <p className="suggestion-price">R$ {(parseFloat(suggestion.price) || 0).toFixed(2)}</p>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

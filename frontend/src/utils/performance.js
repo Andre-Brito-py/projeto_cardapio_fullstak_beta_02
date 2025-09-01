@@ -144,9 +144,9 @@ export const performanceMonitor = {
     const startTime = this.marks.get(name);
     if (startTime) {
       const duration = performance.now() - startTime;
-      console.log(`Performance: ${name} took ${duration.toFixed(2)}ms`);
-      this.marks.delete(name);
-      return duration;
+    // Performance tracking: ${name} took ${duration.toFixed(2)}ms
+    this.marks.delete(name);
+    return duration;
     }
     return null;
   }

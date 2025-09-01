@@ -24,7 +24,7 @@ const Verify = () => {
                 // Limpar carrinho do localStorage para usuários não autenticados
                 if (!token) {
                     localStorage.removeItem('cartItems');
-                    console.log('🛒 Verify: Carrinho limpo do localStorage após pagamento bem-sucedido');
+                    // Cart cleared from localStorage after successful payment
                 }
                 
                 // Redirecionar baseado no status de autenticação

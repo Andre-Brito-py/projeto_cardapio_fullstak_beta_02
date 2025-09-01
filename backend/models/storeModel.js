@@ -48,13 +48,38 @@ const storeSchema = new mongoose.Schema({
     endDate: {
       type: Date,
       default: function() {
-        // 30 dias de trial
-        return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const date = new Date();
+        date.setDate(date.getDate() + 7); // 7 dias de trial
+        return date;
       }
     },
     autoRenew: {
       type: Boolean,
       default: false
+    },
+    // Campos para integração com Asaas
+    asaasCustomerId: {
+      type: String,
+      unique: true,
+      sparse: true
+    },
+    asaasSubscriptionId: {
+      type: String,
+      unique: true,
+      sparse: true
+    },
+    ciclo: {
+      type: String,
+      enum: ['mensal', 'anual'],
+      default: 'mensal'
+    },
+    validadePlano: {
+      type: Date
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['PIX', 'BOLETO', 'CREDIT_CARD'],
+      default: 'PIX'
     }
   },
   settings: {

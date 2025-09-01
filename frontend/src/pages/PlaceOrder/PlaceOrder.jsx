@@ -335,7 +335,6 @@ const PlaceOrder = ({ setShowLogin }) => {
     // Aguardar um pouco para garantir que a sincronização aconteceu
     const timeoutId = setTimeout(() => {
       if(getTotalCartAmount() === 0){
-        console.log('🛒 PlaceOrder: Carrinho vazio, redirecionando para /cart');
         navigate('/cart');
       }
     }, 500); // Aguardar 500ms para sincronização

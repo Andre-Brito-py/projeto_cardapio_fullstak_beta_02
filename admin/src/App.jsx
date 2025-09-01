@@ -24,6 +24,9 @@ import StoreLinks from './pages/StoreLinks/StoreLinks';
 import WaiterManagement from './pages/WaiterManagement/WaiterManagement';
 import Customers from './pages/Customers/Customers';
 import InPersonSales from './pages/InPersonSales/InPersonSales';
+import AsaasDashboard from './pages/AsaasDashboard/AsaasDashboard';
+import ApiManagement from './pages/SuperAdmin/ApiManagement/ApiManagement';
+
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -122,14 +125,17 @@ const App = () => {
           <Route path='/super-admin/dashboard' element={<SuperAdminDashboard url={url} token={token}/>} />
           <Route path='/super-admin/stores' element={<StoreManagement url={url} token={token}/>} />
           <Route path='/super-admin/system-settings' element={<SystemSettings url={url} token={token}/>} />
+          <Route path='/super-admin/api-management' element={<ApiManagement url={url} token={token}/>} />
           <Route path='/super-admin/analytics' element={<Analytics url={url} token={token}/>} />
           <Route path='/super-admin/users' element={<UserManagement url={url} token={token}/>} />
+          <Route path='/super-admin/asaas' element={<AsaasDashboard url={url} token={token}/>} />
           <Route path='/store-links' element={<StoreLinks url={url} token={token}/>} />
           
           {/* Rotas normais do admin */}
           <Route path='/add' element={<Add url={url} />} />
           <Route path='/list' element={<List url={url}/>} />
           <Route path='/categories' element={<Categories url={url}/>} />
+
           <Route path='/orders' element={<Orders url={url} token={token}/>} />
           <Route path='/edit/:id' element={<Edit url={url}/>} />
           <Route path='/settings' element={<Settings url={url}/>} />

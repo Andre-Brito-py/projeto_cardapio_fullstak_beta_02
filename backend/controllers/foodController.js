@@ -1,15 +1,14 @@
 import fs from 'fs'
 import foodModel from '../models/foodModel.js'
+import AddonCategory from '../models/addonCategoryModel.js'
+import ProductSuggestion from '../models/productSuggestionModel.js'
 
 // Função para popular produtos iniciais se não existirem
 const populateInitialFoods = async () => {
     try {
-        console.log('🔍 Verificando produtos existentes...');
         const existingFoods = await foodModel.find({});
-        console.log(`📊 Produtos encontrados no banco: ${existingFoods.length}`);
         
         if (existingFoods.length === 0) {
-            console.log('📦 Populando produtos iniciais...');
             const initialFoods = [
                 {
                     name: 'Pizza Margherita',
@@ -37,21 +36,10 @@ const populateInitialFoods = async () => {
                 }
             ];
             
-            const savedFoods = await foodModel.insertMany(initialFoods);
-            console.log('✅ Produtos iniciais populados com sucesso!');
-            console.log('🆔 IDs dos produtos criados:');
-            savedFoods.forEach(food => {
-                console.log(`   - ${food.name}: ${food._id}`);
-            });
-        } else {
-            console.log('✅ Produtos já existem no banco de dados');
-            console.log('🆔 IDs dos produtos existentes:');
-            existingFoods.forEach(food => {
-                console.log(`   - ${food.name}: ${food._id}`);
-            });
+            await foodModel.insertMany(initialFoods);
         }
     } catch (error) {
-        console.log('❌ Erro ao popular produtos iniciais:', error);
+        console.error('Erro ao popular produtos iniciais:', error);
     }
 };
 
@@ -61,22 +49,41 @@ populateInitialFoods();
 //add food item
 
 const addFood = async (req,res) =>{
-    console.log('=== ADD FOOD REQUEST RECEIVED ===');
-    console.log('Request body:', req.body);
-    console.log('Request file:', req.file);
-    console.log('Store context:', req.store);
 
     let image_filename = req.file ? req.file.filename : req.body.image || 'default.jpg';
 
-    // Parse extras if provided
+    // Parse extras if provided (legacy system)
     let extras = [];
     if (req.body.extras) {
         try {
             extras = typeof req.body.extras === 'string' ? JSON.parse(req.body.extras) : req.body.extras;
         } catch (error) {
-            console.log('Error parsing extras:', error);
+            // Error parsing extras, using empty array as fallback
         }
     }
+
+    // Parse inline addon categories if provided (new system)
+    let inlineAddonCategories = [];
+    if (req.body.addonCategories) {
+        try {
+            inlineAddonCategories = typeof req.body.addonCategories === 'string' ? JSON.parse(req.body.addonCategories) : req.body.addonCategories;
+        } catch (error) {
+            console.error('Error parsing inline addon categories:', error);
+        }
+    }
+
+    // Parse category addons if provided (new system)
+    let categoryAddons = {};
+    if (req.body.categoryAddons) {
+        try {
+            categoryAddons = typeof req.body.categoryAddons === 'string' ? JSON.parse(req.body.categoryAddons) : req.body.categoryAddons;
+        } catch (error) {
+            console.error('Error parsing category addons:', error);
+        }
+    }
+
+    // Determine which system to use
+    const useOldSystem = req.body.useOldSystem === 'true' || req.body.useOldSystem === true;
 
     const food = new foodModel({
         name: req.body.name,
@@ -84,16 +91,18 @@ const addFood = async (req,res) =>{
         price: req.body.price,
         category: req.body.category,
         image: image_filename,
-        storeId: req.store ? req.store._id : null, // Adicionar storeId do contexto se disponível
-        extras: extras
+        storeId: req.store ? req.store._id : null,
+        extras: useOldSystem ? extras : [],
+        inlineAddonCategories: useOldSystem ? [] : inlineAddonCategories,
+        categoryAddons: useOldSystem ? {} : categoryAddons,
+        useOldSystem: useOldSystem
     });
 
     try {
         await food.save();
-        console.log('Food added to database:', food.name, 'for store:', req.store.name);
         res.json({success:true,message:'Food Added'})
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao adicionar produto:', error);
         res.json({success:false, message:'Error'})
     }
 }
@@ -107,7 +116,7 @@ const listFood = async (req,res) =>{
         const foods = await foodModel.find(query).populate('storeId', 'name slug');
         res.json({success:true,data:foods})
     } catch (error) {
-        console.log(error)
+        console.error('Erro ao listar produtos:', error)
         res.json({success:false, message:'Error'})
     }
 }
@@ -127,7 +136,7 @@ const removeFood = async (req,res)=>{
             res.json({success:false, message:'Food not found or access denied'})
         }
     } catch (error) {
-        console.log(error)
+        console.error('Erro ao remover produto:', error)
         res.json({success:false, message:'Error'})
     }
 }
@@ -135,7 +144,7 @@ const removeFood = async (req,res)=>{
 // update food item
 const updateFood = async (req, res) => {
     try {
-        const { id, name, description, price, category, extras } = req.body;
+        const { id, name, description, price, category, extras, addonCategories, categoryAddons, useOldSystem } = req.body;
         
         // Find food in database with store context
         const query = req.store ? { _id: id, storeId: req.store._id } : { _id: id };
@@ -150,19 +159,48 @@ const updateFood = async (req, res) => {
             name: name || food.name,
             description: description || food.description,
             price: price || food.price,
-            category: category || food.category
+            category: category || food.category,
+            useOldSystem: useOldSystem !== undefined ? (useOldSystem === 'true' || useOldSystem === true) : food.useOldSystem
         };
         
-        // Parse and update extras if provided
-        if (extras) {
-            try {
-                updateData.extras = typeof extras === 'string' ? JSON.parse(extras) : extras;
-            } catch (error) {
-                console.log('Error parsing extras:', error);
-                updateData.extras = [];
+        // Update based on system type
+        if (updateData.useOldSystem) {
+            // Sistema antigo - atualizar extras
+            if (extras) {
+                try {
+                    updateData.extras = typeof extras === 'string' ? JSON.parse(extras) : extras;
+                } catch (error) {
+                    updateData.extras = [];
+                }
+            } else {
+                updateData.extras = food.extras;
             }
+            // Limpar campos do novo sistema
+            updateData.inlineAddonCategories = [];
+            updateData.categoryAddons = {};
         } else {
-            updateData.extras = food.extras;
+            // Novo sistema - atualizar categorias e adicionais inline
+            if (addonCategories) {
+                try {
+                    updateData.inlineAddonCategories = typeof addonCategories === 'string' ? JSON.parse(addonCategories) : addonCategories;
+                } catch (error) {
+                    updateData.inlineAddonCategories = [];
+                }
+            } else {
+                updateData.inlineAddonCategories = food.inlineAddonCategories || [];
+            }
+            
+            if (categoryAddons) {
+                try {
+                    updateData.categoryAddons = typeof categoryAddons === 'string' ? JSON.parse(categoryAddons) : categoryAddons;
+                } catch (error) {
+                    updateData.categoryAddons = {};
+                }
+            } else {
+                updateData.categoryAddons = food.categoryAddons || {};
+            }
+            // Limpar extras do sistema antigo
+            updateData.extras = [];
         }
         
         // Update image if new file is uploaded
@@ -181,9 +219,100 @@ const updateFood = async (req, res) => {
         
         res.json({ success: true, message: 'Food Updated', data: updatedFood });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar comida:', error);
         res.json({ success: false, message: 'Error updating food' });
     }
 };
 
-export {addFood, listFood, removeFood, updateFood}
+// Obter produto com categorias de adicionais e sugestões (para o frontend do cliente)
+const getFoodWithAddonsAndSuggestions = async (req, res) => {
+    try {
+        const { foodId } = req.params;
+        const storeId = req.store._id;
+
+        // Buscar o produto
+        const food = await foodModel.findOne({ _id: foodId, storeId, isActive: true });
+
+        if (!food) {
+            return res.json({ success: false, message: 'Produto não encontrado' });
+        }
+
+        // Preparar dados de adicionais baseado no sistema usado
+        let addonData = {};
+        
+        if (food.useOldSystem) {
+            // Sistema antigo - usar extras
+            addonData = {
+                useOldSystem: true,
+                extras: food.extras || []
+            };
+        } else {
+            // Novo sistema inline - usar categorias e adicionais inline
+            addonData = {
+                useOldSystem: false,
+                inlineAddonCategories: food.inlineAddonCategories || [],
+                categoryAddons: food.categoryAddons || {}
+            };
+        }
+
+        // Buscar sugestões de produtos
+        const suggestions = await ProductSuggestion.find({ 
+            productId: foodId, 
+            storeId, 
+            isActive: true 
+        })
+        .populate('suggestedProductId', 'name image price description category')
+        .sort({ order: 1, createdAt: -1 });
+
+        // Filtrar apenas produtos ativos nas sugestões
+        const activeSuggestions = suggestions.filter(suggestion => 
+            suggestion.suggestedProductId && suggestion.suggestedProductId.name
+        );
+
+        res.json({ 
+            success: true, 
+            data: {
+                ...food.toObject(),
+                ...addonData,
+                suggestions: activeSuggestions
+            }
+        });
+    } catch (error) {
+        console.error('Erro ao obter produto com adicionais e sugestões:', error);
+        res.json({ success: false, message: 'Erro interno do servidor' });
+    }
+};
+
+// Listar produtos com informações básicas de adicionais (para listagem)
+const listFoodWithAddonInfo = async (req, res) => {
+    try {
+        const query = req.store ? { storeId: req.store._id, isActive: true } : { isActive: true };
+        const foods = await foodModel.find(query)
+            .populate('storeId', 'name slug')
+            .populate('addonCategories', 'name')
+            .sort({ createdAt: -1 });
+
+        // Adicionar contagem de sugestões para cada produto
+        const foodsWithSuggestionCount = await Promise.all(
+            foods.map(async (food) => {
+                const suggestionCount = await ProductSuggestion.countDocuments({
+                    productId: food._id,
+                    storeId: food.storeId,
+                    isActive: true
+                });
+
+                return {
+                    ...food.toObject(),
+                    suggestionCount
+                };
+            })
+        );
+
+        res.json({ success: true, data: foodsWithSuggestionCount });
+    } catch (error) {
+        console.error('Erro ao listar produtos com informações de adicionais:', error);
+        res.json({ success: false, message: 'Erro interno do servidor' });
+    }
+};
+
+export {addFood, listFood, removeFood, updateFood, getFoodWithAddonsAndSuggestions, listFoodWithAddonInfo}

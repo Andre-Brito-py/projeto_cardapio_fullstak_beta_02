@@ -121,8 +121,7 @@ const createStore = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log('Erro detalhado ao criar loja:', error);
-        console.log('Stack trace:', error.stack);
+        console.error('Erro ao criar loja:', error);
         res.json({ success: false, message: "Erro ao criar loja", error: error.message });
     }
 };
@@ -152,7 +151,7 @@ const getStore = async (req, res) => {
         
         res.json({ success: true, store: store });
     } catch (error) {
-        console.log('Erro em getStore:', error);
+        console.error('Erro ao obter dados da loja:', error);
         res.json({ success: false, message: "Erro ao obter dados da loja" });
     }
 };
@@ -203,7 +202,7 @@ const updateStoreSettings = async (req, res) => {
         
         res.json({ success: true, message: "Configurações atualizadas com sucesso", data: store });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar configurações da loja:', error);
         res.json({ success: false, message: "Erro ao atualizar configurações" });
     }
 };
@@ -235,7 +234,7 @@ const getStoreStats = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao obter estatísticas da loja:', error);
         res.json({ success: false, message: "Erro ao obter estatísticas" });
     }
 };
@@ -255,7 +254,7 @@ const checkPlanLimits = async (req, res) => {
         
         res.json({ success: true, data: limits });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao verificar limites do plano:', error);
         res.json({ success: false, message: "Erro ao verificar limites" });
     }
 };
@@ -285,7 +284,7 @@ const updateSubscription = async (req, res) => {
         
         res.json({ success: true, message: "Assinatura atualizada com sucesso" });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar assinatura da loja:', error);
         res.json({ success: false, message: "Erro ao atualizar assinatura" });
     }
 };
@@ -337,7 +336,7 @@ const loginStoreAdmin = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro no login do admin da loja:', error);
         res.json({ success: false, message: "Erro no login" });
     }
 };
@@ -376,7 +375,7 @@ const getPublicStoreData = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao obter dados públicos da loja:', error);
         res.json({ success: false, message: "Erro ao obter dados da loja" });
     }
 };
@@ -425,7 +424,7 @@ const getPublicStoreMenu = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao obter cardápio público da loja:', error);
         res.json({ success: false, message: "Erro ao obter cardápio da loja" });
     }
 };
@@ -461,7 +460,7 @@ const updateStoreStatus = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar status da loja:', error);
         res.json({ success: false, message: "Erro ao atualizar status da loja" });
     }
 };
@@ -497,7 +496,7 @@ const updateAutoAcceptOrders = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao atualizar configuração de aceitar pedidos automaticamente:', error);
         res.json({ success: false, message: "Erro ao atualizar configuração de aceitar pedidos automaticamente" });
     }
 };
@@ -536,7 +535,7 @@ const getPublicStoreById = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error('Erro ao obter dados públicos da loja por ID:', error);
         res.json({ success: false, message: "Erro ao obter dados da loja" });
     }
 };
