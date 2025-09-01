@@ -130,10 +130,8 @@ const authMultiTenant = async (req, res, next) => {
         
         // Verificando token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // Token decodificado
         
         const user = await userModel.findById(decoded.id).populate('storeId');
-        // Usuário encontrado
         
         if (!user || !user.isActive) {
             // Usuário não encontrado ou inativo

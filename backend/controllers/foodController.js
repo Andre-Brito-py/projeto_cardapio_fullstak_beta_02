@@ -315,4 +315,71 @@ const listFoodWithAddonInfo = async (req, res) => {
     }
 };
 
-export {addFood, listFood, removeFood, updateFood, getFoodWithAddonsAndSuggestions, listFoodWithAddonInfo}
+// Controle de estoque - marcar produto como esgotado
+const updateStockStatus = async (req, res) => {
+    try {
+        const { id, isOutOfStock, outOfStockAddons, outOfStockAddonCategories } = req.body;
+        
+        // Verificar se o produto pertence à loja
+        const query = req.store ? { _id: id, storeId: req.store._id } : { _id: id };
+        const food = await foodModel.findOne(query);
+        
+        if (!food) {
+            return res.json({ success: false, message: 'Produto não encontrado ou acesso negado' });
+        }
+        
+        // Preparar dados de atualização
+        const updateData = {};
+        
+        if (isOutOfStock !== undefined) {
+            updateData.isOutOfStock = isOutOfStock;
+        }
+        
+        if (outOfStockAddons !== undefined) {
+            updateData.outOfStockAddons = Array.isArray(outOfStockAddons) ? outOfStockAddons : [];
+        }
+        
+        if (outOfStockAddonCategories !== undefined) {
+            updateData.outOfStockAddonCategories = Array.isArray(outOfStockAddonCategories) ? outOfStockAddonCategories : [];
+        }
+        
+        // Atualizar produto
+        const updatedFood = await foodModel.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        );
+        
+        res.json({
+            success: true,
+            message: 'Status de estoque atualizado com sucesso',
+            data: updatedFood
+        });
+        
+    } catch (error) {
+        console.error('Erro ao atualizar status de estoque:', error);
+        res.json({ success: false, message: 'Erro interno do servidor' });
+    }
+};
+
+// Buscar detalhes de um produto específico
+const getFoodDetails = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Verificar se o produto pertence à loja
+        const query = req.store ? { _id: id, storeId: req.store._id } : { _id: id };
+        const food = await foodModel.findOne(query);
+        
+        if (!food) {
+            return res.json({ success: false, message: 'Produto não encontrado ou acesso negado' });
+        }
+        
+        res.json({ success: true, data: food });
+    } catch (error) {
+        console.error('Erro ao buscar detalhes do produto:', error);
+        res.json({ success: false, message: 'Erro interno do servidor' });
+    }
+};
+
+export {addFood, listFood, removeFood, updateFood, getFoodWithAddonsAndSuggestions, listFoodWithAddonInfo, updateStockStatus, getFoodDetails}

@@ -26,6 +26,7 @@ import Customers from './pages/Customers/Customers';
 import InPersonSales from './pages/InPersonSales/InPersonSales';
 import AsaasDashboard from './pages/AsaasDashboard/AsaasDashboard';
 import ApiManagement from './pages/SuperAdmin/ApiManagement/ApiManagement';
+import StockManagement from './pages/StockManagement/StockManagement';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -146,6 +147,7 @@ const App = () => {
           <Route path='/waiter-management' element={<WaiterManagement url={url}/>} />
           <Route path='/in-person-sales' element={<InPersonSales url={url} token={token}/>} />
           <Route path='/bluetooth-print' element={<BluetoothPrint url={url} token={token}/>} />
+          <Route path='/stock-management/:id' element={<StockManagement url={url}/>} />
           
           {/* Rota padrão */}
           <Route path='/' element={isSuperAdmin ? <StoreManagement url={url} token={token}/> : <Add url={url} />} />

@@ -42,6 +42,21 @@ const foodSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    // Controle de estoque
+    isOutOfStock: {
+        type: Boolean,
+        default: false
+    },
+    // Adicionais esgotados (array de IDs ou nomes)
+    outOfStockAddons: {
+        type: [String],
+        default: []
+    },
+    // Categorias de adicionais esgotadas (para novo sistema)
+    outOfStockAddonCategories: {
+        type: [String],
+        default: []
+    },
     createdAt: {
         type: Date,
         default: Date.now

@@ -98,6 +98,50 @@
   border-color: var(--primary-300);
 }
 
+.password-input-group {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-group input {
+  width: 100%;
+  padding-right: 40px;
+  box-sizing: border-box;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.8em;
+  padding: 2px 4px;
+  color: rgba(0, 0, 0, 0.4);
+  width: 20px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-btn:focus {
+  outline: 1px solid #555;
+  border-radius: 2px;
+}
+
+.password-toggle-btn:hover {
+  color: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.password-toggle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .super-admin-login-form button[type="submit"] {
   width: 100%;
   padding: var(--spacing-sm);

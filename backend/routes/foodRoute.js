@@ -1,5 +1,5 @@
 import express from 'express'
-import { addFood, listFood, removeFood, updateFood, getFoodWithAddonsAndSuggestions, listFoodWithAddonInfo } from '../controllers/foodController.js'
+import { addFood, listFood, removeFood, updateFood, getFoodWithAddonsAndSuggestions, listFoodWithAddonInfo, updateStockStatus, getFoodDetails } from '../controllers/foodController.js'
 import multer from 'multer'
 import {
     identifyStore,
@@ -35,6 +35,11 @@ foodRouter.get('/admin/with-addon-info', authMultiTenant, requireStoreAdmin, add
 foodRouter.post('/add', authMultiTenant, requireStoreAdmin, addStoreContext, upload.single('image'), addFood)
 foodRouter.post('/remove', authMultiTenant, requireStoreAdmin, addStoreContext, removeFood)
 foodRouter.put('/update', authMultiTenant, requireStoreAdmin, addStoreContext, upload.single('image'), updateFood)
+// Rota para atualizar status de estoque
+foodRouter.put('/stock-status', authMultiTenant, requireStoreAdmin, addStoreContext, updateStockStatus)
+
+// Rota para buscar detalhes de um produto específico
+foodRouter.get('/:id/details', authMultiTenant, requireStoreAdmin, addStoreContext, getFoodDetails)
 
 // Test endpoint
 foodRouter.post('/test', authMultiTenant, requireStoreAdmin, addStoreContext, (req, res) => {

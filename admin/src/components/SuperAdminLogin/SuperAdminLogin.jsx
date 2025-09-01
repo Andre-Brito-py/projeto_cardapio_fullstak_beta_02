@@ -11,6 +11,7 @@ const SuperAdminLogin = ({ url, setToken, setSuperAdmin }) => {
   });
   const [loading, setLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const onChangeHandler = (event) => {
     const name = event.target.name;
@@ -81,14 +82,25 @@ const SuperAdminLogin = ({ url, setToken, setSuperAdmin }) => {
           
           <div className='form-group'>
             <label>Senha:</label>
-            <input
-              name='password'
-              onChange={onChangeHandler}
-              value={data.password}
-              type='password'
-              placeholder='Digite sua senha'
-              required
-            />
+            <div className='password-input-group'>
+              <input
+                name='password'
+                onChange={onChangeHandler}
+                value={data.password}
+                type={showPassword ? 'text' : 'password'}
+                placeholder='Digite sua senha'
+                required
+              />
+              <button 
+                type="button" 
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                disabled={loading}
+                title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {showPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
           </div>
           
           <button type='submit' disabled={loading}>

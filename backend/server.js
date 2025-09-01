@@ -1,3 +1,6 @@
+// Configuração das variáveis de ambiente (DEVE ser o primeiro import)
+import 'dotenv/config';
+
 // Importações principais
 import express from 'express';
 import cors from 'cors';
@@ -25,9 +28,6 @@ import inPersonSaleRouter from './routes/inPersonSaleRoute.js';
 import productSuggestionRouter from './routes/productSuggestionRoute.js';
 import asaasRouter from './routes/asaasRoutes.js';
 import apiRouter from './routes/apiRoutes.js';
-
-// Utilitários
-import 'dotenv/config';
 
 // Configuração da aplicação
 const app = express();

@@ -17,6 +17,7 @@ const LoginPopup = memo(({setShowLogin}) => {
     })
     const [loading, setLoading] = useState(false)
     const [errors, setErrors] = useState({})
+    const [showPassword, setShowPassword] = useState(false)
 
     const handleChange = useCallback((event) => {
         const name = event.target.name;
@@ -129,16 +130,25 @@ const LoginPopup = memo(({setShowLogin}) => {
                     {errors.email && <span className="error-message">{errors.email}</span>}
                 </div>
                 
-                <div className="input-group">
+                <div className="input-group password-input-group">
                     <input 
                         name='password' 
                         onChange={handleChange} 
                         value={data.password} 
-                        type="password" 
+                        type={showPassword ? "text" : "password"} 
                         placeholder='Senha' 
                         className={errors.password ? 'error' : ''}
                         disabled={loading}
                     />
+                    <button 
+                        type="button" 
+                        className="password-toggle-btn"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={loading}
+                        title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    >
+                        {showPassword ? "👁️" : "👁️‍🗨️"}
+                    </button>
                     {errors.password && <span className="error-message">{errors.password}</span>}
                 </div>
             </div>
