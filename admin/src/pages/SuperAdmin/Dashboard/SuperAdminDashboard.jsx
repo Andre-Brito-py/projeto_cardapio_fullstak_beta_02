@@ -51,14 +51,27 @@ const SuperAdminDashboard = ({ token }) => {
   };
 
   const fetchRecentActivity = async () => {
-    // Simulação de atividades recentes - você pode implementar uma API real
-    return [
-      { id: 1, type: 'store_created', message: 'Nova loja "Pizzaria do João" criada', time: '2 min atrás', icon: '🏪' },
-      { id: 2, type: 'user_registered', message: 'Novo usuário cadastrado: maria@email.com', time: '5 min atrás', icon: '👤' },
-      { id: 3, type: 'payment_received', message: 'Pagamento recebido: R$ 299,90', time: '10 min atrás', icon: '💰' },
-      { id: 4, type: 'store_suspended', message: 'Loja "Burger King" suspensa por falta de pagamento', time: '15 min atrás', icon: '⚠️' },
-      { id: 5, type: 'system_backup', message: 'Backup automático realizado com sucesso', time: '1 hora atrás', icon: '💾' }
-    ];
+    try {
+      const response = await axios.get(`${BACKEND_URL}/api/system/recent-activity`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        return response.data.data;
+      } else {
+        console.error('Erro ao buscar atividades recentes:', response.data.message);
+        // Fallback para dados simulados em caso de erro
+        return [
+          { id: 1, type: 'system_backup', message: 'Backup automático realizado com sucesso', time: '1 hora atrás', icon: '💾' }
+        ];
+      }
+    } catch (error) {
+      console.error('Erro ao buscar atividades recentes:', error);
+      // Fallback para dados simulados em caso de erro
+      return [
+        { id: 1, type: 'system_backup', message: 'Backup automático realizado com sucesso', time: '1 hora atrás', icon: '💾' }
+      ];
+    }
   };
 
   const handleQuickAction = (action) => {

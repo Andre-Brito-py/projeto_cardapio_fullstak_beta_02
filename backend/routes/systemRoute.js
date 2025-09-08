@@ -17,7 +17,12 @@ import {
     updateUser,
     deleteUser,
     updateUserStatus,
-    resetUserPassword
+    resetUserPassword,
+    startLisa,
+    stopLisa,
+    restartLisa,
+    getLisaStatus,
+    getRecentActivity
 } from '../controllers/systemController.js';
 import {
     createStore,
@@ -63,5 +68,14 @@ systemRouter.put('/users/:userId', updateUser);
 systemRouter.put('/users/:userId/status', updateUserStatus);
 systemRouter.post('/users/:userId/reset-password', resetUserPassword);
 systemRouter.delete('/users/:userId', deleteUser);
+
+// Gerenciamento da Lisa AI Assistant
+systemRouter.post('/lisa/start', startLisa);
+systemRouter.post('/lisa/stop', stopLisa);
+systemRouter.post('/lisa/restart', restartLisa);
+systemRouter.get('/lisa/status', getLisaStatus);
+
+// Atividades recentes
+systemRouter.get('/recent-activity', getRecentActivity);
 
 export default systemRouter;

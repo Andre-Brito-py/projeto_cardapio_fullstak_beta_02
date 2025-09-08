@@ -31,6 +31,186 @@
   height: 400px;
 }
 
+/* Estilos específicos para Lisa AI Assistant */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.test-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.test-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.test-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.test-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.lisa-controls {
+  margin-top: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+  border-radius: 12px;
+  border: 1px solid #e1e8f0;
+}
+
+.service-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.status-label {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 14px;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.running {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
+}
+
+.status-badge.stopped {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(245, 101, 101, 0.3);
+}
+
+.port-info {
+  background: #edf2f7;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.control-button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.control-button.start {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.3);
+}
+
+.control-button.start:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+}
+
+.control-button.stop {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 101, 101, 0.3);
+}
+
+.control-button.stop:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+}
+
+.control-button.restart {
+  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(237, 137, 54, 0.3);
+}
+
+.control-button.restart:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(237, 137, 54, 0.4);
+}
+
+.control-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.service-url {
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.service-url a {
+  color: #3182ce;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.service-url a:hover {
+  text-decoration: underline;
+}
+
+/* Responsividade para form-row */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -363,5 +543,37 @@
   
   .doc-links {
     flex-direction: column;
+  }
+  
+  .lisa-controls {
+    padding: 16px;
+  }
+  
+  .service-status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .control-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .control-button {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .service-url {
+    padding: 8px;
+    font-size: 13px;
+  }
+  
+  .service-url a {
+    display: block;
+    margin-left: 0;
+    margin-top: 4px;
+    word-break: break-all;
   }
 }

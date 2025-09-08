@@ -123,8 +123,8 @@ MONGODB_URI=mongodb://localhost:27017/food-delivery-multitenant
 JWT_SECRET=seu_jwt_secret_super_seguro_aqui
 STRIPE_SECRET_KEY=sua_chave_stripe_aqui
 PORT=4000
-SUPER_ADMIN_EMAIL=superadmin@fooddelivery.com
-SUPER_ADMIN_PASSWORD=superadmin123
+SUPER_ADMIN_EMAIL=superadmin@gmail.com
+SUPER_ADMIN_PASSWORD=admin123
 ```
 
 **Inicie o servidor backend:**
@@ -158,9 +158,9 @@ node createAdmin.js
 ```
 
 **Credenciais padrão do Super Admin:**
-- **Email**: superadmin@fooddelivery.com
-- **Senha**: superadmin123
-- **URL**: http://localhost:5175
+- **Email**: superadmin@gmail.com
+- **Senha**: admin123
+- **URL**: http://localhost:5173
 
 ## 🚀 Como Executar o Projeto
 

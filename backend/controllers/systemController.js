@@ -5,6 +5,7 @@ import foodModel from '../models/foodModel.js';
 import bannerModel from '../models/bannerModel.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import lisaService from '../services/lisaService.js';
 
 // Obter configurações do sistema
 const getSystemSettings = async (req, res) => {
@@ -734,6 +735,125 @@ const resetUserPassword = async (req, res) => {
     }
 };
 
+// Iniciar Lisa AI Assistant
+const startLisa = async (req, res) => {
+    try {
+        const result = await lisaService.startLisa();
+        res.json(result);
+    } catch (error) {
+        console.error('Erro ao iniciar Lisa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao iniciar Lisa AI Assistant'
+        });
+    }
+};
+
+// Parar Lisa AI Assistant
+const stopLisa = async (req, res) => {
+    try {
+        const result = await lisaService.stopLisa();
+        res.json(result);
+    } catch (error) {
+        console.error('Erro ao parar Lisa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao parar Lisa AI Assistant'
+        });
+    }
+};
+
+// Reiniciar Lisa AI Assistant
+const restartLisa = async (req, res) => {
+    try {
+        const result = await lisaService.restartLisa();
+        res.json(result);
+    } catch (error) {
+        console.error('Erro ao reiniciar Lisa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao reiniciar Lisa AI Assistant'
+        });
+    }
+};
+
+// Obter status da Lisa AI Assistant
+const getLisaStatus = async (req, res) => {
+    try {
+        const status = lisaService.getStatus();
+        res.json({
+            success: true,
+            status
+        });
+    } catch (error) {
+        console.error('Erro ao obter status da Lisa:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao obter status da Lisa AI Assistant'
+        });
+    }
+};
+
+// Obter atividades recentes do sistema
+const getRecentActivity = async (req, res) => {
+    try {
+        const activities = [];
+        
+        // Buscar lojas criadas recentemente (últimas 24 horas)
+        const recentStores = await Store.find({
+            createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+        }).sort({ createdAt: -1 }).limit(5);
+        
+        recentStores.forEach(store => {
+            activities.push({
+                type: 'store_created',
+                message: `Nova loja "${store.name}" criada`,
+                timestamp: store.createdAt,
+                icon: 'store'
+            });
+        });
+        
+        // Buscar usuários registrados recentemente (últimas 24 horas)
+        const recentUsers = await userModel.find({
+            createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+        }).sort({ createdAt: -1 }).limit(5);
+        
+        recentUsers.forEach(user => {
+            activities.push({
+                type: 'user_registered',
+                message: `Novo usuário cadastrado: ${user.email}`,
+                timestamp: user.createdAt,
+                icon: 'user'
+            });
+        });
+        
+        // Buscar mudanças de status de lojas (últimas 24 horas)
+        const statusChanges = await Store.find({
+            updatedAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+            status: { $in: ['suspended', 'active'] }
+        }).sort({ updatedAt: -1 }).limit(3);
+        
+        statusChanges.forEach(store => {
+            if (store.status === 'suspended') {
+                activities.push({
+                    type: 'store_suspended',
+                    message: `Loja "${store.name}" suspensa por falta de pagamento`,
+                    timestamp: store.updatedAt,
+                    icon: 'warning'
+                });
+            }
+        });
+        
+        // Ordenar por timestamp (mais recente primeiro)
+        activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        res.json({ success: true, data: activities.slice(0, 10) });
+    } catch (error) {
+        console.error('Erro ao obter atividades recentes:', error);
+        res.json({ success: false, message: "Erro ao obter atividades recentes" });
+    }
+};
+
 export {
     getSystemSettings,
     updateSystemSettings,
@@ -752,5 +872,10 @@ export {
     updateUser,
     deleteUser,
     updateUserStatus,
-    resetUserPassword
+    resetUserPassword,
+    startLisa,
+    stopLisa,
+    restartLisa,
+    getLisaStatus,
+    getRecentActivity
 };

@@ -8,10 +8,19 @@ import mongoose from 'mongoose';
 // Criar nova loja
 const createStore = async (req, res) => {
     try {
+        console.log('Dados recebidos no backend:', req.body);
+        
         const {
             name,
             description,
             restaurantAddress,
+            street,
+            number,
+            complement,
+            neighborhood,
+            city,
+            state,
+            zipCode,
             ownerName,
             ownerEmail,
             ownerPassword,
@@ -20,6 +29,8 @@ const createStore = async (req, res) => {
             currency = 'BRL',
             timezone = 'America/Sao_Paulo'
         } = req.body;
+        
+        console.log('Campos de endereço extraídos:', { street, number, complement, neighborhood, city, state, zipCode });
         
         // Verificar se o email do proprietário já existe
         const existingUser = await userModel.findOne({ email: ownerEmail });
@@ -59,6 +70,15 @@ const createStore = async (req, res) => {
             },
             settings: {
                 restaurantAddress,
+                address: {
+                    street: street || 'Não informado',
+                    number: number || 'S/N',
+                    complement: complement || '',
+                    neighborhood: neighborhood || 'Não informado',
+                    city: city || 'Não informado',
+                    state: state || 'Não informado',
+                    zipCode: zipCode || '00000-000'
+                },
                 currency,
                 language,
                 timezone,

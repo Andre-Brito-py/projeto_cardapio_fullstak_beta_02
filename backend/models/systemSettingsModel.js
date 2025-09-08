@@ -75,6 +75,47 @@ const systemSettingsSchema = new mongoose.Schema({
     default: false
   },
   
+  // Lisa AI Assistant
+  lisaEnabled: {
+    type: Boolean,
+    default: false
+  },
+  lisaOpenAiApiKey: {
+    type: String,
+    trim: true
+  },
+  lisaGroqApiKey: {
+    type: String,
+    trim: true
+  },
+  lisaChainlitSecret: {
+    type: String,
+    trim: true
+  },
+  lisaLiteralApiKey: {
+    type: String,
+    trim: true
+  },
+  lisaOllamaUrl: {
+    type: String,
+    default: 'http://localhost:11434',
+    trim: true
+  },
+  lisaOllamaModel: {
+    type: String,
+    default: 'llama2',
+    trim: true
+  },
+  lisaPort: {
+    type: String,
+    default: '8000',
+    trim: true
+  },
+  lisaMaxFileSize: {
+    type: Number,
+    default: 10
+  },
+  
   // Configurações de frete
   shippingEnabled: {
     type: Boolean,

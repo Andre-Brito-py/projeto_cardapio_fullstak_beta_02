@@ -32,6 +32,14 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.order_icon} alt="" />
           <p>Orders</p>
         </NavLink>
+        <NavLink to='/order-stats' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>📊 Estatísticas</p>
+        </NavLink>
+        <NavLink to='/payment-stats' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>💳 Pagamentos</p>
+        </NavLink>
         <NavLink to='/tables' className="sidebar-option" onClick={onClose}>
           <img src={assets.add_icon} alt="" />
           <p>Mesas</p>
@@ -48,10 +56,11 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.order_icon} alt="" />
           <p>Garçom</p>
         </NavLink>
-        <NavLink to='/in-person-sales' className="sidebar-option" onClick={onClose}>
-          <img src={assets.add_icon} alt="" />
-          <p>Saídas Presenciais</p>
+        <NavLink to='/counter-attendants' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>Atendentes Balcão</p>
         </NavLink>
+
         <NavLink to='/settings' className="sidebar-option" onClick={onClose}>
           <img src={assets.add_icon} alt="" />
           <p>Settings</p>
@@ -63,6 +72,14 @@ const Sidebar = ({ isOpen, onClose }) => {
         <NavLink to='/bluetooth-print' className="sidebar-option" onClick={onClose}>
           <img src={assets.order_icon} alt="" />
           <p>Impressora BT</p>
+        </NavLink>
+        <NavLink to='/whatsapp-settings' className="sidebar-option" onClick={onClose}>
+          <img src={assets.add_icon} alt="" />
+          <p>WhatsApp Config</p>
+        </NavLink>
+        <NavLink to='/whatsapp-messages' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>WhatsApp Mensagens</p>
         </NavLink>
       </div>
     </div>

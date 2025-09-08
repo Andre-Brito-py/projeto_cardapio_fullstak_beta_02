@@ -23,10 +23,15 @@ import SuperAdminDashboard from './pages/SuperAdmin/Dashboard/SuperAdminDashboar
 import StoreLinks from './pages/StoreLinks/StoreLinks';
 import WaiterManagement from './pages/WaiterManagement/WaiterManagement';
 import Customers from './pages/Customers/Customers';
-import InPersonSales from './pages/InPersonSales/InPersonSales';
+
 import AsaasDashboard from './pages/AsaasDashboard/AsaasDashboard';
 import ApiManagement from './pages/SuperAdmin/ApiManagement/ApiManagement';
 import StockManagement from './pages/StockManagement/StockManagement';
+import WhatsAppSettings from './pages/WhatsAppSettings/WhatsAppSettings';
+import WhatsAppMessages from './pages/WhatsAppMessages/WhatsAppMessages';
+import OrderStats from './pages/OrderStats/OrderStats';
+import PaymentStats from './pages/PaymentStats/PaymentStats';
+import CounterAttendants from './pages/CounterAttendants/CounterAttendants';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -138,6 +143,8 @@ const App = () => {
           <Route path='/categories' element={<Categories url={url}/>} />
 
           <Route path='/orders' element={<Orders url={url} token={token}/>} />
+          <Route path='/order-stats' element={<OrderStats url={url} token={token}/>} />
+          <Route path='/payment-stats' element={<PaymentStats url={url} token={token}/>} />
           <Route path='/edit/:id' element={<Edit url={url}/>} />
           <Route path='/settings' element={<Settings url={url}/>} />
           <Route path='/banners' element={<Banners url={url}/>} />
@@ -145,9 +152,12 @@ const App = () => {
           <Route path='/coupons' element={<Coupons url={url}/>} />
           <Route path='/customers' element={<Customers url={url} token={token}/>} />
           <Route path='/waiter-management' element={<WaiterManagement url={url}/>} />
-          <Route path='/in-person-sales' element={<InPersonSales url={url} token={token}/>} />
+
           <Route path='/bluetooth-print' element={<BluetoothPrint url={url} token={token}/>} />
           <Route path='/stock-management/:id' element={<StockManagement url={url}/>} />
+          <Route path='/whatsapp-settings' element={<WhatsAppSettings url={url}/>} />
+          <Route path='/whatsapp-messages' element={<WhatsAppMessages url={url}/>} />
+          <Route path='/counter-attendants' element={<CounterAttendants url={url}/>} />
           
           {/* Rota padrão */}
           <Route path='/' element={isSuperAdmin ? <StoreManagement url={url} token={token}/> : <Add url={url} />} />

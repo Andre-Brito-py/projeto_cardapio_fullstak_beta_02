@@ -64,6 +64,8 @@ const placeOrder = async (req, res) =>{
             amount: finalAmount,
             address: req.body.address,
             orderType: req.body.orderType || req.body.deliveryType || 'delivery',
+            deliveryType: req.body.deliveryType || 'delivery', // Campo para rastrear tipo de saída
+            paymentMethod: req.body.paymentMethod || null, // Método de pagamento escolhido pelo cliente
             customerId: req.body.customerId || null, // Referência ao cliente
             customerInfo: req.body.customerInfo || null, // Informações do cliente para backup
             // Dados de frete do Google Maps

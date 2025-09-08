@@ -90,30 +90,36 @@ const storeSchema = new mongoose.Schema({
     address: {
       street: {
         type: String,
-        required: true
+        required: false,
+        default: 'Não informado'
       },
       number: {
         type: String,
-        required: true
+        required: false,
+        default: 'S/N'
       },
       complement: {
         type: String
       },
       neighborhood: {
         type: String,
-        required: true
+        required: false,
+        default: 'Não informado'
       },
       city: {
         type: String,
-        required: true
+        required: false,
+        default: 'Não informado'
       },
       state: {
         type: String,
-        required: true
+        required: false,
+        default: 'Não informado'
       },
       zipCode: {
         type: String,
-        required: true
+        required: false,
+        default: '00000-000'
       }
     },
     pixKey: {

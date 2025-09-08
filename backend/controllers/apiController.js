@@ -19,11 +19,29 @@ export const getApiSettings = async (req, res) => {
             asaasEnvironment: settings.asaasEnvironment || 'sandbox',
             asaasEnabled: settings.asaasEnabled || false,
             
+            // Lisa AI Assistant
+            lisaEnabled: settings.lisaEnabled || false,
+            lisaOpenAiApiKey: settings.lisaOpenAiApiKey ? '***' + settings.lisaOpenAiApiKey.slice(-4) : '',
+            lisaGroqApiKey: settings.lisaGroqApiKey ? '***' + settings.lisaGroqApiKey.slice(-4) : '',
+            lisaChainlitSecret: settings.lisaChainlitSecret ? '***' + settings.lisaChainlitSecret.slice(-4) : '',
+            lisaLiteralApiKey: settings.lisaLiteralApiKey ? '***' + settings.lisaLiteralApiKey.slice(-4) : '',
+            lisaOllamaUrl: settings.lisaOllamaUrl || 'http://localhost:11434',
+            lisaOllamaModel: settings.lisaOllamaModel || 'llama2',
+            lisaPort: settings.lisaPort || '8000',
+            lisaMaxFileSize: settings.lisaMaxFileSize || 10,
+            
             // Configurações de frete
             shippingEnabled: settings.shippingEnabled !== false,
             freeShippingMinValue: settings.freeShippingMinValue || 50,
             baseShippingCost: settings.baseShippingCost || 5,
-            costPerKm: settings.costPerKm || 2
+            costPerKm: settings.costPerKm || 2,
+            
+            // WhatsApp Business API
+            whatsappEnabled: settings.whatsappEnabled || false,
+            whatsappAccessToken: settings.whatsappAccessToken ? '***' + settings.whatsappAccessToken.slice(-4) : '',
+            whatsappPhoneNumberId: settings.whatsappPhoneNumberId || '',
+            whatsappWebhookVerifyToken: settings.whatsappWebhookVerifyToken ? '***' + settings.whatsappWebhookVerifyToken.slice(-4) : '',
+            whatsappBusinessAccountId: settings.whatsappBusinessAccountId || ''
         };
         
         res.json({
@@ -50,10 +68,24 @@ export const updateApiSettings = async (req, res) => {
             asaasApiKey,
             asaasEnvironment,
             asaasEnabled,
+            lisaEnabled,
+            lisaOpenAiApiKey,
+            lisaGroqApiKey,
+            lisaChainlitSecret,
+            lisaLiteralApiKey,
+            lisaOllamaUrl,
+            lisaOllamaModel,
+            lisaPort,
+            lisaMaxFileSize,
             shippingEnabled,
             freeShippingMinValue,
             baseShippingCost,
-            costPerKm
+            costPerKm,
+            whatsappEnabled,
+            whatsappAccessToken,
+            whatsappPhoneNumberId,
+            whatsappWebhookVerifyToken,
+            whatsappBusinessAccountId
         } = req.body;
         
         const settings = await SystemSettings.getInstance();
@@ -71,11 +103,41 @@ export const updateApiSettings = async (req, res) => {
         settings.asaasEnvironment = asaasEnvironment;
         settings.asaasEnabled = asaasEnabled;
         
+        // Atualizar configurações da Lisa AI Assistant
+        settings.lisaEnabled = lisaEnabled;
+        if (lisaOpenAiApiKey && !lisaOpenAiApiKey.startsWith('***')) {
+            settings.lisaOpenAiApiKey = lisaOpenAiApiKey;
+        }
+        if (lisaGroqApiKey && !lisaGroqApiKey.startsWith('***')) {
+            settings.lisaGroqApiKey = lisaGroqApiKey;
+        }
+        if (lisaChainlitSecret && !lisaChainlitSecret.startsWith('***')) {
+            settings.lisaChainlitSecret = lisaChainlitSecret;
+        }
+        if (lisaLiteralApiKey && !lisaLiteralApiKey.startsWith('***')) {
+            settings.lisaLiteralApiKey = lisaLiteralApiKey;
+        }
+        settings.lisaOllamaUrl = lisaOllamaUrl || 'http://localhost:11434';
+        settings.lisaOllamaModel = lisaOllamaModel || 'llama2';
+        settings.lisaPort = lisaPort || '8000';
+        settings.lisaMaxFileSize = parseInt(lisaMaxFileSize) || 10;
+        
         // Atualizar configurações de frete
         settings.shippingEnabled = shippingEnabled;
         settings.freeShippingMinValue = parseFloat(freeShippingMinValue) || 50;
         settings.baseShippingCost = parseFloat(baseShippingCost) || 5;
         settings.costPerKm = parseFloat(costPerKm) || 2;
+        
+        // Atualizar configurações do WhatsApp Business API
+        settings.whatsappEnabled = whatsappEnabled;
+        if (whatsappAccessToken && !whatsappAccessToken.startsWith('***')) {
+            settings.whatsappAccessToken = whatsappAccessToken;
+        }
+        settings.whatsappPhoneNumberId = whatsappPhoneNumberId;
+        if (whatsappWebhookVerifyToken && !whatsappWebhookVerifyToken.startsWith('***')) {
+            settings.whatsappWebhookVerifyToken = whatsappWebhookVerifyToken;
+        }
+        settings.whatsappBusinessAccountId = whatsappBusinessAccountId;
         
         await settings.save();
         
@@ -213,6 +275,179 @@ export const testAsaasApi = async (req, res) => {
 };
 
 /**
+ * Testar API da Lisa AI Assistant
+ */
+export const testLisaApi = async (req, res) => {
+    try {
+        const {
+            openAiApiKey,
+            groqApiKey,
+            chainlitSecret,
+            literalApiKey,
+            ollamaUrl,
+            ollamaModel,
+            port
+        } = req.body;
+        
+        if (!openAiApiKey && !groqApiKey) {
+            return res.status(400).json({
+                success: false,
+                message: 'Pelo menos uma chave de API (OpenAI ou Groq) é obrigatória'
+            });
+        }
+        
+        let testResults = [];
+        
+        // Testar OpenAI API se fornecida
+        if (openAiApiKey) {
+            try {
+                const openAiResponse = await fetch('https://api.openai.com/v1/models', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${openAiApiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (openAiResponse.ok) {
+                    testResults.push('✅ OpenAI API: Funcionando');
+                } else {
+                    testResults.push('❌ OpenAI API: Chave inválida');
+                }
+            } catch (error) {
+                testResults.push('❌ OpenAI API: Erro de conexão');
+            }
+        }
+        
+        // Testar Groq API se fornecida
+        if (groqApiKey) {
+            try {
+                const groqResponse = await fetch('https://api.groq.com/openai/v1/models', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${groqApiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (groqResponse.ok) {
+                    testResults.push('✅ Groq API: Funcionando');
+                } else {
+                    testResults.push('❌ Groq API: Chave inválida');
+                }
+            } catch (error) {
+                testResults.push('❌ Groq API: Erro de conexão');
+            }
+        }
+        
+        // Testar conexão com Ollama se URL fornecida
+        if (ollamaUrl) {
+            try {
+                const ollamaResponse = await fetch(`${ollamaUrl}/api/tags`, {
+                    method: 'GET'
+                });
+                
+                if (ollamaResponse.ok) {
+                    testResults.push('✅ Ollama: Conectado');
+                } else {
+                    testResults.push('❌ Ollama: Não conectado');
+                }
+            } catch (error) {
+                testResults.push('❌ Ollama: Erro de conexão');
+            }
+        }
+        
+        const allTestsPassed = testResults.every(result => result.includes('✅'));
+        
+        res.json({
+            success: allTestsPassed,
+            message: allTestsPassed 
+                ? 'Todas as configurações da Lisa estão funcionando corretamente!' 
+                : 'Algumas configurações apresentaram problemas',
+            details: testResults
+        });
+        
+    } catch (error) {
+        console.error('Erro ao testar Lisa API:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao testar configurações da Lisa AI'
+        });
+    }
+};
+
+/**
+ * Testar WhatsApp Business API
+ */
+export const testWhatsAppApi = async (req, res) => {
+    try {
+        const { accessToken, phoneNumberId, businessAccountId } = req.body;
+        
+        if (!accessToken || !phoneNumberId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Access Token e Phone Number ID são obrigatórios'
+            });
+        }
+        
+        // Testar se o token tem acesso ao phone number
+        const phoneResponse = await fetch(`https://graph.facebook.com/v18.0/${phoneNumberId}`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        
+        if (!phoneResponse.ok) {
+            const error = await phoneResponse.json();
+            return res.json({
+                success: false,
+                message: 'Erro ao acessar Phone Number ID',
+                details: error.error?.message || 'Token inválido ou sem permissões'
+            });
+        }
+        
+        const phoneData = await phoneResponse.json();
+        
+        // Se Business Account ID foi fornecido, testar acesso
+        let businessAccountStatus = 'Não testado';
+        if (businessAccountId) {
+            try {
+                const businessResponse = await fetch(`https://graph.facebook.com/v18.0/${businessAccountId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                
+                if (businessResponse.ok) {
+                    businessAccountStatus = '✅ Acesso confirmado';
+                } else {
+                    businessAccountStatus = '❌ Sem acesso';
+                }
+            } catch (error) {
+                businessAccountStatus = '❌ Erro de conexão';
+            }
+        }
+        
+        res.json({
+            success: true,
+            message: 'WhatsApp Business API configurado corretamente!',
+            details: {
+                phoneNumber: phoneData.display_phone_number || phoneData.id,
+                phoneNumberId: phoneData.id,
+                businessAccount: businessAccountStatus
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erro ao testar WhatsApp API:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao testar WhatsApp Business API'
+        });
+    }
+};
+
+/**
  * Obter status das APIs
  */
 export const getApiStatus = async (req, res) => {
@@ -228,6 +463,21 @@ export const getApiStatus = async (req, res) => {
                 configured: !!settings.asaasApiKey,
                 enabled: settings.asaasEnabled || false,
                 environment: settings.asaasEnvironment || 'sandbox'
+            },
+            lisa: {
+                configured: !!(settings.lisaOpenAiApiKey || settings.lisaGroqApiKey),
+                enabled: settings.lisaEnabled || false,
+                openAiConfigured: !!settings.lisaOpenAiApiKey,
+                groqConfigured: !!settings.lisaGroqApiKey,
+                chainlitConfigured: !!settings.lisaChainlitSecret,
+                literalConfigured: !!settings.lisaLiteralApiKey
+            },
+            whatsapp: {
+                configured: !!(settings.whatsappAccessToken && settings.whatsappPhoneNumberId),
+                enabled: settings.whatsappEnabled || false,
+                phoneNumberConfigured: !!settings.whatsappPhoneNumberId,
+                accessTokenConfigured: !!settings.whatsappAccessToken,
+                webhookConfigured: !!settings.whatsappWebhookVerifyToken
             }
         };
         

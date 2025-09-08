@@ -4,6 +4,8 @@ import {
     updateApiSettings, 
     testGoogleMapsApi, 
     testAsaasApi, 
+    testLisaApi,
+    testWhatsAppApi,
     getApiStatus 
 } from '../controllers/apiController.js';
 import { requireSuperAdmin } from '../middleware/multiTenancy.js';
@@ -21,5 +23,7 @@ router.get('/status', getApiStatus);
 // Rotas para testar APIs
 router.post('/test-google-maps', testGoogleMapsApi);
 router.post('/test-asaas', testAsaasApi);
+router.post('/test-lisa', testLisaApi);
+router.post('/test-whatsapp', testWhatsAppApi);
 
 export default router;

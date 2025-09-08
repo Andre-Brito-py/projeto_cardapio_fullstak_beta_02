@@ -25,7 +25,11 @@ const orderSchema = new mongoose.Schema({
     // Campos relacionados ao garçom
     waiterToken:{type:String, required: false}, // Token do garçom que fez o pedido
     isWaiterOrder:{type:Boolean, default: false}, // Indica se o pedido foi feito por um garçom
-    paymentMethod:{type:String, required: false}, // Método de pagamento
+    paymentMethod:{
+        type: String,
+        enum: ['pix', 'dinheiro', 'cartao_credito', 'cartao_debito', 'vale_refeicao', 'vale_alimentacao'],
+        required: false
+    }, // Método de pagamento escolhido pelo cliente
     notes:{type:String, required: false}, // Observações do pedido
     // Campos relacionados ao frete
     shipping: {
@@ -50,6 +54,13 @@ const orderSchema = new mongoose.Schema({
             type: Object, // Dados completos da resposta do Google Maps
             required: false
         }
+    },
+    // Campo para rastrear tipo de saída do produto
+    deliveryType: {
+        type: String,
+        enum: ['delivery', 'waiter', 'in_person'], // delivery: entrega, waiter: garçom, in_person: presencial
+        default: 'delivery',
+        required: true
     }
 })
 

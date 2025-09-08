@@ -32,6 +32,13 @@ const StoreManagement = ({ url, token }) => {
     name: '',
     description: '',
     restaurantAddress: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: '',
+    zipCode: '',
     ownerName: '',
     ownerEmail: '',
     ownerPassword: '',
@@ -200,6 +207,7 @@ const StoreManagement = ({ url, token }) => {
         });
       } else {
         // Criando nova loja
+        console.log('Dados sendo enviados para o backend:', formData);
         response = await axios.post(`${url}/api/system/stores`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -226,6 +234,13 @@ const StoreManagement = ({ url, token }) => {
       name: store.name || '',
       description: store.description || '',
       restaurantAddress: store.restaurantAddress || store.address || '',
+      street: store.settings?.address?.street || '',
+      number: store.settings?.address?.number || '',
+      complement: store.settings?.address?.complement || '',
+      neighborhood: store.settings?.address?.neighborhood || '',
+      city: store.settings?.address?.city || '',
+      state: store.settings?.address?.state || '',
+      zipCode: store.settings?.address?.zipCode || '',
       ownerName: store.ownerName || '',
       ownerEmail: store.ownerEmail || store.email || '',
       ownerPassword: '', // Não pré-preencher senha por segurança
@@ -321,6 +336,13 @@ const StoreManagement = ({ url, token }) => {
       name: '',
       description: '',
       restaurantAddress: '',
+      street: '',
+      number: '',
+      complement: '',
+      neighborhood: '',
+      city: '',
+      state: '',
+      zipCode: '',
       ownerName: '',
       ownerEmail: '',
       ownerPassword: '',
@@ -524,6 +546,86 @@ const StoreManagement = ({ url, token }) => {
                   value={formData.restaurantAddress}
                   onChange={handleInputChange}
                   required
+                />
+              </div>
+              
+              <div className='form-row'>
+                <div className='form-group'>
+                  <label>Rua *</label>
+                  <input
+                    type='text'
+                    name='street'
+                    value={formData.street}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className='form-group'>
+                  <label>Número *</label>
+                  <input
+                    type='text'
+                    name='number'
+                    value={formData.number}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className='form-row'>
+                <div className='form-group'>
+                  <label>Complemento</label>
+                  <input
+                    type='text'
+                    name='complement'
+                    value={formData.complement}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className='form-group'>
+                  <label>Bairro *</label>
+                  <input
+                    type='text'
+                    name='neighborhood'
+                    value={formData.neighborhood}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className='form-row'>
+                <div className='form-group'>
+                  <label>Cidade *</label>
+                  <input
+                    type='text'
+                    name='city'
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                <div className='form-group'>
+                  <label>Estado *</label>
+                  <input
+                    type='text'
+                    name='state'
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className='form-group'>
+                <label>CEP *</label>
+                <input
+                  type='text'
+                  name='zipCode'
+                  value={formData.zipCode}
+                  onChange={handleInputChange}
+                  required
+                  placeholder='00000-000'
                 />
               </div>
               

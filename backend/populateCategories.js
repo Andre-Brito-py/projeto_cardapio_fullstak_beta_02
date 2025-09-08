@@ -5,42 +5,42 @@ const initialCategories = [
     {
         name: "Salad",
         description: "Fresh and healthy salads",
-        image: "menu_1.png"
+        image: "menu_1.svg"
     },
     {
         name: "Rolls",
         description: "Delicious rolls and wraps",
-        image: "menu_2.png"
+        image: "menu_2.svg"
     },
     {
         name: "Deserts",
         description: "Sweet desserts and treats",
-        image: "menu_3.png"
+        image: "menu_3.svg"
     },
     {
         name: "Sandwich",
         description: "Tasty sandwiches",
-        image: "menu_4.png"
+        image: "menu_4.svg"
     },
     {
         name: "Cake",
         description: "Delicious cakes for all occasions",
-        image: "menu_5.png"
+        image: "menu_5.svg"
     },
     {
         name: "Pure Veg",
         description: "Pure vegetarian dishes",
-        image: "menu_6.png"
+        image: "menu_6.svg"
     },
     {
         name: "Pasta",
         description: "Italian pasta dishes",
-        image: "menu_7.png"
+        image: "menu_7.svg"
     },
     {
         name: "Noodles",
         description: "Asian noodle dishes",
-        image: "menu_8.png"
+        image: "menu_8.svg"
     }
 ];
 
