@@ -11,6 +11,7 @@ const createToken = (id) => {
 // Login do atendente de balcão
 const loginAttendant = async (req, res) => {
     const { email, password } = req.body;
+    console.log('Tentativa de login:', { email, password: password ? '***' : 'undefined' });
     
     try {
         const attendant = await CounterAttendant.findOne({ email }).populate('storeId');

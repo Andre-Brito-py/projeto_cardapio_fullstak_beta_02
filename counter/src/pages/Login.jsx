@@ -19,8 +19,10 @@ const Login = ({ onLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+    console.log('Enviando login:', formData)
 
     try {
+      console.log('Fazendo requisição para:', '/api/counter-attendant/login')
       const response = await fetch('/api/counter-attendant/login', {
         method: 'POST',
         headers: {
@@ -29,11 +31,15 @@ const Login = ({ onLogin }) => {
         body: JSON.stringify(formData)
       })
 
+      console.log('Resposta recebida:', response.status, response.statusText)
       const data = await response.json()
+      console.log('Dados da resposta:', data)
 
       if (response.ok) {
+        console.log('Login bem-sucedido, chamando onLogin')
         onLogin(data.token, data.attendant)
       } else {
+        console.log('Login falhou:', data.message)
         toast.error(data.message || 'Erro ao fazer login')
       }
     } catch (error) {

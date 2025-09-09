@@ -3,6 +3,7 @@ import CounterAttendant from '../models/counterAttendantModel.js';
 
 const counterAuth = async (req, res, next) => {
     const { token } = req.headers;
+    console.log('Token recebido:', token);
     
     if (!token) {
         return res.json({ success: false, message: "Não autorizado. Token não fornecido." });
@@ -10,9 +11,11 @@ const counterAuth = async (req, res, next) => {
     
     try {
         const token_decode = jwt.verify(token, process.env.JWT_SECRET);
+        console.log('Token decodificado:', token_decode);
         
         // Buscar o atendente no banco de dados
         const attendant = await CounterAttendant.findById(token_decode.id).populate('storeId');
+        console.log('Atendente encontrado:', attendant ? 'Sim' : 'Não');
         
         if (!attendant) {
             return res.json({ success: false, message: "Atendente não encontrado" });
