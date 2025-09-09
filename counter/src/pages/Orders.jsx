@@ -8,12 +8,16 @@ const Orders = ({ attendant }) => {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
-  const [customerName, setCustomerName] = useState('')
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('dinheiro');
+  const [acceptedPaymentMethods, setAcceptedPaymentMethods] = useState(['dinheiro', 'pix', 'cartao_credito', 'cartao_debito', 'vale_refeicao', 'vale_alimentacao']);
   const [observations, setObservations] = useState('')
 
   useEffect(() => {
     fetchProducts()
     fetchTodayOrders()
+    fetchAcceptedPaymentMethods()
   }, [])
 
   const fetchProducts = async () => {
@@ -31,6 +35,30 @@ const Orders = ({ attendant }) => {
       }
     } catch (error) {
       console.error('Erro ao buscar produtos:', error)
+    }
+  }
+
+  const fetchAcceptedPaymentMethods = async () => {
+    try {
+      const token = localStorage.getItem('counter-token')
+      const response = await fetch('/api/settings/payment-methods', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.acceptedPaymentMethods) {
+          setAcceptedPaymentMethods(data.acceptedPaymentMethods)
+          // Se o método atual não estiver na lista aceita, usar o primeiro disponível
+          if (!data.acceptedPaymentMethods.includes(paymentMethod)) {
+            setPaymentMethod(data.acceptedPaymentMethods[0] || 'dinheiro')
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao buscar formas de pagamento aceitas:', error)
     }
   }
 
@@ -85,6 +113,8 @@ const Orders = ({ attendant }) => {
   const clearCart = () => {
     setCart([])
     setCustomerName('')
+    setCustomerPhone('')
+    setPaymentMethod('dinheiro')
     setObservations('')
   }
 
@@ -109,6 +139,8 @@ const Orders = ({ attendant }) => {
       const token = localStorage.getItem('counter-token')
       const orderData = {
         customerName: customerName.trim(),
+        customerPhone: customerPhone.trim() || null,
+        paymentMethod: paymentMethod,
         items: cart.map(item => ({
           productId: item._id,
           quantity: item.quantity,
@@ -192,6 +224,42 @@ const Orders = ({ attendant }) => {
                 className="form-control"
                 placeholder="Digite o nome do cliente"
               />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Telefone do Cliente (opcional)</label>
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                className="form-control"
+                placeholder="(11) 99999-9999"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Forma de Pagamento</label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="form-control"
+              >
+                {acceptedPaymentMethods.map(method => {
+                  const paymentLabels = {
+                    'dinheiro': '💵 Dinheiro',
+                    'pix': '💳 PIX',
+                    'cartao_credito': '💳 Cartão de Crédito',
+                    'cartao_debito': '💳 Cartão de Débito',
+                    'vale_refeicao': '🍽️ Vale Refeição',
+                    'vale_alimentacao': '🛒 Vale Alimentação'
+                  };
+                  return (
+                    <option key={method} value={method}>
+                      {paymentLabels[method] || method}
+                    </option>
+                  );
+                })}
+              </select>
             </div>
 
             <div className="form-group">

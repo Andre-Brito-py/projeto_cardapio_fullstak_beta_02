@@ -133,6 +133,11 @@ const storeSchema = new mongoose.Schema({
       type: Boolean,
       default: false
     },
+    acceptedPaymentMethods: {
+      type: [String],
+      enum: ['pix', 'dinheiro', 'cartao_credito', 'cartao_debito', 'vale_refeicao', 'vale_alimentacao'],
+      default: ['pix', 'dinheiro', 'cartao_credito', 'cartao_debito', 'vale_refeicao', 'vale_alimentacao']
+    },
     deliveryZones: [{
       name: {
         type: String,

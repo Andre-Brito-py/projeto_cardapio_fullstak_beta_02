@@ -162,4 +162,68 @@ const getBanner = async (req, res) => {
 
 
 
-export { getPixKey, updatePixKey, getSettings, updateBanner, getBanner };
+// Get accepted payment methods
+const getAcceptedPaymentMethods = async (req, res) => {
+    try {
+        const storeId = req.user.storeId;
+        const store = await Store.findById(storeId);
+        
+        if (!store) {
+            return res.json({ success: false, message: "Loja não encontrada" });
+        }
+        
+        res.json({
+            success: true,
+            acceptedPaymentMethods: store.acceptedPaymentMethods || ['pix', 'dinheiro', 'cartao_credito', 'cartao_debito', 'vale_refeicao', 'vale_alimentacao']
+        });
+    } catch (error) {
+        console.error('Erro ao buscar formas de pagamento aceitas:', error);
+        res.json({
+            success: false,
+            message: "Erro ao buscar formas de pagamento aceitas"
+        });
+    }
+};
+
+// Update accepted payment methods (Admin only)
+const updateAcceptedPaymentMethods = async (req, res) => {
+    try {
+        const { acceptedPaymentMethods } = req.body;
+        const storeId = req.user.storeId;
+        
+        if (!acceptedPaymentMethods || !Array.isArray(acceptedPaymentMethods)) {
+            return res.json({ success: false, message: "Formas de pagamento inválidas" });
+        }
+        
+        const validMethods = ['pix', 'dinheiro', 'cartao_credito', 'cartao_debito', 'vale_refeicao', 'vale_alimentacao'];
+        const invalidMethods = acceptedPaymentMethods.filter(method => !validMethods.includes(method));
+        
+        if (invalidMethods.length > 0) {
+            return res.json({ success: false, message: `Formas de pagamento inválidas: ${invalidMethods.join(', ')}` });
+        }
+        
+        const store = await Store.findByIdAndUpdate(
+            storeId,
+            { acceptedPaymentMethods: acceptedPaymentMethods },
+            { new: true }
+        );
+        
+        if (!store) {
+            return res.json({ success: false, message: "Loja não encontrada" });
+        }
+        
+        res.json({
+            success: true,
+            message: "Formas de pagamento atualizadas com sucesso",
+            acceptedPaymentMethods: store.acceptedPaymentMethods
+        });
+    } catch (error) {
+        console.error('Erro ao atualizar formas de pagamento:', error);
+        res.json({
+            success: false,
+            message: "Erro ao atualizar formas de pagamento"
+        });
+    }
+};
+
+export { getPixKey, updatePixKey, getSettings, updateBanner, getBanner, getAcceptedPaymentMethods, updateAcceptedPaymentMethods };

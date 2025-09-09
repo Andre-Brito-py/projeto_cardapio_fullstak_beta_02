@@ -32,6 +32,7 @@ import WhatsAppMessages from './pages/WhatsAppMessages/WhatsAppMessages';
 import OrderStats from './pages/OrderStats/OrderStats';
 import PaymentStats from './pages/PaymentStats/PaymentStats';
 import CounterAttendants from './pages/CounterAttendants/CounterAttendants';
+import PaymentSettings from './pages/Settings/PaymentSettings';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -147,6 +148,7 @@ const App = () => {
           <Route path='/payment-stats' element={<PaymentStats url={url} token={token}/>} />
           <Route path='/edit/:id' element={<Edit url={url}/>} />
           <Route path='/settings' element={<Settings url={url}/>} />
+          <Route path='/payment-settings' element={<PaymentSettings url={url}/>} />
           <Route path='/banners' element={<Banners url={url}/>} />
           <Route path='/tables' element={<Tables url={url}/>} />
           <Route path='/coupons' element={<Coupons url={url}/>} />

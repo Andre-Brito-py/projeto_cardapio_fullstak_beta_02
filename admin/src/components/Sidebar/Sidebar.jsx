@@ -65,6 +65,10 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.add_icon} alt="" />
           <p>Settings</p>
         </NavLink>
+        <NavLink to='/payment-settings' className="sidebar-option" onClick={onClose}>
+          <img src={assets.add_icon} alt="" />
+          <p>💳 Config. Pagamento</p>
+        </NavLink>
         <NavLink to='/store-links' className="sidebar-option" onClick={onClose}>
            <img src={assets.parcel_icon} alt="" />
            <p>Links da Loja</p>
