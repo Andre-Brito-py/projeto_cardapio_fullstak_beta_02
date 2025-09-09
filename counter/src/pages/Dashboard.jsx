@@ -4,6 +4,8 @@ import { ShoppingCart, DollarSign, Clock, TrendingUp } from 'lucide-react'
 const Dashboard = ({ attendant }) => {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  
+
 
   useEffect(() => {
     fetchStats()
@@ -150,27 +152,33 @@ const Dashboard = ({ attendant }) => {
             <div className="card">
               <h3 style={{ marginBottom: '1rem' }}>Permissões</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {attendant?.permissions?.map((permission, index) => (
-                  <div key={index} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem'
-                  }}>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      backgroundColor: '#27ae60',
-                      borderRadius: '50%'
-                    }}></div>
-                    <span style={{ textTransform: 'capitalize' }}>
-                      {permission.replace('_', ' ')}
-                    </span>
-                  </div>
-                )) || [
-                  <div key="default" style={{ color: '#6c757d', fontStyle: 'italic' }}>
+                {attendant?.permissions ? (
+                  Object.entries(attendant.permissions).map(([key, value]) => (
+                    <div key={key} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        backgroundColor: value ? '#27ae60' : '#e74c3c',
+                        borderRadius: '50%'
+                      }}></div>
+                      <span style={{ 
+                        textTransform: 'capitalize',
+                        color: value ? '#2c3e50' : '#6c757d'
+                      }}>
+                        {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                        {value ? '' : ' (Negado)'}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ color: '#6c757d', fontStyle: 'italic' }}>
                     Nenhuma permissão específica
                   </div>
-                ]}
+                )}
               </div>
             </div>
           </div>

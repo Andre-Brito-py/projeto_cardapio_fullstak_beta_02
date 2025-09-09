@@ -11,43 +11,53 @@ import { toast } from 'react-toastify'
 function App() {
   const [token, setToken] = useState(localStorage.getItem('counter-token'))
   const [attendant, setAttendant] = useState(null)
+  const [renderKey, setRenderKey] = useState(0)
+  
+
 
   useEffect(() => {
-    console.log('useEffect executado, token atual:', token)
     if (token) {
-      // Verificar se o token é válido e obter dados do atendente
+      // Verificar se o token não está expirado
+      try {
+        const tokenPayload = JSON.parse(atob(token.split('.')[1]))
+        const currentTime = Math.floor(Date.now() / 1000)
+        
+        if (tokenPayload.exp < currentTime) {
+          handleLogout()
+          return
+        }
+      } catch (error) {
+        handleLogout()
+        return
+      }
+      
       fetchAttendantProfile()
     }
   }, [token])
 
   const fetchAttendantProfile = async () => {
     try {
-      console.log('Fazendo requisição para /api/counter-attendant/profile com token:', token)
       const response = await fetch('/api/counter-attendant/profile', {
         headers: {
-          'token': token
+          'token': token,
+          'Content-Type': 'application/json'
         }
       })
       
-      console.log('Response status:', response.status)
-      
       if (response.ok) {
         const data = await response.json()
-        console.log('Response data:', data)
         
         if (data.success && data.attendant) {
           setAttendant(data.attendant)
         } else {
-          console.log('Profile fetch failed - no success or attendant')
-          handleLogout()
+          handleLogout(false) // Token inválido, não mostrar mensagem
         }
       } else {
-        console.log('Response not ok:', response.status)
-        handleLogout()
+        handleLogout(false) // Erro de autenticação, não mostrar mensagem
       }
     } catch (error) {
       console.error('Erro ao buscar perfil:', error)
-      handleLogout()
+      handleLogout(false) // Erro de conexão, não mostrar mensagem
     }
   }
 
@@ -55,22 +65,24 @@ function App() {
     localStorage.setItem('counter-token', newToken)
     setToken(newToken)
     setAttendant(attendantData)
+    setRenderKey(prev => prev + 1) // Força re-renderização completa
     toast.success('Login realizado com sucesso!')
   }
 
-  const handleLogout = () => {
+  const handleLogout = (showMessage = true) => {
     localStorage.removeItem('counter-token')
     setToken(null)
     setAttendant(null)
-    toast.info('Sessão encerrada')
+    if (showMessage) {
+      toast.info('Sessão encerrada')
+    }
   }
 
   if (!token) {
-    return <Login onLogin={handleLogin} />
+    return <Login key={`login-${renderKey}`} onLogin={handleLogin} />
   }
-
   return (
-    <div className="app">
+    <div key={`app-${renderKey}`} className="app">
       <Navbar attendant={attendant} onLogout={handleLogout} />
       <div className="container">
         <Routes>
