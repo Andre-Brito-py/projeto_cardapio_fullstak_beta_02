@@ -1,0 +1,101 @@
+{
+  "intents": {
+    "greeting": {
+      "examples": [
+        "Olá", "Oi", "Bom dia", "Boa tarde", "Boa noite", "E aí", "Opa", "Salve"
+      ],
+      "responses": [
+        "Olá! Bem-vindo ao {store_name}! Como posso ajudá-lo hoje?",
+        "Oi! Que bom ter você aqui! O que gostaria de pedir?",
+        "Olá! Estou aqui para ajudar com seu pedido. O que deseja?"
+      ]
+    },
+    "menu_request": {
+      "examples": [
+        "Qual é o cardápio?", "O que vocês têm?", "Quais são os pratos?", "Me mostra o menu", "Que comida vocês fazem?", "Cardápio por favor"
+      ],
+      "responses": [
+        "Aqui está nosso cardápio completo! Temos várias opções deliciosas:",
+        "Vou mostrar nosso menu para você! Confira nossas especialidades:"
+      ]
+    },
+    "order_request": {
+      "examples": [
+        "Quero fazer um pedido", "Gostaria de pedir", "Vou querer", "Pode anotar meu pedido?", "Quero comprar"
+      ],
+      "responses": [
+        "Perfeito! Vou ajudar você com seu pedido. O que gostaria?",
+        "Claro! Estou pronto para anotar seu pedido. Me diga o que deseja!"
+      ]
+    },
+    "delivery_info": {
+      "examples": [
+        "Quanto tempo demora a entrega?", "Vocês entregam onde?", "Qual o prazo de entrega?", "Entregam na minha região?", "Taxa de entrega"
+      ],
+      "responses": [
+        "Nossa entrega demora entre 30-45 minutos. Qual seu endereço para confirmar se atendemos sua região?",
+        "Entregamos em toda a cidade! O tempo estimado é de 30-45 minutos. Preciso do seu endereço para calcular a taxa."
+      ]
+    },
+    "payment_info": {
+      "examples": [
+        "Formas de pagamento", "Como posso pagar?", "Aceitam cartão?", "Tem PIX?", "Dinheiro?", "Débito ou crédito?"
+      ],
+      "responses": [
+        "Aceitamos PIX, cartão de débito, crédito e dinheiro. Qual forma prefere?",
+        "Temos várias opções: PIX (mais rápido), cartões e dinheiro. Como gostaria de pagar?"
+      ]
+    },
+    "order_status": {
+      "examples": [
+        "Onde está meu pedido?", "Status do pedido", "Quanto tempo ainda?", "Meu pedido saiu?", "Já está pronto?"
+      ],
+      "responses": [
+        "Vou verificar o status do seu pedido. Pode me informar seu número de telefone ou código do pedido?",
+        "Claro! Para consultar seu pedido, preciso do número do seu telefone ou código do pedido."
+      ]
+    },
+    "complaint": {
+      "examples": [
+        "Meu pedido veio errado", "Comida fria", "Demorou muito", "Não gostei", "Problema com o pedido", "Reclamação"
+      ],
+      "responses": [
+        "Sinto muito pelo inconveniente! Vou resolver isso imediatamente. Pode me contar o que aconteceu?",
+        "Peço desculpas pelo problema. Vamos resolver isso agora! Me explique a situação, por favor."
+      ]
+    },
+    "recommendation": {
+      "examples": [
+        "O que você recomenda?", "Qual o melhor prato?", "Sugestão", "O que está bom hoje?", "Carro-chefe"
+      ],
+      "responses": [
+        "Nossas especialidades mais pedidas são: {popular_items}. Qual tipo de comida você prefere?",
+        "Recomendo muito nossos pratos mais populares! Você gosta de que tipo de sabor?"
+      ]
+    },
+    "cancel_order": {
+      "examples": [
+        "Quero cancelar", "Cancelar pedido", "Não quero mais", "Desistir do pedido"
+      ],
+      "responses": [
+        "Entendo. Vou verificar se ainda é possível cancelar. Qual o código do seu pedido?",
+        "Sem problemas! Me informe o número do pedido para verificar o cancelamento."
+      ]
+    },
+    "thanks": {
+      "examples": [
+        "Obrigado", "Valeu", "Muito obrigado", "Agradeço", "Brigado"
+      ],
+      "responses": [
+        "Por nada! Foi um prazer atendê-lo. Volte sempre!",
+        "Disponha! Obrigado por escolher o {store_name}!"
+      ]
+    }
+  },
+  "entities": {
+    "food_types": ["pizza", "hambúrguer", "lanche", "salgado", "doce", "bebida", "refrigerante", "suco", "água", "cerveja"],
+    "sizes": ["pequeno", "médio", "grande", "família", "individual"],
+    "payment_methods": ["pix", "cartão", "dinheiro", "débito", "crédito"],
+    "urgency": ["urgente", "rápido", "com pressa", "o mais rápido possível"]
+  }
+}

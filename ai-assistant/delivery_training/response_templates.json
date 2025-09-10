@@ -1,0 +1,73 @@
+{
+  "templates": {
+    "greeting": {
+      "default": "Olá! Bem-vindo ao {store_name}! 🍕\n\nSou a Liza, sua assistente virtual. Como posso ajudá-lo hoje?\n\n📋 *Menu completo*\n🛒 *Fazer pedido*\n📍 *Informações de entrega*\n💳 *Formas de pagamento*",
+      "returning_customer": "Olá novamente, {customer_name}! 😊\n\nQue bom ter você de volta no {store_name}!\n\nGostaria de repetir seu último pedido ou prefere ver nosso menu?"
+    },
+    "menu_display": {
+      "categories": "🍽️ *NOSSO CARDÁPIO* - {store_name}\n\n{categories_list}\n\nDigite o número da categoria ou nome do produto que deseja!",
+      "products": "📋 *{category_name}*\n\n{products_list}\n\nPara adicionar ao carrinho, digite:\n*Quero [nome do produto]*"
+    },
+    "order_process": {
+      "item_added": "✅ *{product_name}* adicionado ao carrinho!\n\n💰 Valor: R$ {price}\n🛒 Total atual: R$ {cart_total}\n\nDeseja:\n• Adicionar mais itens\n• Ver carrinho completo\n• Finalizar pedido",
+      "cart_summary": "🛒 *SEU CARRINHO*\n\n{cart_items}\n\n💰 *Total: R$ {total}*\n\nPara finalizar:\n• Digite *FINALIZAR*\n• Ou continue adicionando itens",
+      "checkout": "🏁 *FINALIZAR PEDIDO*\n\n📋 Resumo:\n{order_summary}\n\n💰 *Total: R$ {total}*\n\nPreciso de algumas informações:\n\n📍 *Endereço de entrega:*\n💳 *Forma de pagamento:*\n\nPor favor, me informe seu endereço completo."
+    },
+    "delivery_info": {
+      "address_request": "📍 *ENDEREÇO DE ENTREGA*\n\nPor favor, me informe:\n\n🏠 Rua e número\n🏘️ Bairro\n🏙️ Cidade\n\nExemplo:\n*Rua das Flores, 123\nCentro\nSão Paulo*",
+      "delivery_calculation": "📍 *INFORMAÇÕES DE ENTREGA*\n\n🏠 Endereço: {address}\n⏰ Tempo estimado: {delivery_time}\n🚚 Taxa de entrega: R$ {delivery_fee}\n\n✅ Atendemos sua região!\n\nConfirma o endereço?",
+      "out_of_area": "😔 Infelizmente não atendemos sua região ainda.\n\n📍 Atendemos nas seguintes áreas:\n{delivery_areas}\n\nTem outro endereço que possamos entregar?"
+    },
+    "payment": {
+      "methods": "💳 *FORMAS DE PAGAMENTO*\n\n✅ PIX (desconto de 5%)\n✅ Cartão de Débito\n✅ Cartão de Crédito\n✅ Dinheiro\n\nQual forma prefere?",
+      "pix_selected": "💚 *PIX SELECIONADO*\n\n🎉 Você ganhou 5% de desconto!\n\n💰 Valor original: R$ {original_total}\n💸 Desconto PIX: R$ {discount}\n💰 *Total final: R$ {final_total}*\n\nConfirma o pedido?",
+      "card_selected": "💳 *CARTÃO SELECIONADO*\n\n💰 *Total: R$ {total}*\n\nO pagamento será processado na entrega.\n\nConfirma o pedido?",
+      "money_selected": "💵 *DINHEIRO SELECIONADO*\n\n💰 *Total: R$ {total}*\n\nPrecisa de troco?\nSe sim, para quanto?"
+    },
+    "order_confirmation": {
+      "success": "🎉 *PEDIDO CONFIRMADO!*\n\n📋 Número do pedido: #{order_number}\n⏰ Previsão de entrega: {delivery_time}\n\n📱 Você receberá atualizações por aqui!\n\n{order_details}\n\n💰 *Total: R$ {total}*\n💳 Pagamento: {payment_method}\n📍 Entrega: {address}\n\nObrigado por escolher o {store_name}! 😊",
+      "preparation": "👨‍🍳 *SEU PEDIDO ESTÁ SENDO PREPARADO*\n\n📋 Pedido #{order_number}\n⏰ Previsão: {estimated_time}\n\nEm breve estará pronto para entrega! 🚚",
+      "out_for_delivery": "🚚 *PEDIDO SAIU PARA ENTREGA*\n\n📋 Pedido #{order_number}\n👤 Entregador: {delivery_person}\n⏰ Chegada prevista: {arrival_time}\n\nJá está a caminho! 🏃‍♂️",
+      "delivered": "✅ *PEDIDO ENTREGUE*\n\n📋 Pedido #{order_number}\n⏰ Entregue às {delivery_time}\n\nEsperamos que tenha gostado! 😋\n\nAvalie nossa comida de 1 a 5 estrelas:
+⭐⭐⭐⭐⭐"
+    },
+    "order_status": {
+      "not_found": "❌ Não encontrei seu pedido.\n\nPode me informar:\n• Número do pedido\n• Seu telefone\n• Nome do cliente",
+      "status_info": "📋 *STATUS DO PEDIDO #{order_number}*\n\n📊 Status: {status}\n⏰ Pedido feito: {order_time}\n⏰ Previsão: {estimated_delivery}\n💰 Total: R$ {total}\n\n{status_message}"
+    },
+    "recommendations": {
+      "popular": "🔥 *NOSSOS MAIS PEDIDOS*\n\n{popular_items}\n\nQual desperta seu interesse?",
+      "combo_suggestion": "💡 *SUGESTÃO DE COMBO*\n\n{combo_items}\n\n💰 Valor individual: R$ {individual_price}\n🎯 *Combo: R$ {combo_price}*\n💸 *Economia: R$ {savings}*\n\nQuer o combo?",
+      "based_on_history": "😋 *BASEADO NO SEU HISTÓRICO*\n\nVocê costuma gostar de:\n{recommended_items}\n\nQue tal experimentar hoje?"
+    },
+    "complaints": {
+      "initial_response": "😔 Sinto muito pelo inconveniente!\n\nVou resolver isso imediatamente.\n\nPode me contar o que aconteceu?\n\n📋 Número do pedido (se tiver)\n❗ Qual foi o problema",
+      "resolution_offer": "🔧 *VAMOS RESOLVER ISSO*\n\nOpções disponíveis:\n\n🔄 Refazer o pedido\n💰 Reembolso total\n🎁 Desconto no próximo pedido\n\nQual prefere?",
+      "escalation": "📞 Vou transferir para nosso gerente.\n\nEle entrará em contato em até 10 minutos.\n\nSeu protocolo: #{protocol_number}"
+    },
+    "errors": {
+      "not_understood": "🤔 Desculpe, não entendi sua mensagem.\n\nPode reformular ou escolher uma opção:\n\n📋 Ver cardápio\n🛒 Fazer pedido\n📞 Falar com atendente\n❓ Ajuda",
+      "system_error": "⚠️ Ops! Algo deu errado.\n\nTente novamente em alguns segundos ou digite *ATENDENTE* para falar com uma pessoa.",
+      "store_closed": "🕐 *{store_name} FECHADO*\n\n⏰ Horário de funcionamento:\n{opening_hours}\n\n📱 Você pode fazer seu pedido e agendaremos para quando abrirmos!"
+    },
+    "help": {
+      "menu": "❓ *COMO POSSO AJUDAR*\n\n📋 *CARDÁPIO* - Ver todos os produtos\n🛒 *PEDIDO* - Fazer um novo pedido\n📍 *ENTREGA* - Informações de entrega\n💳 *PAGAMENTO* - Formas de pagamento\n📱 *STATUS* - Acompanhar pedido\n👤 *ATENDENTE* - Falar com pessoa\n\nDigite a palavra-chave ou escolha uma opção!",
+      "commands": "🤖 *COMANDOS ÚTEIS*\n\n• *CARDÁPIO* - Ver menu\n• *CARRINHO* - Ver itens\n• *LIMPAR* - Limpar carrinho\n• *STATUS* - Ver pedido\n• *ATENDENTE* - Suporte humano\n• *AJUDA* - Este menu\n\nDigite qualquer comando!"
+    }
+  },
+  "quick_replies": {
+    "main_menu": ["📋 Cardápio", "🛒 Fazer Pedido", "📍 Entrega", "💳 Pagamento"],
+    "order_actions": ["➕ Adicionar Item", "🛒 Ver Carrinho", "🏁 Finalizar", "🗑️ Limpar"],
+    "payment_methods": ["💚 PIX", "💳 Cartão", "💵 Dinheiro"],
+    "support": ["👤 Atendente", "❓ Ajuda", "📱 Status Pedido"]
+  },
+  "variables": {
+    "store_name": "Nome da Loja",
+    "customer_name": "Nome do Cliente",
+    "order_number": "Número do Pedido",
+    "delivery_time": "Tempo de Entrega",
+    "total": "Valor Total",
+    "address": "Endereço",
+    "payment_method": "Forma de Pagamento"
+  }
+}
