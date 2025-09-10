@@ -33,6 +33,7 @@ import OrderStats from './pages/OrderStats/OrderStats';
 import PaymentStats from './pages/PaymentStats/PaymentStats';
 import CounterAttendants from './pages/CounterAttendants/CounterAttendants';
 import PaymentSettings from './pages/Settings/PaymentSettings';
+import LizaChat from './pages/LizaChat/LizaChat';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -160,6 +161,7 @@ const App = () => {
           <Route path='/whatsapp-settings' element={<WhatsAppSettings url={url}/>} />
           <Route path='/whatsapp-messages' element={<WhatsAppMessages url={url}/>} />
           <Route path='/counter-attendants' element={<CounterAttendants url={url}/>} />
+          <Route path='/liza-chat' element={<LizaChat url={url} token={token}/>} />
           
           {/* Rota padrão */}
           <Route path='/' element={isSuperAdmin ? <StoreManagement url={url} token={token}/> : <Add url={url} />} />

@@ -85,6 +85,10 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.order_icon} alt="" />
           <p>WhatsApp Mensagens</p>
         </NavLink>
+        <NavLink to='/liza-chat' className="sidebar-option" onClick={onClose}>
+          <img src={assets.liza_chat_icon} alt="" />
+          <p>🤖 Chat com Liza</p>
+        </NavLink>
       </div>
     </div>
     </>

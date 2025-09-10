@@ -27,11 +27,11 @@ storeRouter.get('/public/:slug', getPublicStoreData);
 storeRouter.get('/public/:slug/menu', getPublicStoreMenu);
 storeRouter.get('/public/id/:storeId', getPublicStoreById);
 
+// Rota pública para login do admin da loja (antes dos middlewares)
+storeRouter.post('/admin/login', loginStoreAdmin);
+
 // Middleware para identificar a loja em todas as rotas abaixo
 storeRouter.use(identifyStore);
-
-// Rota pública para login do admin da loja
-storeRouter.post('/admin/login', loginStoreAdmin);
 
 // Middleware de autenticação para todas as rotas abaixo
 storeRouter.use(authMultiTenant);

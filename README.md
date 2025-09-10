@@ -24,6 +24,12 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **Upload de Imagens**: Sistema integrado para imagens de produtos e banners
 - **Categorias Dinâmicas**: Sistema completo de categorias com status ativo/inativo
 - **Configurações da Loja**: Personalização específica por loja
+- **🤖 Assistente Liza**: IA integrada com Ollama para automação e suporte
+  - Consulta de cardápio via comandos de voz
+  - Relatórios automáticos do dia
+  - Verificação de pedidos em andamento
+  - Alteração de preços e disponibilidade
+  - Processamento de linguagem natural local
 
 ### 👑 Para Super Administradores
 - **Gestão Multi-Tenant**: Controle centralizado de múltiplas lojas
@@ -63,6 +69,14 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **Super Admin Dashboard** - Painel para gestão multi-tenant
 - **Store Management** - Interface para gerenciar lojas individuais
 
+### 🤖 Assistente IA Liza
+- **Ollama** - Runtime local para modelos de IA
+- **Llama 3.1** - Modelo de linguagem natural
+- **Processamento Local** - IA rodando sem dependência de APIs externas
+- **Integração Backend** - Comunicação direta com APIs do sistema
+- **Interface de Chat** - Interface moderna para interação
+- **Comandos Inteligentes** - Reconhecimento de intenções e ações automáticas
+
 ## 📦 Instalação e Configuração
 
 ### Pré-requisitos
@@ -70,6 +84,9 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **MongoDB** (local ou MongoDB Atlas)
 - **Git** (para clonar o repositório)
 - **Conta no Stripe** (opcional, para pagamentos)
+- **Ollama** (para a assistente IA Liza)
+  - Instale o Ollama: https://ollama.ai/download
+  - Execute: `ollama pull llama3.1:latest`
 
 ### ⚡ Configuração Automática (Recomendado)
 
@@ -234,6 +251,8 @@ npm run dev
 - **🛒 Frontend (Clientes)**: http://localhost:5173
 - **🏪 Admin Panel (Lojas)**: http://localhost:5174
 - **🔌 Backend API**: http://localhost:4000
+- **🤖 Assistente Liza**: Integrada no Admin Panel (Chat com IA)
+- **🧠 Ollama API**: http://localhost:11434 (IA Local)
 
 ### ⚠️ IMPORTANTE: Configuração de URLs
 
