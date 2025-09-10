@@ -165,7 +165,26 @@ npm install
 npm run dev
 ```
 
-### 5. Configurar Super Administrador
+### 5. Configuração da Assistente IA (ai-assistant)
+**Em um novo terminal:**
+```bash
+cd ai-assistant
+pip install -r requirements.txt
+```
+
+**Configure o arquivo `.env` na pasta ai-assistant:**
+```env
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1:latest
+CHAINLIT_AUTH_SECRET=seu_chainlit_secret_aqui
+```
+
+**Inicie a assistente IA:**
+```bash
+chainlit run app.py -w
+```
+
+### 6. Configurar Super Administrador
 **Primeira execução - O Super Admin será criado automaticamente na primeira inicialização do sistema.**
 
 **Ou crie manualmente:**
