@@ -96,6 +96,10 @@ const systemSettingsSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  lisaOpenRouterApiKey: {
+    type: String,
+    trim: true
+  },
 
   lisaPort: {
     type: String,
@@ -105,6 +109,32 @@ const systemSettingsSchema = new mongoose.Schema({
   lisaMaxFileSize: {
     type: Number,
     default: 10
+  },
+  
+  // Telegram Bot Integration
+  telegramEnabled: {
+    type: Boolean,
+    default: false
+  },
+  telegramBotToken: {
+    type: String,
+    trim: true
+  },
+  telegramWebhookUrl: {
+    type: String,
+    trim: true
+  },
+  telegramAdminChatId: {
+    type: String,
+    trim: true
+  },
+  telegramMassMessagingEnabled: {
+    type: Boolean,
+    default: false
+  },
+  telegramCampaignsEnabled: {
+    type: Boolean,
+    default: false
   },
   
   // Configurações de frete

@@ -1,5 +1,6 @@
 // Configuração das variáveis de ambiente (DEVE ser o primeiro import)
 import 'dotenv/config';
+// MongoDB connection updated
 
 // Importações principais
 import express from 'express';
@@ -35,9 +36,11 @@ import apiRouter from './routes/apiRoutes.js';
 import whatsappRouter from './routes/whatsappRoute.js';
 import whatsappWebhookRouter from './routes/whatsappWebhook.js';
 import telegramRouter from './routes/telegramRoutes.js';
+import telegramAdminRouter from './routes/telegramRoute.js';
 import lizaRouter from './routes/lizaRoutes.js';
 import reportRouter from './routes/reportRoutes.js';
 import dailyReportScheduler from './services/dailyReportScheduler.js';
+import telegramCampaignScheduler from './services/telegramCampaignScheduler.js';
 import { identifyStore, validateStoreActive, logStoreContext } from './middleware/storeContext.js';
 
 // Configuração da aplicação
@@ -74,7 +77,8 @@ app.use('/api/asaas', asaasRouter); // Rotas para integração com Asaas
 app.use('/api/system/api', apiRouter); // Rotas para gerenciamento de APIs
 app.use('/api/whatsapp', validateStoreActive, whatsappRouter); // Rotas para integração com WhatsApp
 app.use('/api/whatsapp-webhook', whatsappWebhookRouter); // Webhook não precisa validar loja ativa
-app.use('/api/telegram', telegramRouter); // Rotas para integração com Telegram
+app.use('/api/telegram', telegramRouter); // Rotas para integração com Telegram (Super Admin)
+app.use('/api/telegram', validateStoreActive, telegramAdminRouter); // Rotas para integração com Telegram (Admin Regular)
 app.use('/api/liza', lizaRouter); // Rotas para chat com IA Liza
 app.use('/api/reports', reportRouter); // Rotas para relatórios diários
 
@@ -95,11 +99,13 @@ app.get('/', (req, res) => {
     res.send('API working');
 });
 
-// Inicializar agendador de relatórios
+// Inicializar agendadores
 dailyReportScheduler.init();
+telegramCampaignScheduler.init();
 
 // Inicialização do servidor
 app.listen(port, () => {
     console.log(`Server started on http://localhost:${port}`);
     console.log('📊 Agendador de relatórios diários inicializado');
+    console.log('📅 Agendador de campanhas do Telegram inicializado');
 });

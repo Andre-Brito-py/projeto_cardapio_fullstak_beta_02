@@ -1,43 +1,48 @@
-/**
- * Rotas do Telegram Bot
- * 
- * Define todas as rotas relacionadas às funcionalidades
- * do bot Telegram, incluindo envio de mensagens,
- * gerenciamento de contatos e webhooks.
- * 
- * Autor: Sistema IA Liza
- * Data: Janeiro 2025
- */
-
 import express from 'express';
-import {
-    sendMenu,
-    sendPromotionalMessage,
-    getTelegramContacts,
-    getBotStats,
-    testAdminMessage,
-    getMenuPreview,
-    webhook
-} from '../controllers/telegramController.js';
+import telegramController from '../controllers/telegramController.js';
 import authMiddleware from '../middleware/auth.js';
-import { requireStoreAdmin } from '../middleware/multiTenancy.js';
+import { isSuperAdmin } from '../middleware/superAdmin.js';
 
 const router = express.Router();
 
-// Webhook público (sem autenticação)
-router.post('/webhook', webhook);
+/**
+ * Webhook do Telegram (público - sem autenticação)
+ * Recebe mensagens enviadas pelos usuários do bot
+ */
+router.post('/webhook', telegramController.receiveWebhook);
 
-// Todas as outras rotas requerem autenticação
-router.use(authMiddleware);
+/**
+ * Rotas administrativas (requerem autenticação)
+ */
 
-// Rotas específicas da loja (requerem acesso à loja)
-router.post('/stores/:storeId/send-menu', requireStoreAdmin, sendMenu);
-router.post('/stores/:storeId/send-promotional', requireStoreAdmin, sendPromotionalMessage);
-router.get('/stores/:storeId/contacts', requireStoreAdmin, getTelegramContacts);
-router.get('/stores/:storeId/stats', requireStoreAdmin, getBotStats);
-router.get('/stores/:storeId/menu-preview', requireStoreAdmin, getMenuPreview);
+// Configuração do webhook
+router.post('/webhook/set', authMiddleware, isSuperAdmin, telegramController.setWebhook);
+router.delete('/webhook/remove', authMiddleware, isSuperAdmin, telegramController.removeWebhook);
 
-// Rotas administrativas
-router.post('/test-admin-message', testAdminMessage);
+// Envio de mensagens
+router.post('/message/send', authMiddleware, isSuperAdmin, telegramController.sendMessage);
+router.post('/broadcast', authMiddleware, isSuperAdmin, telegramController.sendBroadcast);
+
+// Informações e estatísticas
+router.get('/stats', authMiddleware, isSuperAdmin, telegramController.getStats);
+router.get('/clients', authMiddleware, isSuperAdmin, telegramController.getClients);
+router.get('/status', authMiddleware, isSuperAdmin, telegramController.getBotStatus);
+
+// Gerenciamento de clientes
+router.post('/clients', authMiddleware, isSuperAdmin, telegramController.addClient);
+router.get('/clients/:clientId', authMiddleware, isSuperAdmin, telegramController.getClient);
+router.put('/clients/:clientId', authMiddleware, isSuperAdmin, telegramController.updateClient);
+router.delete('/clients/:clientId', authMiddleware, isSuperAdmin, telegramController.removeClient);
+
+// Teste de conexão
+router.get('/test', authMiddleware, isSuperAdmin, telegramController.testConnection);
+
+// Rotas de campanhas
+router.post('/campaigns', authMiddleware, isSuperAdmin, telegramController.createCampaign);
+router.get('/campaigns', authMiddleware, isSuperAdmin, telegramController.getCampaigns);
+router.post('/campaigns/:campaignId/execute', authMiddleware, isSuperAdmin, telegramController.executeCampaign);
+router.post('/campaigns/:campaignId/pause', authMiddleware, isSuperAdmin, telegramController.pauseCampaign);
+router.post('/campaigns/:campaignId/cancel', authMiddleware, isSuperAdmin, telegramController.cancelCampaign);
+router.post('/campaigns/:campaignId/resume', authMiddleware, isSuperAdmin, telegramController.resumeCampaign);
 
 export default router;
