@@ -53,7 +53,7 @@ const LizaChat = ({ url, token }) => {
     return null;
   };
 
-  // Função para enviar mensagem para a Liza (Ollama local)
+  // Função para enviar mensagem para a Liza (OpenRouter)
   const sendMessageToAI = async (messageText) => {
     try {
       const result = await lizaService.processMessage(messageText);
@@ -68,7 +68,7 @@ const LizaChat = ({ url, token }) => {
     } catch (error) {
       console.error('Erro ao enviar mensagem para Liza:', error);
       return {
-        text: 'Desculpe, estou com dificuldades técnicas no momento. Verifique se o Ollama está rodando.',
+        text: 'Desculpe, estou com dificuldades técnicas no momento. Verifique a conexão com o OpenRouter.',
         sender: 'liza',
         timestamp: new Date(),
         type: 'error'

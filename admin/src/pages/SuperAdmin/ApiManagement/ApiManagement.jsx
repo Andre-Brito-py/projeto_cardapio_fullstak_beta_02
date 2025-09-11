@@ -20,8 +20,7 @@ const ApiManagement = ({ url, token }) => {
     lisaGroqApiKey: '',
     lisaChainlitSecret: '',
     lisaLiteralApiKey: '',
-    lisaOllamaUrl: 'http://localhost:11434',
-    lisaOllamaModel: 'llama2',
+
     lisaPort: '8000',
     lisaMaxFileSize: 10,
     
@@ -36,7 +35,14 @@ const ApiManagement = ({ url, token }) => {
     whatsappAccessToken: '',
     whatsappPhoneNumberId: '',
     whatsappWebhookVerifyToken: '',
-    whatsappBusinessAccountId: ''
+    whatsappBusinessAccountId: '',
+    
+    // Telegram Bot API
+    telegramEnabled: false,
+    telegramBotToken: '',
+    telegramWebhookUrl: '',
+    telegramAllowedUsers: '',
+    telegramAdminChatId: ''
   });
   
   const [loading, setLoading] = useState(false);
@@ -44,10 +50,12 @@ const ApiManagement = ({ url, token }) => {
   const [testingAsaas, setTestingAsaas] = useState(false);
   const [testingLisa, setTestingLisa] = useState(false);
   const [testingWhatsApp, setTestingWhatsApp] = useState(false);
+  const [testingTelegram, setTestingTelegram] = useState(false);
   const [googleMapsStatus, setGoogleMapsStatus] = useState(null);
   const [asaasStatus, setAsaasStatus] = useState(null);
   const [lisaStatus, setLisaStatus] = useState(null);
   const [whatsappStatus, setWhatsappStatus] = useState(null);
+  const [telegramStatus, setTelegramStatus] = useState(null);
   const [lisaServiceStatus, setLisaServiceStatus] = useState(null);
   const [controllingLisa, setControllingLisa] = useState(false);
 
@@ -194,6 +202,39 @@ const ApiManagement = ({ url, token }) => {
     }
   };
 
+  const testTelegramApi = async () => {
+    if (!settings.telegramBotToken) {
+      toast.error('Insira o Token do Bot do Telegram primeiro');
+      return;
+    }
+
+    try {
+      setTestingTelegram(true);
+      const response = await axios.post(`${url}/api/system/api/test-telegram`, {
+        botToken: settings.telegramBotToken,
+        webhookUrl: settings.telegramWebhookUrl,
+        allowedUsers: settings.telegramAllowedUsers,
+        adminChatId: settings.telegramAdminChatId
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data.success) {
+        setTelegramStatus({ success: true, message: response.data.message });
+        toast.success('API do Telegram Bot funcionando corretamente!');
+      } else {
+        setTelegramStatus({ success: false, message: response.data.message });
+        toast.error('Erro na API do Telegram: ' + response.data.message);
+      }
+    } catch (error) {
+      console.error('Erro ao testar Telegram:', error);
+      setTelegramStatus({ success: false, message: 'Erro ao conectar com a API' });
+      toast.error('Erro ao testar API do Telegram Bot');
+    } finally {
+      setTestingTelegram(false);
+    }
+  };
+
   const testLisaApi = async () => {
     if (!settings.lisaOpenAiApiKey && !settings.lisaGroqApiKey) {
       toast.error('Insira pelo menos uma chave de API (OpenAI ou Groq) para testar a Lisa');
@@ -207,8 +248,7 @@ const ApiManagement = ({ url, token }) => {
         groqApiKey: settings.lisaGroqApiKey,
         chainlitSecret: settings.lisaChainlitSecret,
         literalApiKey: settings.lisaLiteralApiKey,
-        ollamaUrl: settings.lisaOllamaUrl,
-        ollamaModel: settings.lisaOllamaModel,
+
         port: settings.lisaPort
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -618,6 +658,178 @@ const ApiManagement = ({ url, token }) => {
           </div>
         </div>
 
+        {/* Telegram Bot API */}
+        <div className="api-section">
+          <div className="section-header">
+            <div className="section-title">
+              <h2>🤖 Telegram Bot API</h2>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="telegramEnabled"
+                  name="telegramEnabled"
+                  checked={settings.telegramEnabled}
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="telegramEnabled">Ativar</label>
+              </div>
+            </div>
+            {telegramStatus && (
+              <div className={`status-indicator ${telegramStatus.success ? 'success' : 'error'}`}>
+                {telegramStatus.success ? '✅' : '❌'} {telegramStatus.message}
+              </div>
+            )}
+          </div>
+
+          <div className="section-content">
+            <div className="form-group">
+              <label>Bot Token</label>
+              <div className="input-with-button">
+                <input
+                  type="password"
+                  name="telegramBotToken"
+                  value={settings.telegramBotToken}
+                  onChange={handleInputChange}
+                  placeholder="Insira o token do seu bot do Telegram"
+                  disabled={!settings.telegramEnabled}
+                />
+                <button
+                  type="button"
+                  onClick={testTelegramApi}
+                  disabled={testingTelegram || !settings.telegramEnabled}
+                  className="test-button"
+                >
+                  {testingTelegram ? 'Testando...' : 'Testar'}
+                </button>
+              </div>
+              <small className="form-help">
+                Token do bot obtido através do @BotFather no Telegram.
+                <a href="https://core.telegram.org/bots#6-botfather" target="_blank" rel="noopener noreferrer">
+                  Como criar um bot no Telegram
+                </a>
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label>Webhook URL</label>
+              <input
+                type="text"
+                name="telegramWebhookUrl"
+                value={settings.telegramWebhookUrl}
+                onChange={handleInputChange}
+                placeholder="https://seudominio.com/api/telegram/webhook"
+                disabled={!settings.telegramEnabled}
+              />
+              <small className="form-help">
+                URL onde o Telegram enviará as atualizações do bot.
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label>Usuários Permitidos</label>
+              <input
+                type="text"
+                name="telegramAllowedUsers"
+                value={settings.telegramAllowedUsers}
+                onChange={handleInputChange}
+                placeholder="@usuario1,@usuario2,123456789"
+                disabled={!settings.telegramEnabled}
+              />
+              <small className="form-help">
+                Lista de usuários ou IDs separados por vírgula que podem usar o bot.
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label>Chat ID do Admin</label>
+              <input
+                type="text"
+                name="telegramAdminChatId"
+                value={settings.telegramAdminChatId}
+                onChange={handleInputChange}
+                placeholder="123456789"
+                disabled={!settings.telegramEnabled}
+              />
+              <small className="form-help">
+                ID do chat do administrador para receber notificações.
+              </small>
+            </div>
+
+            <div className="api-info">
+              <h4>ℹ️ Informações Importantes</h4>
+              <ul>
+                <li>Configure o webhook URL: <code>{url}/api/telegram/webhook</code></li>
+                <li>Use o @BotFather para criar e configurar seu bot</li>
+                <li>O bot pode enviar cardápios e mensagens promocionais</li>
+                <li>Integração com a Lisa AI para atendimento automatizado</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Configurações de Frete */}
+        <div className="api-section">
+          <div className="section-header">
+            <div className="section-title">
+              <h2>🚚 Configurações de Frete</h2>
+              <div className="toggle-switch">
+                <input
+                  type="checkbox"
+                  id="shippingEnabled"
+                  name="shippingEnabled"
+                  checked={settings.shippingEnabled}
+                  onChange={handleInputChange}
+                />
+                <label htmlFor="shippingEnabled">Ativar</label>
+              </div>
+            </div>
+          </div>
+
+          <div className="section-content">
+            <div className="form-group">
+              <label>Valor Mínimo para Frete Grátis (R$)</label>
+              <input
+                type="number"
+                name="freeShippingMinValue"
+                value={settings.freeShippingMinValue}
+                onChange={handleInputChange}
+                placeholder="50.00"
+                step="0.01"
+                min="0"
+                disabled={!settings.shippingEnabled}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Custo Base do Frete (R$)</label>
+              <input
+                type="number"
+                name="baseShippingCost"
+                value={settings.baseShippingCost}
+                onChange={handleInputChange}
+                placeholder="5.00"
+                step="0.01"
+                min="0"
+                disabled={!settings.shippingEnabled}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Custo por Km (R$)</label>
+              <input
+                type="number"
+                name="costPerKm"
+                value={settings.costPerKm}
+                onChange={handleInputChange}
+                placeholder="2.00"
+                step="0.01"
+                min="0"
+                disabled={!settings.shippingEnabled}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Lisa AI Assistant */}
         <div className="api-section">
           <div className="section-header">
@@ -639,44 +851,128 @@ const ApiManagement = ({ url, token }) => {
                 {lisaStatus.success ? '✅' : '❌'} {lisaStatus.message}
               </div>
             )}
+            {lisaServiceStatus && (
+              <div className={`service-status ${lisaServiceStatus.running ? 'running' : 'stopped'}`}>
+                🔄 Serviço: {lisaServiceStatus.running ? 'Executando' : 'Parado'}
+                {lisaServiceStatus.port && ` (Porta: ${lisaServiceStatus.port})`}
+              </div>
+            )}
           </div>
 
           <div className="section-content">
-            <div className="form-group">
-              <label>OpenAI API Key</label>
-              <div className="input-with-button">
-                <input
-                  type="password"
-                  name="lisaOpenAiApiKey"
-                  value={settings.lisaOpenAiApiKey}
-                  onChange={handleInputChange}
-                  placeholder="sk-..."
-                  disabled={!settings.lisaEnabled}
-                />
+            <div className="ai-provider-tabs">
+              <div className="tab-buttons">
+                <button 
+                  className={`tab-button ${activeTab === 'openai' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('openai')}
+                >
+                  OpenAI
+                </button>
+                <button 
+                  className={`tab-button ${activeTab === 'groq' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('groq')}
+                >
+                  Groq
+                </button>
+
               </div>
+
+              {activeTab === 'openai' && (
+                <div className="tab-content">
+                  <div className="form-group">
+                    <label>OpenAI API Key</label>
+                    <div className="input-with-button">
+                      <input
+                        type="password"
+                        name="lisaOpenAiApiKey"
+                        value={settings.lisaOpenAiApiKey}
+                        onChange={handleInputChange}
+                        placeholder="sk-..."
+                        disabled={!settings.lisaEnabled}
+                      />
+                      <button
+                        type="button"
+                        onClick={testLisaApi}
+                        disabled={testingLisa || !settings.lisaEnabled}
+                        className="test-button"
+                      >
+                        {testingLisa ? 'Testando...' : 'Testar'}
+                      </button>
+                    </div>
+                    <small className="form-help">
+                      Chave da API da OpenAI para usar modelos como GPT-4.
+                      <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">
+                        Obter chave da API
+                      </a>
+                    </small>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'groq' && (
+                <div className="tab-content">
+                  <div className="form-group">
+                    <label>Groq API Key</label>
+                    <div className="input-with-button">
+                      <input
+                        type="password"
+                        name="lisaGroqApiKey"
+                        value={settings.lisaGroqApiKey}
+                        onChange={handleInputChange}
+                        placeholder="gsk_..."
+                        disabled={!settings.lisaEnabled}
+                      />
+                      <button
+                        type="button"
+                        onClick={testLisaApi}
+                        disabled={testingLisa || !settings.lisaEnabled}
+                        className="test-button"
+                      >
+                        {testingLisa ? 'Testando...' : 'Testar'}
+                      </button>
+                    </div>
+                    <small className="form-help">
+                      Chave da API da Groq para modelos rápidos como Llama.
+                      <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">
+                        Obter chave da API
+                      </a>
+                    </small>
+                  </div>
+                </div>
+              )}
+
+
+            </div>
+
+            <div className="form-group">
+              <label>Porta do Serviço</label>
+              <input
+                type="text"
+                name="lisaPort"
+                value={settings.lisaPort}
+                onChange={handleInputChange}
+                placeholder="8000"
+                disabled={!settings.lisaEnabled}
+              />
               <small className="form-help">
-                Chave da API do OpenAI para modelos GPT.
-                <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">
-                  Obter chave da API
-                </a>
+                Porta onde o serviço da Lisa será executado.
               </small>
             </div>
 
             <div className="form-group">
-              <label>Groq API Key</label>
+              <label>Tamanho Máximo de Arquivo (MB)</label>
               <input
-                type="password"
-                name="lisaGroqApiKey"
-                value={settings.lisaGroqApiKey}
+                type="number"
+                name="lisaMaxFileSize"
+                value={settings.lisaMaxFileSize}
                 onChange={handleInputChange}
-                placeholder="gsk_..."
+                placeholder="10"
+                min="1"
+                max="100"
                 disabled={!settings.lisaEnabled}
               />
               <small className="form-help">
-                Chave da API do Groq para modelos rápidos.
-                <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">
-                  Obter chave da API
-                </a>
+                Tamanho máximo para upload de arquivos na Lisa.
               </small>
             </div>
 
@@ -687,163 +983,75 @@ const ApiManagement = ({ url, token }) => {
                 name="lisaChainlitSecret"
                 value={settings.lisaChainlitSecret}
                 onChange={handleInputChange}
-                placeholder="Segredo para autenticação do Chainlit"
+                placeholder="Chave secreta para Chainlit"
                 disabled={!settings.lisaEnabled}
               />
               <small className="form-help">
-                Chave secreta para autenticação do Chainlit.
+                Chave secreta para autenticação do Chainlit (opcional).
               </small>
             </div>
 
             <div className="form-group">
-              <label>Literal AI API Key</label>
+              <label>Literal API Key</label>
               <input
                 type="password"
                 name="lisaLiteralApiKey"
                 value={settings.lisaLiteralApiKey}
                 onChange={handleInputChange}
-                placeholder="lsk_..."
+                placeholder="Chave da API Literal"
                 disabled={!settings.lisaEnabled}
               />
               <small className="form-help">
-                Chave da API do Literal AI para observabilidade.
-                <a href="https://cloud.getliteral.ai/" target="_blank" rel="noopener noreferrer">
-                  Obter chave da API
-                </a>
+                Chave da API Literal para observabilidade (opcional).
               </small>
             </div>
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>URL do Ollama</label>
-                <input
-                  type="text"
-                  name="lisaOllamaUrl"
-                  value={settings.lisaOllamaUrl}
-                  onChange={handleInputChange}
-                  placeholder="http://localhost:11434"
-                  disabled={!settings.lisaEnabled}
-                />
-                <small className="form-help">
-                  URL do servidor Ollama local.
-                </small>
-              </div>
-
-              <div className="form-group">
-                <label>Modelo Ollama</label>
-                <input
-                  type="text"
-                  name="lisaOllamaModel"
-                  value={settings.lisaOllamaModel}
-                  onChange={handleInputChange}
-                  placeholder="llama2"
-                  disabled={!settings.lisaEnabled}
-                />
-                <small className="form-help">
-                  Nome do modelo Ollama a ser usado.
-                </small>
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Porta do Servidor</label>
-                <input
-                  type="number"
-                  name="lisaPort"
-                  value={settings.lisaPort}
-                  onChange={handleInputChange}
-                  placeholder="8000"
-                  disabled={!settings.lisaEnabled}
-                />
-                <small className="form-help">
-                  Porta onde o servidor da Lisa será executado.
-                </small>
-              </div>
-
-              <div className="form-group">
-                <label>Tamanho Máximo de Arquivo (MB)</label>
-                <input
-                  type="number"
-                  name="lisaMaxFileSize"
-                  value={settings.lisaMaxFileSize}
-                  onChange={handleInputChange}
-                  placeholder="10"
-                  disabled={!settings.lisaEnabled}
-                />
-                <small className="form-help">
-                  Tamanho máximo para upload de arquivos.
-                </small>
-              </div>
-            </div>
-
-            <div className="test-section">
-              <button
-                type="button"
-                onClick={testLisaApi}
-                disabled={testingLisa || !settings.lisaEnabled}
-                className="test-button"
-              >
-                {testingLisa ? 'Testando...' : '🧪 Testar Configuração'}
-              </button>
-              
-              {settings.lisaEnabled && (
-                <div className="lisa-controls">
-                  <div className="service-status">
-                    <span className="status-label">Status do Serviço:</span>
-                    <span className={`status-badge ${lisaServiceStatus?.running ? 'running' : 'stopped'}`}>
-                      {lisaServiceStatus?.running ? '🟢 Executando' : '🔴 Parado'}
-                    </span>
-                    {lisaServiceStatus?.port && (
-                      <span className="port-info">Porta: {lisaServiceStatus.port}</span>
-                    )}
-                  </div>
-                  
-                  <div className="control-buttons">
-                    <button
-                      type="button"
-                      onClick={startLisa}
-                      disabled={controllingLisa || lisaServiceStatus?.running}
-                      className="control-button start"
-                    >
-                      {controllingLisa ? '⏳' : '▶️'} Iniciar
-                    </button>
-                    
-                    <button
-                      type="button"
-                      onClick={stopLisa}
-                      disabled={controllingLisa || !lisaServiceStatus?.running}
-                      className="control-button stop"
-                    >
-                      {controllingLisa ? '⏳' : '⏹️'} Parar
-                    </button>
-                    
-                    <button
-                      type="button"
-                      onClick={restartLisa}
-                      disabled={controllingLisa}
-                      className="control-button restart"
-                    >
-                      {controllingLisa ? '⏳' : '🔄'} Reiniciar
-                    </button>
-                  </div>
-                  
-                  {lisaServiceStatus?.url && (
-                    <div className="service-url">
-                      <span>Acesse a Lisa em: </span>
-                      <a href={lisaServiceStatus.url} target="_blank" rel="noopener noreferrer">
-                        {lisaServiceStatus.url}
-                      </a>
-                    </div>
-                  )}
+            {settings.lisaEnabled && (
+              <div className="lisa-controls">
+                <div className="control-buttons">
+                  <button
+                    type="button"
+                    onClick={startLisaService}
+                    disabled={controllingLisa || (lisaServiceStatus && lisaServiceStatus.running)}
+                    className="control-button start"
+                  >
+                    {controllingLisa ? 'Iniciando...' : '▶️ Iniciar Lisa'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={stopLisaService}
+                    disabled={controllingLisa || (lisaServiceStatus && !lisaServiceStatus.running)}
+                    className="control-button stop"
+                  >
+                    {controllingLisa ? 'Parando...' : '⏹️ Parar Lisa'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={restartLisaService}
+                    disabled={controllingLisa}
+                    className="control-button restart"
+                  >
+                    {controllingLisa ? 'Reiniciando...' : '🔄 Reiniciar Lisa'}
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
+
+            <div className="api-info">
+              <h4>ℹ️ Informações da Lisa AI</h4>
+              <ul>
+                <li>A Lisa é uma assistente de IA especializada em delivery</li>
+                <li>Pode processar pedidos em linguagem natural</li>
+                <li>Integra com WhatsApp e Telegram para atendimento automático</li>
+                <li>Suporta múltiplos provedores de IA (OpenAI, Groq)</li>
+                <li>Interface web disponível em: <code>http://localhost:{settings.lisaPort}</code></li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="actions">
+      <div className="save-section">
         <button
           type="button"
           onClick={saveSettings}
@@ -854,7 +1062,7 @@ const ApiManagement = ({ url, token }) => {
         </button>
       </div>
 
-      <div className="api-documentation">
+      <div className="documentation-section">
         <h3>📚 Documentação</h3>
         <div className="doc-links">
           <a href="https://developers.google.com/maps/documentation" target="_blank" rel="noopener noreferrer">
@@ -874,6 +1082,9 @@ const ApiManagement = ({ url, token }) => {
           </a>
           <a href="https://developers.facebook.com/docs/whatsapp/business-management-api" target="_blank" rel="noopener noreferrer">
             📖 Documentação WhatsApp Business API
+          </a>
+          <a href="https://core.telegram.org/bots/api" target="_blank" rel="noopener noreferrer">
+            📖 Documentação Telegram Bot API
           </a>
         </div>
       </div>

@@ -58,7 +58,7 @@ class ConversationalOrderManager:
         
         # Inicializar modelo Ollama
         self.llm = ChatOllama(
-            model="llama3.1",
+            model="llama3.2:1b",
             temperature=0.7,
             base_url="http://localhost:11434"
         )

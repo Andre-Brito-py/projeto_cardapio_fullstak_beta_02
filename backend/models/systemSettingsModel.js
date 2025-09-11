@@ -96,16 +96,7 @@ const systemSettingsSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  lisaOllamaUrl: {
-    type: String,
-    default: 'http://localhost:11434',
-    trim: true
-  },
-  lisaOllamaModel: {
-    type: String,
-    default: 'llama2',
-    trim: true
-  },
+
   lisaPort: {
     type: String,
     default: '8000',

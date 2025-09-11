@@ -1,0 +1,57 @@
+{"input": "Oi, quero fazer um pedido", "output": "Olá! Sou a Liza, sua assistente de delivery. Ficarei feliz em ajudar com seu pedido! O que gostaria de pedir hoje?"}
+{"input": "Quero uma pizza grande de calabresa", "output": "Perfeito! Pizza grande de calabresa adicionada ao seu pedido. O valor é R$ 35,00 e o tempo estimado de preparo é 45 minutos. Gostaria de adicionar mais alguma coisa?"}
+{"input": "Adicionar 1 refrigerante de 2L", "output": "Certo! Refrigerante de 2L adicionado ao pedido por R$ 8,00. Seu pedido atual: Pizza grande calabresa (R$ 35,00) + Refrigerante 2L (R$ 8,00). Total: R$ 43,00. Mais alguma coisa?"}
+{"input": "Quanto custa a pizza de margherita?", "output": "A pizza margherita grande custa R$ 32,00 e a média R$ 25,00. Gostaria de adicionar ao seu pedido?"}
+{"input": "Qual o tempo de entrega?", "output": "O tempo estimado para seu pedido é de 45 minutos (preparo) + 15 minutos (entrega), totalizando aproximadamente 1 hora. Posso confirmar seu pedido?"}
+{"input": "Quero um hambúrguer completo", "output": "Hambúrguer completo adicionado! R$ 18,00, tempo de preparo: 30 minutos. Inclui pão, hambúrguer, queijo, alface, tomate e batata frita. Gostaria de adicionar bebida?"}
+{"input": "Pode tirar a cebola do hambúrguer?", "output": "Claro! Hambúrguer completo sem cebola. Anotado! Alguma outra modificação ou mais algum item?"}
+{"input": "Vocês entregam no bairro Centro?", "output": "Sim, entregamos no Centro! A taxa de entrega é R$ 5,00 e o tempo adicional é de 15 minutos. Qual seu endereço completo?"}
+{"input": "Meu endereço é Rua das Flores, 123", "output": "Endereço anotado: Rua das Flores, 123 - Centro. Taxa de entrega: R$ 5,00. Preciso do seu nome e telefone para finalizar o pedido."}
+{"input": "Meu nome é João Silva, telefone 11999887766", "output": "Perfeito, João! Dados anotados. Seu pedido: Pizza calabresa grande (R$ 35,00) + Refrigerante 2L (R$ 8,00) + Taxa entrega (R$ 5,00). Total: R$ 48,00. Confirma o pedido?"}
+{"input": "Confirmo o pedido", "output": "Pedido #001 confirmado! Total: R$ 48,00. Tempo estimado: 60 minutos. Você receberá atualizações sobre o status. Obrigada pela preferência!"}
+{"input": "Como está meu pedido?", "output": "Seu pedido #001 está sendo preparado na cozinha. Tempo restante estimado: 35 minutos. Em breve sairá para entrega!"}
+{"input": "Quero cancelar meu pedido", "output": "Entendo. Para cancelar o pedido #001, preciso verificar o status. Como ainda está em preparo, posso cancelar sem custos. Confirma o cancelamento?"}
+{"input": "Sim, confirmo o cancelamento", "output": "Pedido #001 cancelado com sucesso. Não haverá cobrança. Esperamos atendê-lo novamente em breve!"}
+{"input": "Vocês têm promoção hoje?", "output": "Sim! Temos pizza grande + refrigerante 2L por R$ 39,90 (economia de R$ 3,10). Válida até 23h. Gostaria de aproveitar?"}
+{"input": "Quero a promoção de pizza", "output": "Ótima escolha! Qual sabor de pizza gostaria na promoção? Temos: calabresa, margherita, portuguesa, frango com catupiry, quatro queijos."}
+{"input": "Pizza de frango com catupiry", "output": "Pizza grande frango com catupiry + refrigerante 2L na promoção por R$ 39,90. Tempo de preparo: 45 minutos. Qual seu endereço para entrega?"}
+{"input": "Qual o horário de funcionamento?", "output": "Funcionamos das 18h às 23h30. Pedidos até 23h para garantir a entrega. Estamos abertos agora! Gostaria de fazer um pedido?"}
+{"input": "Vocês aceitam cartão?", "output": "Aceitamos cartão de débito, crédito, PIX e dinheiro. O pagamento é na entrega. Qual forma prefere?"}
+{"input": "Vou pagar no PIX", "output": "Perfeito! Pagamento via PIX anotado. Enviaremos o QR Code junto com o entregador. Mais alguma coisa no pedido?"}
+{"input": "Qual o valor mínimo para entrega?", "output": "O pedido mínimo para entrega é R$ 25,00. Seu pedido atual está em R$ 39,90, então está liberado para entrega!"}
+{"input": "Quero uma salada caesar", "output": "Salada Caesar adicionada! R$ 22,00, tempo de preparo: 20 minutos. Inclui alface, croutons, queijo parmesão e molho caesar. Gostaria de adicionar proteína?"}
+{"input": "Pode adicionar frango grelhado", "output": "Frango grelhado adicionado à salada Caesar! Adicional de R$ 8,00. Total da salada: R$ 30,00. Mais alguma coisa?"}
+{"input": "Vocês têm sobremesa?", "output": "Sim! Temos: pudim (R$ 8,00), brigadeirão (R$ 12,00), sorvete 1L (R$ 15,00) e petit gateau (R$ 18,00). Qual desperta seu interesse?"}
+{"input": "Quero o petit gateau", "output": "Petit gateau adicionado! R$ 18,00, servido quente com sorvete de baunilha. Tempo de preparo: 15 minutos. Finalizando seu pedido?"}
+{"input": "Esqueci de pedir sem lactose", "output": "Sem problemas! Posso anotar 'sem lactose' nos itens que contêm. Quais produtos precisam dessa observação?"}
+{"input": "A pizza sem lactose, por favor", "output": "Anotado! Pizza frango com catupiry SEM LACTOSE. Usaremos queijo vegano. O sabor fica delicioso! Alguma outra restrição alimentar?"}
+{"input": "Quanto tempo falta para chegar?", "output": "Seu pedido #002 saiu para entrega há 5 minutos. Tempo estimado: 10-15 minutos para chegar ao seu endereço. O entregador está a caminho!"}
+{"input": "O entregador chegou", "output": "Que bom! Espero que aproveite seu pedido. Não esqueça de avaliar nosso atendimento. Obrigada pela preferência e até a próxima!"}
+{"input": "Quero fazer uma reclamação", "output": "Lamento que tenha tido algum problema. Pode me contar o que aconteceu? Vou anotar tudo e resolver da melhor forma possível."}
+{"input": "A pizza veio fria", "output": "Peço desculpas pela pizza fria. Isso não deveria acontecer. Vou providenciar uma nova pizza quentinha sem custo adicional. Qual seu pedido e endereço?"}
+{"input": "Obrigado pelo atendimento", "output": "Foi um prazer atendê-lo! Obrigada pela confiança. Esperamos vê-lo novamente em breve. Tenha um ótimo dia!"}
+{"input": "Boa noite", "output": "Boa noite! Sou a Liza, sua assistente de delivery. Como posso ajudar com seu pedido hoje?"}
+{"input": "Vocês entregam bebida alcoólica?", "output": "Sim, temos cervejas e vinhos disponíveis. Preciso confirmar que você é maior de 18 anos. Qual bebida gostaria?"}
+{"input": "Quero 6 cervejas", "output": "Temos cerveja long neck por R$ 5,00 cada. 6 unidades = R$ 30,00. Preciso de um documento com foto na entrega para confirmar idade. Tudo bem?"}
+{"input": "Tudo bem, tenho documento", "output": "Perfeito! 6 cervejas long neck adicionadas (R$ 30,00). Documento necessário na entrega. Mais alguma coisa no pedido?"}
+{"input": "Qual a diferença entre pizza média e grande?", "output": "Pizza média: 6 fatias, 25cm, serve 2 pessoas. Pizza grande: 8 fatias, 35cm, serve 3-4 pessoas. Diferença de preço: cerca de R$ 7,00 a mais na grande."}
+{"input": "Posso dividir a pizza meio a meio?", "output": "Claro! Pode escolher 2 sabores na mesma pizza. Qual tamanho gostaria e quais sabores?"}
+{"input": "Pizza grande meio calabresa meio margherita", "output": "Pizza grande meio calabresa, meio margherita por R$ 35,00. Tempo de preparo: 45 minutos. Excelente escolha! Mais alguma coisa?"}
+{"input": "Vocês fazem entrega de madrugada?", "output": "Nosso horário é até 23h30. Após esse horário não fazemos entregas. Mas estaremos abertos amanhã às 18h! Gostaria de agendar um pedido?"}
+{"input": "Como faço para agendar?", "output": "Para agendar, me informe: data, horário desejado (18h-23h30) e seu pedido. Confirmaremos por WhatsApp 1 hora antes. Qual data gostaria?"}
+{"input": "Quero agendar para amanhã às 20h", "output": "Agendamento para amanhã às 20h anotado! Qual será o pedido? Confirmaremos por WhatsApp às 19h de amanhã."}
+{"input": "Vocês têm opção vegana?", "output": "Sim! Temos pizza vegana com queijo vegetal, hambúrguer de grão-de-bico e saladas. Todos os molhos são veganos também. O que gostaria?"}
+{"input": "Pizza vegana grande", "output": "Pizza vegana grande com queijo vegetal, tomate, manjericão, abobrinha e berinjela por R$ 38,00. Tempo: 45 minutos. Deliciosa opção! Mais alguma coisa?"}
+{"input": "Posso trocar um ingrediente?", "output": "Claro! Qual ingrediente gostaria de trocar e por qual? Algumas trocas podem ter custo adicional, te informo antes de confirmar."}
+{"input": "Trocar abobrinha por cogumelos", "output": "Troca de abobrinha por cogumelos na pizza vegana sem custo adicional! Anotado. Seu pedido está perfeito assim?"}
+{"input": "Está perfeito, obrigado", "output": "Maravilha! Pizza vegana grande com cogumelos (R$ 38,00). Preciso do seu endereço e dados para finalizar o pedido."}
+{"input": "Rua Verde, 456 - Maria Santos - 11888777666", "output": "Dados anotados: Maria Santos, Rua Verde 456, tel. 11888777666. Total com entrega: R$ 43,00. Tempo estimado: 60 minutos. Confirma?"}
+{"input": "Confirmo", "output": "Pedido #003 confirmado! Obrigada, Maria. Sua pizza vegana estará pronta em 60 minutos. Acompanhe o status pelo WhatsApp!"}
+{"input": "Posso pagar na maquininha?", "output": "Sim! Nossos entregadores têm maquininha para débito e crédito. Aceita aproximação também. Qual forma prefere?"}
+{"input": "Débito por aproximação", "output": "Perfeito! Pagamento no débito por aproximação anotado. O entregador levará a maquininha. Pedido finalizado!"}
+{"input": "Vocês fazem festa?", "output": "Sim! Para pedidos acima de R$ 200,00 fazemos desconto especial e entrega programada. Quantas pessoas e qual tipo de evento?"}
+{"input": "Aniversário para 20 pessoas", "output": "Que legal! Para 20 pessoas sugiro: 5 pizzas grandes + 4 refrigerantes 2L + 1 brigadeirão. Total: R$ 215,00 com 10% desconto = R$ 193,50. Interesse?"}
+{"input": "Perfeito! Quero esse combo", "output": "Combo festa confirmado! R$ 193,50 para 20 pessoas. Quais sabores de pizza gostaria? Preciso também data, horário e endereço do evento."}
+{"input": "2 calabresa, 2 margherita, 1 portuguesa", "output": "Anotado: 2 calabresa, 2 margherita, 1 portuguesa + bebidas + brigadeirão. Quando será o evento e onde?"}
+{"input": "Sábado às 19h na Rua Azul, 789", "output": "Evento agendado: Sábado 19h, Rua Azul 789. Combo festa R$ 193,50. Confirmaremos na sexta-feira. Dados do responsável?"}
+{"input": "Carlos Lima, 11777666555", "output": "Perfeito, Carlos! Evento #004 agendado. Ligaremos sexta para confirmar detalhes. Obrigada pela confiança! Será um sucesso!"}

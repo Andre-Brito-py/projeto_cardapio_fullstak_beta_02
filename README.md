@@ -24,7 +24,7 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **Upload de Imagens**: Sistema integrado para imagens de produtos e banners
 - **Categorias Dinâmicas**: Sistema completo de categorias com status ativo/inativo
 - **Configurações da Loja**: Personalização específica por loja
-- **🤖 Assistente Liza**: IA integrada com Ollama para automação e suporte
+- **🤖 Assistente Liza**: IA integrada com OpenRouter para automação e suporte
   - Consulta de cardápio via comandos de voz
   - Relatórios automáticos do dia
   - Verificação de pedidos em andamento
@@ -70,7 +70,7 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **Store Management** - Interface para gerenciar lojas individuais
 
 ### 🤖 Assistente IA Liza
-- **Ollama** - Runtime local para modelos de IA
+- **OpenRouter** - API para modelos de IA
 - **Llama 3.1** - Modelo de linguagem natural
 - **Processamento Local** - IA rodando sem dependência de APIs externas
 - **Integração Backend** - Comunicação direta com APIs do sistema
@@ -84,9 +84,9 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **MongoDB** (local ou MongoDB Atlas)
 - **Git** (para clonar o repositório)
 - **Conta no Stripe** (opcional, para pagamentos)
-- **Ollama** (para a assistente IA Liza)
-  - Instale o Ollama: https://ollama.ai/download
-  - Execute: `ollama pull llama3.1:latest`
+- **OpenRouter API Key** (para a assistente IA Liza)
+- Obtenha sua chave em: https://openrouter.ai/
+- Configure a variável `VITE_OPENROUTER_API_KEY`
 
 ### ⚡ Configuração Automática (Recomendado)
 
@@ -174,8 +174,7 @@ pip install -r requirements.txt
 
 **Configure o arquivo `.env` na pasta ai-assistant:**
 ```env
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1:latest
+VITE_OPENROUTER_API_KEY=sua_chave_aqui
 CHAINLIT_AUTH_SECRET=seu_chainlit_secret_aqui
 ```
 
@@ -271,7 +270,7 @@ npm run dev
 - **🏪 Admin Panel (Lojas)**: http://localhost:5174
 - **🔌 Backend API**: http://localhost:4000
 - **🤖 Assistente Liza**: Integrada no Admin Panel (Chat com IA)
-- **🧠 Ollama API**: http://localhost:11434 (IA Local)
+- **🧠 OpenRouter API**: https://openrouter.ai/api/v1 (IA Cloud)
 
 ### ⚠️ IMPORTANTE: Configuração de URLs
 

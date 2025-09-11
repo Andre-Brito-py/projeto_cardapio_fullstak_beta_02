@@ -26,6 +26,7 @@ import Customers from './pages/Customers/Customers';
 
 import AsaasDashboard from './pages/AsaasDashboard/AsaasDashboard';
 import ApiManagement from './pages/SuperAdmin/ApiManagement/ApiManagement';
+import TelegramManagement from './pages/SuperAdmin/TelegramManagement/TelegramManagement';
 import StockManagement from './pages/StockManagement/StockManagement';
 import WhatsAppSettings from './pages/WhatsAppSettings/WhatsAppSettings';
 import WhatsAppMessages from './pages/WhatsAppMessages/WhatsAppMessages';
@@ -134,6 +135,7 @@ const App = () => {
           <Route path='/super-admin/stores' element={<StoreManagement url={url} token={token}/>} />
           <Route path='/super-admin/system-settings' element={<SystemSettings url={url} token={token}/>} />
           <Route path='/super-admin/api-management' element={<ApiManagement url={url} token={token}/>} />
+          <Route path='/super-admin/telegram-management' element={<TelegramManagement url={url} token={token}/>} />
           <Route path='/super-admin/analytics' element={<Analytics url={url} token={token}/>} />
           <Route path='/super-admin/users' element={<UserManagement url={url} token={token}/>} />
           <Route path='/super-admin/asaas' element={<AsaasDashboard url={url} token={token}/>} />

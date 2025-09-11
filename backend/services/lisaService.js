@@ -70,9 +70,7 @@ class LisaService {
             envContent += `LITERAL_API_KEY=${this.settings.lisaLiteralApiKey}\n`;
         }
 
-        // Ollama
-        envContent += `OLLAMA_BASE_URL=${this.settings.lisaOllamaUrl}\n`;
-        envContent += `OLLAMA_MODEL=${this.settings.lisaOllamaModel}\n`;
+
 
         // Configurações gerais
         envContent += `CHAINLIT_PORT=${this.settings.lisaPort}\n`;

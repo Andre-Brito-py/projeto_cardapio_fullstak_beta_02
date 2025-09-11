@@ -31,6 +31,11 @@ const SuperAdminSidebar = ({ isOpen, onClose }) => {
             <p>Gerenciar APIs</p>
           </NavLink>
           
+          <NavLink to='/super-admin/telegram-management' className='super-admin-sidebar-option' onClick={onClose}>
+            <img src={assets.add_icon} alt='Telegram' />
+            <p>Telegram Bot</p>
+          </NavLink>
+          
           <NavLink to='/super-admin/analytics' className='super-admin-sidebar-option' onClick={onClose}>
             <img src={assets.parcel_icon} alt='Analytics' />
             <p>Analytics Global</p>

@@ -25,8 +25,7 @@ export const getApiSettings = async (req, res) => {
             lisaGroqApiKey: settings.lisaGroqApiKey ? '***' + settings.lisaGroqApiKey.slice(-4) : '',
             lisaChainlitSecret: settings.lisaChainlitSecret ? '***' + settings.lisaChainlitSecret.slice(-4) : '',
             lisaLiteralApiKey: settings.lisaLiteralApiKey ? '***' + settings.lisaLiteralApiKey.slice(-4) : '',
-            lisaOllamaUrl: settings.lisaOllamaUrl || 'http://localhost:11434',
-            lisaOllamaModel: settings.lisaOllamaModel || 'llama2',
+
             lisaPort: settings.lisaPort || '8000',
             lisaMaxFileSize: settings.lisaMaxFileSize || 10,
             
@@ -41,7 +40,14 @@ export const getApiSettings = async (req, res) => {
             whatsappAccessToken: settings.whatsappAccessToken ? '***' + settings.whatsappAccessToken.slice(-4) : '',
             whatsappPhoneNumberId: settings.whatsappPhoneNumberId || '',
             whatsappWebhookVerifyToken: settings.whatsappWebhookVerifyToken ? '***' + settings.whatsappWebhookVerifyToken.slice(-4) : '',
-            whatsappBusinessAccountId: settings.whatsappBusinessAccountId || ''
+            whatsappBusinessAccountId: settings.whatsappBusinessAccountId || '',
+            
+            // Telegram Bot API
+            telegramEnabled: settings.telegramEnabled || false,
+            telegramBotToken: settings.telegramBotToken ? '***' + settings.telegramBotToken.slice(-4) : '',
+            telegramWebhookUrl: settings.telegramWebhookUrl || '',
+            telegramAllowedUsers: settings.telegramAllowedUsers || '',
+            telegramAdminChatId: settings.telegramAdminChatId || ''
         };
         
         res.json({
@@ -73,8 +79,7 @@ export const updateApiSettings = async (req, res) => {
             lisaGroqApiKey,
             lisaChainlitSecret,
             lisaLiteralApiKey,
-            lisaOllamaUrl,
-            lisaOllamaModel,
+
             lisaPort,
             lisaMaxFileSize,
             shippingEnabled,
@@ -85,7 +90,12 @@ export const updateApiSettings = async (req, res) => {
             whatsappAccessToken,
             whatsappPhoneNumberId,
             whatsappWebhookVerifyToken,
-            whatsappBusinessAccountId
+            whatsappBusinessAccountId,
+            telegramEnabled,
+            telegramBotToken,
+            telegramWebhookUrl,
+            telegramAllowedUsers,
+            telegramAdminChatId
         } = req.body;
         
         const settings = await SystemSettings.getInstance();
@@ -117,8 +127,7 @@ export const updateApiSettings = async (req, res) => {
         if (lisaLiteralApiKey && !lisaLiteralApiKey.startsWith('***')) {
             settings.lisaLiteralApiKey = lisaLiteralApiKey;
         }
-        settings.lisaOllamaUrl = lisaOllamaUrl || 'http://localhost:11434';
-        settings.lisaOllamaModel = lisaOllamaModel || 'llama2';
+
         settings.lisaPort = lisaPort || '8000';
         settings.lisaMaxFileSize = parseInt(lisaMaxFileSize) || 10;
         
@@ -138,6 +147,15 @@ export const updateApiSettings = async (req, res) => {
             settings.whatsappWebhookVerifyToken = whatsappWebhookVerifyToken;
         }
         settings.whatsappBusinessAccountId = whatsappBusinessAccountId;
+        
+        // Atualizar configurações do Telegram Bot API
+        settings.telegramEnabled = telegramEnabled;
+        if (telegramBotToken && !telegramBotToken.startsWith('***')) {
+            settings.telegramBotToken = telegramBotToken;
+        }
+        settings.telegramWebhookUrl = telegramWebhookUrl;
+        settings.telegramAllowedUsers = telegramAllowedUsers;
+        settings.telegramAdminChatId = telegramAdminChatId;
         
         await settings.save();
         
@@ -284,8 +302,7 @@ export const testLisaApi = async (req, res) => {
             groqApiKey,
             chainlitSecret,
             literalApiKey,
-            ollamaUrl,
-            ollamaModel,
+
             port
         } = req.body;
         
@@ -340,22 +357,7 @@ export const testLisaApi = async (req, res) => {
             }
         }
         
-        // Testar conexão com Ollama se URL fornecida
-        if (ollamaUrl) {
-            try {
-                const ollamaResponse = await fetch(`${ollamaUrl}/api/tags`, {
-                    method: 'GET'
-                });
-                
-                if (ollamaResponse.ok) {
-                    testResults.push('✅ Ollama: Conectado');
-                } else {
-                    testResults.push('❌ Ollama: Não conectado');
-                }
-            } catch (error) {
-                testResults.push('❌ Ollama: Erro de conexão');
-            }
-        }
+
         
         const allTestsPassed = testResults.every(result => result.includes('✅'));
         
@@ -448,6 +450,91 @@ export const testWhatsAppApi = async (req, res) => {
 };
 
 /**
+ * Testar API do Telegram Bot
+ */
+export const testTelegramApi = async (req, res) => {
+    try {
+        const { telegramBotToken, telegramAdminChatId } = req.body;
+        
+        if (!telegramBotToken) {
+            return res.status(400).json({
+                success: false,
+                message: 'Token do bot é obrigatório'
+            });
+        }
+        
+        // Testar a API obtendo informações do bot
+        const botInfoResponse = await fetch(
+            `https://api.telegram.org/bot${telegramBotToken}/getMe`
+        );
+        
+        const botInfoData = await botInfoResponse.json();
+        
+        if (!botInfoData.ok) {
+            return res.status(400).json({
+                success: false,
+                message: 'Token do bot inválido',
+                error: botInfoData.description
+            });
+        }
+        
+        // Se um chat ID de admin foi fornecido, testar envio de mensagem
+        let testMessageResult = null;
+        if (telegramAdminChatId) {
+            try {
+                const testMessageResponse = await fetch(
+                    `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chat_id: telegramAdminChatId,
+                            text: '🤖 Teste de conexão do Bot Liza realizado com sucesso!'
+                        })
+                    }
+                );
+                
+                const testMessageData = await testMessageResponse.json();
+                testMessageResult = {
+                    success: testMessageData.ok,
+                    message: testMessageData.ok ? 'Mensagem de teste enviada' : 'Erro ao enviar mensagem de teste'
+                };
+            } catch (error) {
+                testMessageResult = {
+                    success: false,
+                    message: 'Erro ao testar envio de mensagem'
+                };
+            }
+        }
+        
+        res.json({
+            success: true,
+            message: 'Telegram Bot API configurado corretamente!',
+            details: {
+                botInfo: {
+                    id: botInfoData.result.id,
+                    username: botInfoData.result.username,
+                    firstName: botInfoData.result.first_name,
+                    canJoinGroups: botInfoData.result.can_join_groups,
+                    canReadAllGroupMessages: botInfoData.result.can_read_all_group_messages,
+                    supportsInlineQueries: botInfoData.result.supports_inline_queries
+                },
+                testMessage: testMessageResult
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erro ao testar Telegram API:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao testar Telegram Bot API'
+        });
+    }
+};
+
+/**
  * Obter status das APIs
  */
 export const getApiStatus = async (req, res) => {
@@ -478,6 +565,13 @@ export const getApiStatus = async (req, res) => {
                 phoneNumberConfigured: !!settings.whatsappPhoneNumberId,
                 accessTokenConfigured: !!settings.whatsappAccessToken,
                 webhookConfigured: !!settings.whatsappWebhookVerifyToken
+            },
+            telegram: {
+                configured: !!settings.telegramBotToken,
+                enabled: settings.telegramEnabled || false,
+                botTokenConfigured: !!settings.telegramBotToken,
+                webhookConfigured: !!settings.telegramWebhookUrl,
+                adminChatConfigured: !!settings.telegramAdminChatId
             }
         };
         

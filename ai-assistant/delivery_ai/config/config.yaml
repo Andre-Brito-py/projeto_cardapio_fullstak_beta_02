@@ -1,0 +1,178 @@
+# Configuração da IA Liza para Sistema de Delivery
+# Arquivo de configuração principal para treinamento e inferência
+
+# Configurações do Modelo
+model:
+  name: "liza_delivery_ai"
+  version: "1.0.0"
+  base_model: "llama2:7b"  # Modelo base do Ollama
+  fine_tuned_model: "liza_delivery:latest"
+  max_tokens: 512
+  temperature: 0.7
+  top_p: 0.9
+  context_length: 2048
+
+# Hiperparâmetros de Treinamento
+training:
+  batch_size: 8
+  learning_rate: 0.0001
+  epochs: 10
+  warmup_steps: 100
+  gradient_accumulation_steps: 4
+  max_grad_norm: 1.0
+  weight_decay: 0.01
+  save_steps: 500
+  eval_steps: 250
+  logging_steps: 50
+  early_stopping_patience: 3
+
+# Configurações do Dataset
+dataset:
+  train_file: "datasets/dataset.jsonl"
+  validation_split: 0.2
+  max_sequence_length: 512
+  padding: true
+  truncation: true
+  shuffle: true
+  seed: 42
+
+# Configurações de Tokenização
+tokenizer:
+  vocab_file: "models/vocab.txt"
+  special_tokens:
+    - "[PEDIDO]"
+    - "[RESPOSTA]"
+    - "[PRODUTO]"
+    - "[PRECO]"
+    - "[TEMPO]"
+    - "[ENDERECO]"
+    - "[CLIENTE]"
+  max_vocab_size: 10000
+  min_frequency: 2
+
+# Configurações de Checkpoints
+checkpoints:
+  save_dir: "checkpoints/"
+  save_total_limit: 3
+  save_best_only: true
+  monitor_metric: "eval_loss"
+  mode: "min"
+
+# Configurações do Ollama
+ollama:
+  host: "localhost"
+  port: 11434
+  timeout: 30
+  max_retries: 3
+  model_pull_timeout: 300
+
+# Configurações de Delivery
+delivery:
+  # Categorias de produtos
+  categories:
+    - "pizzas"
+    - "hambúrgueres"
+    - "bebidas"
+    - "sobremesas"
+    - "pratos_executivos"
+    - "lanches"
+    - "saladas"
+  
+  # Tempos estimados por categoria (em minutos)
+  estimated_times:
+    pizzas: 45
+    hambúrgueres: 30
+    bebidas: 5
+    sobremesas: 15
+    pratos_executivos: 40
+    lanches: 25
+    saladas: 20
+  
+  # Configurações de entrega
+  delivery_fee: 5.00
+  minimum_order: 25.00
+  max_delivery_distance: 10  # km
+  working_hours:
+    start: "18:00"
+    end: "23:30"
+  
+  # Status de pedidos
+  order_status:
+    - "recebido"
+    - "preparando"
+    - "saiu_para_entrega"
+    - "entregue"
+    - "cancelado"
+
+# Configurações do Telegram
+telegram:
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  webhook_url: "${TELEGRAM_WEBHOOK_URL}"
+  admin_chat_ids: []
+  max_message_length: 4096
+  parse_mode: "Markdown"
+  
+  # Configurações de disparos promocionais
+  promotional:
+    enabled: true
+    max_recipients_per_batch: 30
+    delay_between_messages: 1  # segundos
+    retry_attempts: 3
+    
+  # Templates de mensagens
+  templates:
+    welcome: "Olá! Sou a Liza, sua assistente de delivery. Como posso ajudar?"
+    order_confirmation: "Pedido #{order_id} confirmado! Tempo estimado: {estimated_time} minutos."
+    order_status: "Seu pedido #{order_id} está {status}."
+    promotional: "🍕 Oferta especial! {offer_description}. Válida até {expiry_date}."
+
+# Configurações de Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/liza_delivery.log"
+  max_file_size: "10MB"
+  backup_count: 5
+
+# Configurações de API
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+  cors_origins: ["*"]
+  rate_limit: "100/minute"
+
+# Configurações de Banco de Dados
+database:
+  type: "sqlite"  # ou "postgresql" para produção
+  url: "sqlite:///delivery_ai.db"
+  # Para PostgreSQL:
+  # url: "postgresql://user:password@localhost:5432/delivery_ai"
+  pool_size: 10
+  max_overflow: 20
+  echo: false
+
+# Configurações de Cache
+cache:
+  type: "redis"  # ou "memory" para desenvolvimento
+  url: "redis://localhost:6379/0"
+  ttl: 3600  # segundos
+
+# Configurações de Segurança
+security:
+  secret_key: "${SECRET_KEY}"
+  algorithm: "HS256"
+  access_token_expire_minutes: 30
+  
+# Configurações de Monitoramento
+monitoring:
+  enabled: true
+  metrics_port: 9090
+  health_check_interval: 30  # segundos
+
+# Configurações de Desenvolvimento
+development:
+  debug: true
+  hot_reload: true
+  mock_external_apis: true
+  test_mode: false

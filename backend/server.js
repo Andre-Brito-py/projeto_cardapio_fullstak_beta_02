@@ -34,6 +34,7 @@ import asaasRouter from './routes/asaasRoutes.js';
 import apiRouter from './routes/apiRoutes.js';
 import whatsappRouter from './routes/whatsappRoute.js';
 import whatsappWebhookRouter from './routes/whatsappWebhook.js';
+import telegramRouter from './routes/telegramRoutes.js';
 import lizaRouter from './routes/lizaRoutes.js';
 import reportRouter from './routes/reportRoutes.js';
 import dailyReportScheduler from './services/dailyReportScheduler.js';
@@ -73,6 +74,7 @@ app.use('/api/asaas', asaasRouter); // Rotas para integração com Asaas
 app.use('/api/system/api', apiRouter); // Rotas para gerenciamento de APIs
 app.use('/api/whatsapp', validateStoreActive, whatsappRouter); // Rotas para integração com WhatsApp
 app.use('/api/whatsapp-webhook', whatsappWebhookRouter); // Webhook não precisa validar loja ativa
+app.use('/api/telegram', telegramRouter); // Rotas para integração com Telegram
 app.use('/api/liza', lizaRouter); // Rotas para chat com IA Liza
 app.use('/api/reports', reportRouter); // Rotas para relatórios diários
 

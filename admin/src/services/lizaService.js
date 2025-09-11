@@ -1,4 +1,4 @@
-import ollamaService from './ollamaService.js';
+import openRouterService from './openRouterService.js';
 import backendService from './backendService.js';
 
 // Serviço principal da assistente Liza
@@ -31,8 +31,8 @@ class LizaService {
         }
       }
 
-      // Se não foi um comando específico, enviar para o Ollama
-      return await this.sendToOllama(message);
+      // Se não foi um comando específico, enviar para o OpenRouter
+      return await this.sendToOpenRouter(message);
 
     } catch (error) {
       console.error('Erro no LizaService:', error);
@@ -390,8 +390,8 @@ class LizaService {
     };
   }
 
-  // Enviar mensagem para o Ollama
-  async sendToOllama(message) {
+  // Enviar mensagem para o OpenRouter
+  async sendToOpenRouter(message) {
     try {
       // Buscar contexto atual (cardápio e pedidos)
       const [menuResult, ordersResult] = await Promise.all([
@@ -401,13 +401,13 @@ class LizaService {
 
       const context = {};
       if (menuResult.success) {
-        context.menuItems = menuResult.data.slice(0, 20); // Limitar contexto
+        context.menu = menuResult.data.slice(0, 20); // Limitar contexto
       }
       if (ordersResult.success) {
         context.orders = ordersResult.data.slice(0, 10); // Limitar contexto
       }
 
-      const result = await ollamaService.sendMessage(message, context);
+      const result = await openRouterService.sendMessage(message, context);
       return {
         success: result.success,
         response: result.response,
