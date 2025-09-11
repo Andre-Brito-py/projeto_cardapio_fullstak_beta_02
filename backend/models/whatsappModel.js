@@ -61,7 +61,7 @@ const whatsappConfigSchema = mongoose.Schema({
     },
     welcomeMessage: {
         type: String,
-        default: 'Olá! Sou a Lisa, sua assistente virtual. Como posso ajudá-lo hoje?'
+        default: 'Olá! Sou a Liza, sua assistente virtual. Como posso ajudá-lo hoje?'
     },
     // Horário de funcionamento
     businessHours: {

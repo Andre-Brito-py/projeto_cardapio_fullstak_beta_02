@@ -307,7 +307,7 @@ class LisaService {
     buildPrompt(context) {
         const { store, menu, currentMessage, conversationHistory, customerName } = context;
         
-        let prompt = `Você é a Lisa, assistente virtual do ${store.name}. `;
+        let prompt = `Você é a Liza, assistente virtual do ${store.name}. `;
         prompt += `Você é especializada em atendimento ao cliente, vendas e suporte para pedidos de comida. `;
         prompt += `Seja sempre educada, prestativa e focada em ajudar o cliente a fazer seu pedido.\n\n`;
         
@@ -327,13 +327,15 @@ class LisaService {
         if (conversationHistory.length > 0) {
             prompt += `\nHISTÓRICO DA CONVERSA:\n`;
             conversationHistory.slice(-5).forEach(msg => {
-                const sender = msg.direction === 'inbound' ? customerName || 'Cliente' : 'Lisa';
+                const sender = msg.direction === 'inbound' ? customerName || 'Cliente' : 'Liza';
                 prompt += `${sender}: ${msg.content}\n`;
             });
         }
         
         prompt += `\nMENSAGEM ATUAL DO CLIENTE:\n${currentMessage}\n\n`;
-        prompt += `INSTRUÇÕES:\n`;
+        prompt += `\nINSTRUÇÕES:\n`;
+        prompt += `- Você é a LIZA, não se refira ao usuário como 'Liza'\n`;
+        prompt += `- Trate o usuário como 'você' ou pelo nome dele se souber\n`;
         prompt += `- Responda de forma natural e conversacional\n`;
         prompt += `- Ajude o cliente a escolher itens do cardápio\n`;
         prompt += `- Forneça informações sobre preços quando solicitado\n`;
@@ -409,7 +411,7 @@ class LisaService {
         
         // Primeira mensagem - boas-vindas
         if (conversationHistory.length === 0) {
-            return `Olá! 👋 Bem-vindo ao ${store.name}! Sou a Lisa, sua assistente virtual. Como posso ajudá-lo hoje? Posso mostrar nosso cardápio ou ajudar com seu pedido! 😊`;
+            return `Olá! 👋 Bem-vindo ao ${store.name}! Sou a Liza, sua assistente virtual. Como posso ajudá-lo hoje? Posso mostrar nosso cardápio ou ajudar com seu pedido! 😊`;
         }
         
         // Cardápio/Menu
