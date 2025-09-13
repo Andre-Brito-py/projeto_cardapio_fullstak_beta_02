@@ -176,7 +176,7 @@ const CounterAttendants = ({ url }) => {
   }
 
   const copyCounterLink = () => {
-    const counterUrl = window.location.origin.replace(':5173', ':5175');
+    const counterUrl = window.location.origin.replace(':5174', ':5176');
     navigator.clipboard.writeText(counterUrl).then(() => {
       toast.success('Link copiado para a área de transferência!');
     }).catch(() => {
@@ -204,7 +204,7 @@ const CounterAttendants = ({ url }) => {
           <div className="link-container">
             <input 
               type="text" 
-              value={window.location.origin.replace(':5173', ':5175')} 
+              value={window.location.origin.replace(':5174', ':5176')} 
               readOnly 
               className="link-input"
             />

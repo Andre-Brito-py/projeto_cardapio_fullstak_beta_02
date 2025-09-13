@@ -26,7 +26,7 @@ const StoreContextProvider = (props) => {
     
     // Estados do contexto
     const [cartItems, setCartItems] = useState(() => getInitialCart()); // Itens do carrinho
-    const url = "http://localhost:4000"; // URL da API
+    const url = "http://localhost:4001"; // URL da API
     const [token, setToken] = useState(""); // Token de autenticação
     const [food_list, setFoodList] = useState([]); // Lista de comidas disponíveis
     const [currentStore, setCurrentStore] = useState(null); // Loja atual selecionada

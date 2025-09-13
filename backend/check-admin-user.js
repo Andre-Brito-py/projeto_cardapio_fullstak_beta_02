@@ -11,7 +11,7 @@ async function checkAdminUser() {
     console.log('Conectado ao MongoDB');
 
     // Verificar usuário admin
-    const user = await User.findOne({ email: 'admin@edgarbolos.com' }).populate('storeId');
+    const user = await User.findOne({ email: 'superadmin@admin.com' }).populate('storeId');
     
     if (user) {
       console.log('✅ Usuário encontrado:');

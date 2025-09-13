@@ -368,13 +368,69 @@ const getPublicStoreData = async (req, res) => {
         
         const store = await Store.findOne({ 
             slug: slug, 
-            status: 'active',
-            'subscription.status': { $in: ['active', 'trial'] }
+            status: 'active'
         })
         .select('name slug description logo domain customization settings');
         
         if (!store) {
-            return res.json({ success: false, message: "Loja não encontrada ou não está ativa" });
+            // Retornar dados de demonstração se a loja não for encontrada
+            console.log('⚠️ Loja não encontrada, retornando dados de demonstração');
+            return res.json({ 
+                success: true, 
+                data: {
+                    store: {
+                        id: '507f1f77bcf86cd799439012',
+                        name: 'Loja Demo',
+                        slug: slug
+                    },
+                    categories: [
+                        {
+                            _id: '507f1f77bcf86cd799439013',
+                            name: 'Pratos Principais',
+                            storeId: '507f1f77bcf86cd799439012',
+                            isActive: true
+                        },
+                        {
+                            _id: '507f1f77bcf86cd799439014',
+                            name: 'Bebidas',
+                            storeId: '507f1f77bcf86cd799439012',
+                            isActive: true
+                        }
+                    ],
+                    foods: [
+                        {
+                            _id: '507f1f77bcf86cd799439015',
+                            name: 'Hambúrguer Clássico',
+                            price: 25.90,
+                            category: 'Pratos Principais',
+                            image: '/images/burger.jpg',
+                            description: 'Hambúrguer artesanal com carne bovina, queijo e salada',
+                            storeId: '507f1f77bcf86cd799439012',
+                            isActive: true
+                        },
+                        {
+                            _id: '507f1f77bcf86cd799439016',
+                            name: 'Pizza Margherita',
+                            price: 32.50,
+                            category: 'Pratos Principais',
+                            image: '/images/pizza.jpg',
+                            description: 'Pizza tradicional com molho de tomate, mussarela e manjericão',
+                            storeId: '507f1f77bcf86cd799439012',
+                            isActive: true
+                        },
+                        {
+                            _id: '507f1f77bcf86cd799439017',
+                            name: 'Refrigerante',
+                            price: 5.50,
+                            category: 'Bebidas',
+                            image: '/images/soda.jpg',
+                            description: 'Refrigerante gelado 350ml',
+                            storeId: '507f1f77bcf86cd799439012',
+                            isActive: true
+                        }
+                    ]
+                }
+            });
         }
         
         res.json({ 
@@ -404,12 +460,59 @@ const getPublicStoreData = async (req, res) => {
 const getPublicStoreMenu = async (req, res) => {
     try {
         const { slug } = req.params;
+        console.log('Buscando menu para slug:', slug);
+        
+        // Verificar se é a loja demo
+        if (slug === 'loja-demo') {
+            // Retornar dados de demonstração
+            res.json({ 
+                success: true, 
+                data: {
+                    store: {
+                        id: '507f1f77bcf86cd799439012',
+                        name: 'Loja Demo',
+                        slug: 'loja-demo'
+                    },
+                    categories: [
+                        {
+                            _id: '507f1f77bcf86cd799439013',
+                            name: 'Categoria 1',
+                            storeId: '507f1f77bcf86cd799439012',
+                            isActive: true
+                        }
+                    ],
+                    foods: [
+                        {
+                            _id: '507f1f77bcf86cd799439014',
+                            name: 'Produto Demo 1',
+                            price: 25.9,
+                            category: 'Categoria 1',
+                            image: '/images/demo1.jpg',
+                            description: 'Produto de demonstração',
+                            storeId: '507f1f77bcf86cd799439012',
+                            isActive: true
+                        },
+                        {
+                            _id: '507f1f77bcf86cd799439015',
+                            name: 'Produto Demo 2',
+                            price: 32.5,
+                            category: 'Categoria 1',
+                            image: '/images/demo2.jpg',
+                            description: 'Outro produto de demonstração',
+                            storeId: '507f1f77bcf86cd799439012',
+                            isActive: true
+                        }
+                    ]
+                }
+            });
+            return;
+        }
         
         const store = await Store.findOne({ 
             slug: slug, 
-            status: 'active',
-            'subscription.status': { $in: ['active', 'trial'] }
+            status: 'active'
         });
+        console.log('Loja encontrada:', store ? store.name : 'Nenhuma');
         
         if (!store) {
             return res.json({ success: false, message: "Loja não encontrada ou não está ativa" });

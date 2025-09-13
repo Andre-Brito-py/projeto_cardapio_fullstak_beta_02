@@ -27,18 +27,23 @@ REM Criar diretorio de logs se nao existir
 if not exist "logs" mkdir logs
 
 REM Iniciar Backend
-echo [1/3] Iniciando Backend (porta 4000)...
+echo [1/4] Iniciando Backend (porta 4001)...
 start "Backend" cmd /k "cd backend && npm start"
 timeout /t 3 >nul
 
 REM Iniciar Frontend
-echo [2/3] Iniciando Frontend (porta 5173)...
+echo [2/4] Iniciando Frontend (porta 5173)...
 start "Frontend" cmd /k "cd frontend && npm run dev"
 timeout /t 3 >nul
 
 REM Iniciar Admin
-echo [3/3] Iniciando Admin (porta 5174)...
+echo [3/4] Iniciando Admin (porta 5174)...
 start "Admin" cmd /k "cd admin && npm run dev"
+timeout /t 3 >nul
+
+REM Iniciar Counter
+echo [4/4] Iniciando Counter (porta 5176)...
+start "Counter" cmd /k "cd counter && npm run dev"
 timeout /t 3 >nul
 
 echo.
@@ -49,7 +54,8 @@ echo.
 echo URLs de acesso:
 echo - Frontend (Clientes): http://localhost:5173
 echo - Admin (Lojas):       http://localhost:5174
-echo - Backend (API):       http://localhost:4000
+echo - Counter (Balcao):    http://localhost:5176
+echo - Backend (API):       http://localhost:4001
 echo.
 echo Aguarde alguns segundos para todos os servicos carregarem...
 echo.
@@ -59,6 +65,7 @@ pause >nul
 REM Abrir URLs no navegador
 start http://localhost:5173
 start http://localhost:5174
+start http://localhost:5176
 
 echo.
 echo Projeto iniciado! Verifique as janelas do terminal para logs.

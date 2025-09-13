@@ -3,7 +3,7 @@ import axios from 'axios';
 const createSuperAdmin = async () => {
   try {
     console.log('👤 Criando Super Admin...');
-    const response = await axios.post('http://localhost:4000/api/system/super-admin/create', {
+    const response = await axios.post('http://localhost:4001/api/system/super-admin/create', {
       name: 'Super Admin',
       email: 'superadmin@admin.com',
       password: 'superadmin123'

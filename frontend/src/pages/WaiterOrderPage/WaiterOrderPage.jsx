@@ -24,7 +24,7 @@ const WaiterOrderPage = () => {
   const [currentOrders, setCurrentOrders] = useState([]);
   const [showOrderHistory, setShowOrderHistory] = useState(false);
 
-  const url = 'http://localhost:4000';
+  const url = 'http://localhost:4001';
 
   // Validar token de garçom
   const validateWaiterToken = useCallback(async (token) => {

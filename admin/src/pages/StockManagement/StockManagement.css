@@ -13,6 +13,15 @@
   height: 50vh;
 }
 
+.loading p {
+  animation: none !important;
+  transform: none !important;
+  -webkit-animation: none !important;
+  -webkit-transform: none !important;
+  transition: none !important;
+  will-change: auto !important;
+}
+
 .loading-spinner {
   font-size: 18px;
   color: #666;

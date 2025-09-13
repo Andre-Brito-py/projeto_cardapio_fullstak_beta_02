@@ -93,6 +93,7 @@ $success = $true
 $success = $success -and (Install-Dependencies "backend" "Backend")
 $success = $success -and (Install-Dependencies "frontend" "Frontend")
 $success = $success -and (Install-Dependencies "admin" "Admin")
+$success = $success -and (Install-Dependencies "counter" "Counter")
 
 if (-not $success) {
     Write-Host "ERRO: Falha na instalação de dependências" -ForegroundColor Red
@@ -109,20 +110,26 @@ Write-Host ""
 Write-Host "[INICIALIZAÇÃO] Iniciando serviços..." -ForegroundColor Cyan
 
 # Iniciar Backend
-Write-Host "🚀 [1/3] Iniciando Backend (porta 4000)..." -ForegroundColor Green
+Write-Host "🚀 [1/4] Iniciando Backend (porta 4001)..." -ForegroundColor Green
 Set-Location "$PSScriptRoot\backend"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "npm start" -WindowStyle Normal
 Start-Sleep -Seconds 3
 
 # Iniciar Frontend
-Write-Host "🚀 [2/3] Iniciando Frontend (porta 5173)..." -ForegroundColor Green
+Write-Host "🚀 [2/4] Iniciando Frontend (porta 5173)..." -ForegroundColor Green
 Set-Location "$PSScriptRoot\frontend"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "npm run dev" -WindowStyle Normal
 Start-Sleep -Seconds 3
 
 # Iniciar Admin
-Write-Host "🚀 [3/3] Iniciando Admin (porta 5174)..." -ForegroundColor Green
+Write-Host "🚀 [3/4] Iniciando Admin (porta 5174)..." -ForegroundColor Green
 Set-Location "$PSScriptRoot\admin"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "npm run dev" -WindowStyle Normal
+Start-Sleep -Seconds 3
+
+# Iniciar Counter
+Write-Host "🚀 [4/4] Iniciando Counter (porta 5176)..." -ForegroundColor Green
+Set-Location "$PSScriptRoot\counter"
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "npm run dev" -WindowStyle Normal
 Start-Sleep -Seconds 3
 
@@ -137,7 +144,8 @@ Write-Host ""
 Write-Host "📍 URLs de acesso:" -ForegroundColor Yellow
 Write-Host "   • Frontend (Clientes): http://localhost:5173" -ForegroundColor White
 Write-Host "   • Admin (Lojas):       http://localhost:5174" -ForegroundColor White
-Write-Host "   • Backend (API):       http://localhost:4000" -ForegroundColor White
+Write-Host "   • Counter (Balcão):    http://localhost:5176" -ForegroundColor White
+Write-Host "   • Backend (API):       http://localhost:4001" -ForegroundColor White
 Write-Host ""
 Write-Host "⏳ Aguardando serviços carregarem..." -ForegroundColor Yellow
 Start-Sleep -Seconds 10
@@ -145,6 +153,7 @@ Start-Sleep -Seconds 10
 Write-Host "🌐 Abrindo URLs no navegador..." -ForegroundColor Green
 Start-Process "http://localhost:5173"
 Start-Process "http://localhost:5174"
+Start-Process "http://localhost:5176"
 
 Write-Host ""
 Write-Host "✅ Projeto iniciado com sucesso!" -ForegroundColor Green

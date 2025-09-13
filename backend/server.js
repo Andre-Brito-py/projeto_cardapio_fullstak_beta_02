@@ -42,14 +42,21 @@ import reportRouter from './routes/reportRoutes.js';
 import dailyReportScheduler from './services/dailyReportScheduler.js';
 import telegramCampaignScheduler from './services/telegramCampaignScheduler.js';
 import { identifyStore, validateStoreActive, logStoreContext } from './middleware/storeContext.js';
+import { simulateAuth, simulateDatabase } from './middleware/simulationMode.js';
 
 // Configuração da aplicação
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 4001;
 
 // Configuração de middlewares
 app.use(express.json()); // Parser para JSON
 app.use(cors()); // Habilita CORS para requisições cross-origin
+
+// Middleware de simulação desabilitado para permitir conexão real com MongoDB
+// if (process.env.NODE_ENV === 'development') {
+//     app.use(simulateAuth);
+//     app.use(simulateDatabase);
+// }
 
 // Middleware de contexto de loja removido da aplicação global
 // Será aplicado apenas nas rotas específicas que precisam

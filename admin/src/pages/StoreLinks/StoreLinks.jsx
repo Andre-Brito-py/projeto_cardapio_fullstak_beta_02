@@ -54,7 +54,7 @@ const StoreLinks = ({ url }) => {
 
   const generateStoreLink = (store) => {
     if (store && store.slug) {
-      // Usar a URL correta do frontend (cliente) - porta 5174
+      // Usar a URL correta do frontend (cliente) - porta 5173
       const link = `${FRONTEND_URL}/loja/${store.slug}`;
       setGeneratedLink(link);
       

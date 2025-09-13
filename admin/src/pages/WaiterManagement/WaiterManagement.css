@@ -14,6 +14,14 @@
   text-align: center;
 }
 
+.loading-container p {
+  animation: none !important;
+  transform: none !important;
+  color: #666;
+  font-size: 16px;
+  margin: 0;
+}
+
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -28,11 +36,6 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-
-.loading-container p {
-  color: #666;
-  font-size: 16px;
-  margin: 0;
 }
 
 .waiter-header {

@@ -30,6 +30,14 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
   - Verificação de pedidos em andamento
   - Alteração de preços e disponibilidade
   - Processamento de linguagem natural local
+- **📱 Bot Telegram Liza**: Integração completa com Telegram para automação
+  - Recebimento de pedidos via Telegram
+  - Notificações automáticas de novos pedidos
+  - Consulta de cardápio e preços via bot
+  - Relatórios de vendas e estatísticas
+  - Gestão de pedidos através do chat
+  - Configuração de webhooks automática
+  - Interface administrativa para gerenciar bot
 
 ### 👑 Para Super Administradores
 - **Gestão Multi-Tenant**: Controle centralizado de múltiplas lojas
@@ -77,6 +85,16 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **Interface de Chat** - Interface moderna para interação
 - **Comandos Inteligentes** - Reconhecimento de intenções e ações automáticas
 
+### 📱 Bot Telegram Liza
+- **Telegram Bot API** - Integração oficial com Telegram
+- **Webhooks** - Recebimento em tempo real de mensagens
+- **Node.js Backend** - Processamento de comandos do bot
+- **MongoDB Integration** - Armazenamento de dados do bot
+- **Automated Responses** - Respostas automáticas inteligentes
+- **Order Management** - Gestão completa de pedidos via Telegram
+- **Menu Integration** - Acesso completo ao cardápio da loja
+- **Admin Controls** - Controles administrativos via chat
+
 ## 📦 Instalação e Configuração
 
 ### Pré-requisitos
@@ -87,6 +105,9 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **OpenRouter API Key** (para a assistente IA Liza)
 - Obtenha sua chave em: https://openrouter.ai/
 - Configure a variável `VITE_OPENROUTER_API_KEY`
+- **Telegram Bot Token** (para o Bot Telegram Liza)
+- Crie um bot com @BotFather no Telegram
+- Configure a variável `TELEGRAM_BOT_TOKEN`
 
 ### ⚡ Configuração Automática (Recomendado)
 
@@ -116,9 +137,53 @@ Este comando irá:
 # Windows Batch
 start-project.bat
 
-# Manual (3 terminais)
+# Manual (4 terminais)
 npm run dev:all
 ```
+
+## 🔑 Credenciais de Teste
+
+### Atendente de Balcão (Counter)
+- **Email**: `atendente@teste.com`
+- **Senha**: `123456789`
+- **URL**: http://localhost:5176
+
+### Super Admin
+- **Email**: `admin@sistema.com`
+- **Senha**: `admin123`
+- **URL**: http://localhost:5174
+
+### URLs do Sistema
+- **Frontend (Clientes)**: http://localhost:5173
+- **Admin (Lojas)**: http://localhost:5174
+- **Counter (Balcão)**: http://localhost:5176
+- **Backend (API)**: http://localhost:4001
+
+## 🔄 Reinicialização do Projeto
+
+### Inicialização Rápida
+1. **Certifique-se que o MongoDB está rodando**
+2. **Execute um dos scripts de inicialização:**
+   - PowerShell: `.\start-project.ps1`
+   - Batch: `start-project.bat`
+3. **Aguarde todos os serviços carregarem (≈30 segundos)**
+4. **Acesse as URLs listadas acima**
+
+### Se houver problemas:
+1. **Crie o atendente de teste** (se necessário):
+   ```bash
+   cd backend
+   node create-test-attendant.js
+   ```
+2. **Verifique se todas as portas estão livres**:
+   - Backend: 4001
+   - Frontend: 5173
+   - Admin: 5174
+   - Counter: 5176
+3. **Reinstale dependências se necessário**:
+   ```bash
+   npm run setup
+   ```
 
 ### 🔧 Configuração Manual (Avançado)
 
@@ -126,6 +191,21 @@ npm run dev:all
 ```bash
 git clone https://github.com/seu-usuario/projeto_cardapio_fullstak_beta_02.git
 cd projeto_cardapio_fullstak_beta_02
+```
+
+### 2. Instale as dependências em cada módulo:
+```bash
+# Backend
+cd backend && npm install
+
+# Frontend
+cd ../frontend && npm install
+
+# Admin
+cd ../admin && npm install
+
+# Counter
+cd ../counter && npm install
 ```
 
 ### 2. Configuração do Backend
@@ -142,6 +222,8 @@ STRIPE_SECRET_KEY=sua_chave_stripe_aqui
 PORT=4000
 SUPER_ADMIN_EMAIL=superadmin@gmail.com
 SUPER_ADMIN_PASSWORD=admin123
+TELEGRAM_BOT_TOKEN=seu_token_do_bot_telegram_aqui
+WEBHOOK_URL=https://seu-dominio.com/webhook/telegram
 ```
 
 **Inicie o servidor backend:**
@@ -183,7 +265,27 @@ CHAINLIT_AUTH_SECRET=seu_chainlit_secret_aqui
 chainlit run app.py -w
 ```
 
-### 6. Configurar Super Administrador
+### 6. Configuração do Bot Telegram Liza
+**Configure o Bot Telegram:**
+```bash
+# 1. Crie um bot no Telegram com @BotFather
+# 2. Obtenha o token do bot
+# 3. Configure as variáveis de ambiente no backend/.env:
+TELEGRAM_BOT_TOKEN=seu_token_aqui
+WEBHOOK_URL=https://seu-dominio.com/webhook/telegram
+
+# 4. O webhook será configurado automaticamente na inicialização
+```
+
+**Funcionalidades do Bot:**
+- 📋 Consulta de cardápio: `/menu`
+- 📊 Relatórios de vendas: `/relatorio`
+- 🛒 Gestão de pedidos: `/pedidos`
+- ⚙️ Configurações: `/config`
+- 💰 Preços e disponibilidade: `/precos`
+- 📈 Estatísticas: `/stats`
+
+### 7. Configurar Super Administrador
 **Primeira execução - O Super Admin será criado automaticamente na primeira inicialização do sistema.**
 
 **Ou crie manualmente:**
@@ -271,6 +373,8 @@ npm run dev
 - **🔌 Backend API**: http://localhost:4000
 - **🤖 Assistente Liza**: Integrada no Admin Panel (Chat com IA)
 - **🧠 OpenRouter API**: https://openrouter.ai/api/v1 (IA Cloud)
+- **📱 Bot Telegram**: Integrado com webhook automático
+- **🔗 Telegram API**: https://api.telegram.org/bot{token} (Bot oficial)
 
 ### ⚠️ IMPORTANTE: Configuração de URLs
 
@@ -363,13 +467,26 @@ Após executar `setup-test-data.js`:
 5. **Estatísticas**: Monitore performance geral de todas as lojas
 
 ### 🔧 Para Administradores de Loja
-1. **Login**: Acesse http://localhost:5175 com as credenciais da loja
+1. **Login**: Acesse http://localhost:5174 com as credenciais da loja
 2. **Produtos**: Gerencie cardápio na seção "Add Items"
 3. **Categorias**: Controle categorias em "Categories"
 4. **Banners**: Configure banners promocionais em "Banners"
 5. **Pedidos**: Monitore e atualize status em "Orders"
 6. **Usuários**: Visualize clientes em "Users"
-7. **Configurações**: Personalize configurações específicas da loja
+7. **Bot Telegram**: Configure e monitore o bot na seção "Telegram Bot"
+8. **Assistente IA**: Interaja com a Liza através do chat integrado
+9. **Configurações**: Personalize configurações específicas da loja
+
+### 📱 Para Usar o Bot Telegram
+1. **Configuração**: Configure o token do bot no painel administrativo
+2. **Comandos Básicos**:
+   - `/start` - Iniciar conversa com o bot
+   - `/menu` - Ver cardápio completo
+   - `/pedidos` - Consultar pedidos em andamento
+   - `/relatorio` - Relatório de vendas do dia
+   - `/help` - Lista de comandos disponíveis
+3. **Notificações**: Receba alertas automáticos de novos pedidos
+4. **Gestão**: Gerencie pedidos diretamente pelo chat
 
 ## 🏗️ Estrutura Detalhada do Projeto
 
@@ -386,7 +503,8 @@ Após executar `setup-test-data.js`:
 │   │   ├── orderController.js     # Gestão de pedidos (multi-tenant)
 │   │   ├── storeController.js     # Gestão de lojas individuais
 │   │   ├── systemController.js    # Gestão do Super Admin
-│   │   └── deliveryController.js  # Cálculo de entrega
+│   │   ├── deliveryController.js  # Cálculo de entrega
+│   │   └── telegramController.js  # Controlador do Bot Telegram
 │   ├── 📁 middleware/
 │   │   ├── auth.js               # Middleware de autenticação
 │   │   └── multiTenancy.js       # Middleware multi-tenant
@@ -397,7 +515,8 @@ Após executar `setup-test-data.js`:
 │   │   ├── userModel.js          # Modelo de usuários (com roles)
 │   │   ├── orderModel.js         # Modelo de pedidos
 │   │   ├── storeModel.js         # Modelo de lojas
-│   │   └── systemSettingsModel.js # Configurações globais
+│   │   ├── systemSettingsModel.js # Configurações globais
+│   │   └── telegramBotModel.js   # Modelo do Bot Telegram
 │   ├── 📁 routes/
 │   │   ├── foodRoute.js          # Rotas de produtos
 │   │   ├── categoryRoute.js      # Rotas de categorias
@@ -406,12 +525,15 @@ Após executar `setup-test-data.js`:
 │   │   ├── orderRoute.js         # Rotas de pedidos
 │   │   ├── storeRoute.js         # Rotas de lojas
 │   │   ├── systemRoute.js        # Rotas do Super Admin
-│   │   └── deliveryRoute.js      # Rotas de entrega
+│   │   ├── deliveryRoute.js      # Rotas de entrega
+│   │   └── telegramRoute.js      # Rotas do Bot Telegram
 │   ├── 📁 services/
-│   │   └── distanceService.js    # Serviço de cálculo de distância
+│   │   ├── distanceService.js    # Serviço de cálculo de distância
+│   │   └── telegramService.js    # Serviço do Bot Telegram
 │   ├── 📁 uploads/               # Imagens enviadas
 │   ├── server.js                 # Servidor principal
 │   ├── createAdmin.js            # Script para criar admin
+│   ├── telegramBot.js            # Configuração do Bot Telegram
 │   └── package.json              # Dependências backend
 ├── 📁 frontend/                   # Aplicação React (Clientes)
 │   ├── 📁 src/
@@ -431,25 +553,35 @@ Após executar `setup-test-data.js`:
 │   │   │   └── StoreContext.jsx  # Context API
 │   │   └── App.jsx               # Componente principal
 │   └── package.json              # Dependências frontend
-└── 📁 admin/                      # Painel Administrativo Multi-Tenant
-    ├── 📁 src/
-    │   ├── 📁 components/
-    │   │   ├── Navbar/           # Navegação admin
-    │   │   ├── Sidebar/          # Menu lateral (Store Admin)
-    │   │   ├── SuperAdminLogin/  # Login Super Admin
-    │   │   └── SuperAdminSidebar/ # Menu lateral Super Admin
-    │   ├── 📁 pages/
-    │   │   ├── Add/              # Adicionar produtos
-    │   │   ├── List/             # Listar produtos
-    │   │   ├── Orders/           # Gerenciar pedidos
-    │   │   ├── Categories/       # Gerenciar categorias
-    │   │   ├── Banners/          # Gerenciar banners
-    │   │   ├── Users/            # Visualizar usuários
-    │   │   └── SuperAdmin/       # Páginas Super Admin
-    │   │       ├── StoreManagement/ # Gestão de lojas
-    │   │       └── SystemSettings/  # Configurações globais
-    │   └── App.jsx               # App administrativo
-    └── package.json              # Dependências admin
+├── 📁 admin/                      # Painel Administrativo Multi-Tenant
+│   ├── 📁 src/
+│   │   ├── 📁 components/
+│   │   │   ├── Navbar/           # Navegação admin
+│   │   │   ├── Sidebar/          # Menu lateral (Store Admin)
+│   │   │   ├── SuperAdminLogin/  # Login Super Admin
+│   │   │   └── SuperAdminSidebar/ # Menu lateral Super Admin
+│   │   ├── 📁 pages/
+│   │   │   ├── Add/              # Adicionar produtos
+│   │   │   ├── List/             # Listar produtos
+│   │   │   ├── Orders/           # Gerenciar pedidos
+│   │   │   ├── Categories/       # Gerenciar categorias
+│   │   │   ├── Banners/          # Gerenciar banners
+│   │   │   ├── Users/            # Visualizar usuários
+│   │   │   ├── TelegramBot/      # Gerenciar Bot Telegram
+│   │   │   └── SuperAdmin/       # Páginas Super Admin
+│   │   │       ├── StoreManagement/ # Gestão de lojas
+│   │   │       └── SystemSettings/  # Configurações globais
+│   │   └── App.jsx               # App administrativo
+│   └── package.json              # Dependências admin
+└── 📁 ai-assistant/               # Assistente IA Liza
+    ├── 📁 .chainlit/             # Configurações Chainlit
+    ├── 📁 delivery_ai/           # Módulos da IA
+    ├── 📁 src/                   # Código fonte da IA
+    ├── .env                      # Variáveis de ambiente
+    ├── app.py                    # Aplicação principal Chainlit
+    ├── config.py                 # Configurações da IA
+    ├── requirements.txt          # Dependências Python
+    └── README.md                 # Documentação da IA
 ```
 
 ## 🔧 Scripts Disponíveis

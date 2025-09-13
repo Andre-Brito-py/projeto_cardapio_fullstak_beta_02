@@ -5,7 +5,7 @@ const URLS = {
   // URLs de desenvolvimento
   FRONTEND_URL: 'http://localhost:5173', // Frontend onde roda a aplicação do cliente e garçom
   ADMIN_URL: 'http://localhost:5174',    // Admin onde roda o painel administrativo
-  BACKEND_URL: 'http://localhost:4000',  // Backend API
+  BACKEND_URL: 'http://localhost:4001',  // Backend API
   
   // URLs de produção (para quando a aplicação for para produção)
   PRODUCTION: {

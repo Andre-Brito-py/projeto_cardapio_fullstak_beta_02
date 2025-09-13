@@ -3,7 +3,7 @@ import axios from 'axios';
 // Serviço para comunicação com o backend
 class BackendService {
   constructor() {
-    this.baseUrl = 'http://localhost:4000/api';
+    this.baseUrl = 'http://localhost:4001/api';
     this.token = localStorage.getItem('token');
   }
 

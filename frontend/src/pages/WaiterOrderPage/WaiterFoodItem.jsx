@@ -5,7 +5,7 @@ import { assets } from '../../assets/assets';
 
 const WaiterFoodItem = memo(({ id, name, price, description, image, addToCart, removeFromCart, cartItems }) => {
   const itemCount = cartItems[id] || 0;
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
 
   const handleAddClick = (e) => {
     e.stopPropagation();
