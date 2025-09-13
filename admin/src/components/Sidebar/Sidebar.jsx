@@ -85,6 +85,22 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.order_icon} alt="" />
           <p>WhatsApp Mensagens</p>
         </NavLink>
+        <NavLink to='/telegram-contacts' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>📱 Contatos Telegram</p>
+        </NavLink>
+        <NavLink to='/telegram-campaigns' className="sidebar-option" onClick={onClose}>
+          <img src={assets.add_icon} alt="" />
+          <p>📢 Campanhas Telegram</p>
+        </NavLink>
+        <NavLink to='/telegram-stats' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>📊 Stats Telegram</p>
+        </NavLink>
+        <NavLink to='/telegram-messages' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>💬 Mensagens Telegram</p>
+        </NavLink>
         <NavLink to='/liza-chat' className="sidebar-option" onClick={onClose}>
           <img src={assets.liza_chat_icon} alt="" />
           <p>🤖 Chat com Liza</p>

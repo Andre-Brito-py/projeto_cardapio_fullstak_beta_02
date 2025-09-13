@@ -48,6 +48,7 @@ const ApiManagement = ({ url, token }) => {
   const [loading, setLoading] = useState(false);
   const [testingGoogleMaps, setTestingGoogleMaps] = useState(false);
   const [testingAsaas, setTestingAsaas] = useState(false);
+  const [activeTab, setActiveTab] = useState('openai');
   const [testingLisa, setTestingLisa] = useState(false);
   const [testingWhatsApp, setTestingWhatsApp] = useState(false);
   const [testingTelegram, setTestingTelegram] = useState(false);

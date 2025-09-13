@@ -27,6 +27,7 @@ import Customers from './pages/Customers/Customers';
 import AsaasDashboard from './pages/AsaasDashboard/AsaasDashboard';
 import ApiManagement from './pages/SuperAdmin/ApiManagement/ApiManagement';
 import TelegramManagement from './pages/SuperAdmin/TelegramManagement/TelegramManagement';
+import SystemLogs from './pages/SuperAdmin/SystemLogs/SystemLogs';
 import StockManagement from './pages/StockManagement/StockManagement';
 import WhatsAppSettings from './pages/WhatsAppSettings/WhatsAppSettings';
 import WhatsAppMessages from './pages/WhatsAppMessages/WhatsAppMessages';
@@ -35,6 +36,10 @@ import PaymentStats from './pages/PaymentStats/PaymentStats';
 import CounterAttendants from './pages/CounterAttendants/CounterAttendants';
 import PaymentSettings from './pages/Settings/PaymentSettings';
 import LizaChat from './pages/LizaChat/LizaChat';
+import TelegramContacts from './pages/TelegramContacts/TelegramContacts';
+import TelegramCampaigns from './pages/TelegramCampaigns/TelegramCampaigns';
+import TelegramStats from './pages/TelegramStats/TelegramStats';
+import TelegramMessages from './pages/TelegramMessages/TelegramMessages';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -138,6 +143,7 @@ const App = () => {
           <Route path='/super-admin/telegram-management' element={<TelegramManagement url={url} token={token}/>} />
           <Route path='/super-admin/analytics' element={<Analytics url={url} token={token}/>} />
           <Route path='/super-admin/users' element={<UserManagement url={url} token={token}/>} />
+          <Route path='/super-admin/logs' element={<SystemLogs url={url} token={token}/>} />
           <Route path='/super-admin/asaas' element={<AsaasDashboard url={url} token={token}/>} />
           <Route path='/store-links' element={<StoreLinks url={url} token={token}/>} />
           
@@ -162,6 +168,10 @@ const App = () => {
           <Route path='/stock-management/:id' element={<StockManagement url={url}/>} />
           <Route path='/whatsapp-settings' element={<WhatsAppSettings url={url}/>} />
           <Route path='/whatsapp-messages' element={<WhatsAppMessages url={url}/>} />
+          <Route path='/telegram-contacts' element={<TelegramContacts url={url} token={token}/>} />
+          <Route path='/telegram-campaigns' element={<TelegramCampaigns url={url} token={token}/>} />
+          <Route path='/telegram-stats' element={<TelegramStats url={url} token={token}/>} />
+          <Route path='/telegram-messages' element={<TelegramMessages url={url} token={token}/>} />
           <Route path='/counter-attendants' element={<CounterAttendants url={url}/>} />
           <Route path='/liza-chat' element={<LizaChat url={url} token={token}/>} />
           
