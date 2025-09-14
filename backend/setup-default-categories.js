@@ -109,14 +109,11 @@ const createDefaultCategories = async (storeId = null) => {
         console.log('🔄 Verificando categorias padrão...');
         
         for (const categoryData of defaultCategories) {
-            // Verificar se categoria já existe
+            // Verificar se categoria já existe - SEMPRE incluir storeId na query
             const query = { 
-                name: { $regex: new RegExp(`^${categoryData.name}$`, 'i') }
+                name: { $regex: new RegExp(`^${categoryData.name}$`, 'i') },
+                storeId: storeId // Incluir sempre, mesmo se for null
             };
-            
-            if (storeId) {
-                query.storeId = storeId;
-            }
             
             const existingCategory = await categoryModel.findOne(query);
             
@@ -125,18 +122,15 @@ const createDefaultCategories = async (storeId = null) => {
                     name: categoryData.name,
                     description: categoryData.description,
                     image: categoryData.image,
-                    isActive: true
+                    isActive: true,
+                    storeId: storeId // Incluir sempre, mesmo se for null
                 };
-                
-                if (storeId) {
-                    categoryDoc.storeId = storeId;
-                }
                 
                 const category = new categoryModel(categoryDoc);
                 await category.save();
-                console.log(`✅ Categoria '${categoryData.name}' criada`);
+                console.log(`✅ Categoria '${categoryData.name}' criada para store: ${storeId || 'global'}`);
             } else {
-                console.log(`ℹ️ Categoria '${categoryData.name}' já existe`);
+                console.log(`ℹ️ Categoria '${categoryData.name}' já existe para store: ${storeId || 'global'}`);
             }
         }
         
