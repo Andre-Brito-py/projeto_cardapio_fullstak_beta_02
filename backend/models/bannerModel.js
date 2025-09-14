@@ -27,6 +27,15 @@ const bannerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'food',
         required: false
+    },
+    storeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Store',
+        required: true
+    },
+    isDefault: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

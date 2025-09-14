@@ -87,17 +87,29 @@ const Banners = () => {
     }
   };
 
-  const handleDelete = async (bannerId) => {
-    if (window.confirm('Tem certeza que deseja excluir este banner?')) {
+  const handleDelete = async (bannerId, isDefault = false) => {
+    const confirmMessage = isDefault 
+      ? 'ATENÇÃO: Este é um banner padrão do sistema. Tem certeza que deseja excluí-lo? Esta ação não pode ser desfeita.'
+      : 'Tem certeza que deseja excluir este banner?';
+      
+    if (window.confirm(confirmMessage)) {
       try {
+        const requestData = { id: bannerId };
+        if (isDefault) {
+          requestData.confirmDefault = true;
+        }
+        
         const response = await axios.post(`${url}/api/banner/remove`, 
-          { id: bannerId },
+          requestData,
           { headers: { token: localStorage.getItem('token') } }
         );
         
         if (response.data.success) {
           toast.success(response.data.message);
           fetchBanners();
+        } else if (response.data.requiresConfirmation) {
+          // Tentar novamente com confirmação
+          handleDelete(bannerId, true);
         } else {
           toast.error(response.data.message);
         }
@@ -255,7 +267,7 @@ const Banners = () => {
                   <img src={banner.image.startsWith('http') ? banner.image : `${url}/images/${banner.image}`} alt={banner.title} />
                 </div>
                 <div className="banner-info">
-                  <h4>{banner.title}</h4>
+                  <h4>{banner.title} {banner.isDefault && <span className="default-badge">Padrão</span>}</h4>
                   <p>{banner.description}</p>
                   <span className="banner-order">Ordem: {banner.order}</span>
                   <span className={`banner-status ${banner.isActive ? 'active' : 'inactive'}`}>
@@ -277,7 +289,7 @@ const Banners = () => {
                   </button>
                   <button 
                     className="delete-btn" 
-                    onClick={() => handleDelete(banner._id)}
+                    onClick={() => handleDelete(banner._id, banner.isDefault)}
                   >
                     Excluir
                   </button>

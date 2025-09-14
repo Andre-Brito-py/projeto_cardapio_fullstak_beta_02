@@ -149,6 +149,45 @@
 }
 
 /* ========================================
+   MODO ESCURO
+======================================== */
+[data-theme="dark"] {
+  /* === CORES NEUTRAS MODO ESCURO === */
+  --white: #1a1a1a;
+  --gray-50: #121212;
+  --gray-100: #1e1e1e;
+  --gray-200: #2d2d2d;
+  --gray-300: #404040;
+  --gray-400: #595959;
+  --gray-500: #737373;
+  --gray-600: #8c8c8c;
+  --gray-700: #a6a6a6;
+  --gray-800: #d4d4d4;
+  --gray-900: #f5f5f5;
+  
+  /* === CORES DE SUPERFÍCIE MODO ESCURO === */
+  --surface-primary: #1a1a1a;
+  --surface-secondary: #2d2d2d;
+  --surface-tertiary: #404040;
+  
+  /* === CORES DE TEXTO MODO ESCURO === */
+  --text-primary: #f5f5f5;
+  --text-secondary: #d4d4d4;
+  --text-muted: #a6a6a6;
+  
+  /* === BORDAS MODO ESCURO === */
+  --border-color: #404040;
+  --border-color-light: #2d2d2d;
+  
+  /* === SOMBRAS MODO ESCURO === */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* ========================================
    CLASSES UTILITÁRIAS GLOBAIS
 ======================================== */
 

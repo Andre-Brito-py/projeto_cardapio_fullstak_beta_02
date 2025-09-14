@@ -192,6 +192,14 @@ const storeSchema = new mongoose.Schema({
     },
     favicon: {
       type: String
+    },
+    bannerImage: {
+      type: String,
+      default: 'banner_principal.png' // Banner padrão para todas as lojas
+    },
+    defaultCategories: {
+      type: Boolean,
+      default: true // Flag para indicar se deve usar categorias padrão
     }
   },
   domain: {

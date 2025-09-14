@@ -10,7 +10,8 @@ const addBanner = async (req, res) => {
         description: req.body.description,
         image: image_filename,
         order: req.body.order || 0,
-        productId: req.body.productId && req.body.productId !== '' ? req.body.productId : null
+        productId: req.body.productId && req.body.productId !== '' ? req.body.productId : null,
+        storeId: req.storeId
     });
 
     try {
@@ -25,7 +26,11 @@ const addBanner = async (req, res) => {
 // Listar banners ativos (público)
 const listBanners = async (req, res) => {
     try {
-        const banners = await bannerModel.find({ isActive: true }).sort({ order: 1 });
+        const filter = { isActive: true };
+        if (req.storeId) {
+            filter.storeId = req.storeId;
+        }
+        const banners = await bannerModel.find(filter).sort({ order: 1 });
         res.json({ success: true, data: banners });
     } catch (error) {
         console.error('Erro ao listar banners:', error);
@@ -36,7 +41,11 @@ const listBanners = async (req, res) => {
 // Listar todos os banners (admin)
 const listAllBanners = async (req, res) => {
     try {
-        const banners = await bannerModel.find({}).sort({ createdAt: -1 });
+        const filter = {};
+        if (req.storeId && req.user.role !== 'super_admin') {
+            filter.storeId = req.storeId;
+        }
+        const banners = await bannerModel.find(filter).sort({ createdAt: -1 });
         res.json({ success: true, data: banners });
     } catch (error) {
         console.error('Erro ao listar todos os banners:', error);
@@ -47,13 +56,30 @@ const listAllBanners = async (req, res) => {
 // Remover banner
 const removeBanner = async (req, res) => {
     try {
-        const banner = await bannerModel.findById(req.body.id);
+        const filter = { _id: req.body.id };
+        if (req.storeId && req.user.role !== 'super_admin') {
+            filter.storeId = req.storeId;
+        }
+        
+        const banner = await bannerModel.findOne(filter);
         if (!banner) {
             return res.json({ success: false, message: "Banner não encontrado" });
         }
 
-        // Remover arquivo de imagem
-        fs.unlink(`uploads/${banner.image}`, () => {});
+        // Verificar se é um banner padrão e se foi confirmado
+        if (banner.isDefault && !req.body.confirmDefault) {
+            return res.json({ 
+                success: false, 
+                message: "Este é um banner padrão. Tem certeza que deseja removê-lo?",
+                requiresConfirmation: true,
+                isDefault: true
+            });
+        }
+
+        // Remover arquivo de imagem (exceto se for o banner padrão principal)
+        if (banner.image !== 'banner_principal.png') {
+            fs.unlink(`uploads/${banner.image}`, () => {});
+        }
 
         await bannerModel.findByIdAndDelete(req.body.id);
         res.json({ success: true, message: "Banner removido com sucesso" });
@@ -67,7 +93,12 @@ const removeBanner = async (req, res) => {
 const updateBanner = async (req, res) => {
     try {
         // Dados recebidos para atualização
-        const banner = await bannerModel.findById(req.body.id);
+        const filter = { _id: req.body.id };
+        if (req.storeId && req.user.role !== 'super_admin') {
+            filter.storeId = req.storeId;
+        }
+        
+        const banner = await bannerModel.findOne(filter);
         if (!banner) {
             return res.json({ success: false, message: "Banner não encontrado" });
         }
@@ -100,7 +131,12 @@ const updateBanner = async (req, res) => {
 // Ativar/Desativar banner
 const toggleBannerStatus = async (req, res) => {
     try {
-        const banner = await bannerModel.findById(req.body.id);
+        const filter = { _id: req.body.id };
+        if (req.storeId && req.user.role !== 'super_admin') {
+            filter.storeId = req.storeId;
+        }
+        
+        const banner = await bannerModel.findOne(filter);
         if (!banner) {
             return res.json({ success: false, message: "Banner não encontrado" });
         }

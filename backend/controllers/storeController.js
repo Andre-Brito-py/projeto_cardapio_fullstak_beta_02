@@ -1,6 +1,7 @@
 import Store from '../models/storeModel.js';
 import userModel from '../models/userModel.js';
 import SystemSettings from '../models/systemSettingsModel.js';
+import { setupDefaultCategories } from '../setup-default-categories.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
@@ -64,6 +65,9 @@ const createStore = async (req, res) => {
             slug,
             description,
             owner: tempOwnerId,
+            domain: {
+                subdomain: slug // Usar o slug como subdomain
+            },
             subscription: {
                 plan: subscriptionPlan,
                 status: 'trial'
@@ -101,6 +105,10 @@ const createStore = async (req, res) => {
                     saturday: { open: '08:00', close: '22:00', closed: false },
                     sunday: { open: '08:00', close: '22:00', closed: false }
                 }
+            },
+            customization: {
+                bannerImage: 'banner_principal.png', // Banner padrão
+                defaultCategories: true // Usar categorias padrão
             }
         });
         
@@ -122,7 +130,16 @@ const createStore = async (req, res) => {
         // Atualizar a loja com o proprietário real
         store.owner = owner._id;
         await store.save();
-        
+
+        // Configurar categorias padrão para a nova loja
+        try {
+            await setupDefaultCategories(store._id, false); // Não fechar conexão
+            console.log('Categorias padrão configuradas para a loja:', store.name);
+        } catch (categoryError) {
+            console.error('Erro ao configurar categorias padrão:', categoryError);
+            // Não falha a criação da loja se houver erro nas categorias
+        }
+
         res.json({
             success: true,
             message: "Loja criada com sucesso",

@@ -43,6 +43,7 @@ import TelegramMessages from './pages/TelegramMessages/TelegramMessages';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 const App = () => {
   const url = 'http://localhost:4001';
@@ -70,71 +71,74 @@ const App = () => {
 
   if (!token) {
     return (
-      <div>
-        <ToastContainer/>
-        {showSuperAdminLogin ? (
-          <div>
-            <SuperAdminLogin url={url} setToken={setToken} setSuperAdmin={setIsSuperAdmin} />
-            <div style={{textAlign: 'center', marginTop: '20px'}}>
-              <button 
-                onClick={() => setShowSuperAdminLogin(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#667eea',
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
-                }}
-              >
-                Voltar para Login Normal
-              </button>
+      <ThemeProvider>
+        <div>
+          <ToastContainer/>
+          {showSuperAdminLogin ? (
+            <div>
+              <SuperAdminLogin url={url} setToken={setToken} setSuperAdmin={setIsSuperAdmin} />
+              <div style={{textAlign: 'center', marginTop: '20px'}}>
+                <button 
+                  onClick={() => setShowSuperAdminLogin(false)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#667eea',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Voltar para Login Normal
+                </button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div>
-            <Login url={url} setToken={setToken} />
-            <div style={{textAlign: 'center', marginTop: '20px'}}>
-              <button 
-                onClick={() => setShowSuperAdminLogin(true)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#667eea',
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
-                }}
-              >
-                Acesso Super Admin
-              </button>
+          ) : (
+            <div>
+              <Login url={url} setToken={setToken} />
+              <div style={{textAlign: 'center', marginTop: '20px'}}>
+                <button 
+                  onClick={() => setShowSuperAdminLogin(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#667eea',
+                    cursor: 'pointer',
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Acesso Super Admin
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </ThemeProvider>
     );
   }
 
   return (
-    <div>
-      <ToastContainer/>
-      <Navbar 
-        logout={logout} 
-        isSuperAdmin={isSuperAdmin}
-        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-      />
-      <hr/>
-      <div className="app-content">
-        {isSuperAdmin ? (
-          <SuperAdminSidebar 
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-          />
-        ) : (
-          <Sidebar 
-            isOpen={sidebarOpen}
-            onClose={() => setSidebarOpen(false)}
-          />
-        )}
-        <Routes>
+    <ThemeProvider>
+      <div>
+        <ToastContainer/>
+        <Navbar 
+          logout={logout} 
+          isSuperAdmin={isSuperAdmin}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        />
+        <hr/>
+        <div className="app-content">
+          {isSuperAdmin ? (
+            <SuperAdminSidebar 
+              isOpen={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+            />
+          ) : (
+            <Sidebar 
+              isOpen={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+            />
+          )}
+          <Routes>
           {/* Rotas do Super Admin */}
           <Route path='/super-admin/dashboard' element={<SuperAdminDashboard url={url} token={token}/>} />
           <Route path='/super-admin/stores' element={<StoreManagement url={url} token={token}/>} />
@@ -180,6 +184,7 @@ const App = () => {
         </Routes>
       </div>
     </div>
+  </ThemeProvider>
   )
 }
 

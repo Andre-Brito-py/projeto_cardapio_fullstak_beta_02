@@ -1,8 +1,11 @@
 import React from 'react'
 import './Navbar.css'
 import { assets } from './../../assets/assets';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const Navbar = ({ logout, isSuperAdmin, onToggleSidebar }) => {
+  const { theme, toggleTheme, isDark } = useTheme();
+
   return (
     <div className='navbar'>
         <button className='mobile-menu-toggle' onClick={onToggleSidebar}>
@@ -19,6 +22,9 @@ const Navbar = ({ logout, isSuperAdmin, onToggleSidebar }) => {
           )}
         </div>
         <div className='navbar-right'>
+          <button className='theme-toggle-btn' onClick={toggleTheme} title={`Alternar para modo ${isDark ? 'claro' : 'escuro'}`}>
+            {isDark ? '☀️' : '🌙'}
+          </button>
           <img src={assets.profile_image} alt="" className="profile" />
           <button onClick={logout} className='logout-btn'>Sair</button>
         </div>
