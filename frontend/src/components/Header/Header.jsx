@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 const Header = () => {
-  const { url } = useContext(StoreContext);
+  const { url, storeId } = useContext(StoreContext);
   const navigate = useNavigate();
   const [banners, setBanners] = useState([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
@@ -13,7 +13,12 @@ const Header = () => {
 
   const fetchBanners = async () => {
     try {
-      const response = await axios.get(`${url}/api/banner/list`);
+      const headers = {};
+      if (storeId) {
+        headers['X-Store-ID'] = storeId;
+      }
+      
+      const response = await axios.get(`${url}/api/banner/list`, { headers });
       if (response.data.success && response.data.data.length > 0) {
         setBanners(response.data.data);
       } else {
@@ -29,7 +34,12 @@ const Header = () => {
 
   const fetchMainBanner = async () => {
     try {
-      const response = await axios.get(`${url}/api/settings/banner`);
+      const headers = {};
+      if (storeId) {
+        headers['X-Store-ID'] = storeId;
+      }
+      
+      const response = await axios.get(`${url}/api/settings/banner`, { headers });
       if (response.data.success && response.data.data) {
         setBanners([response.data.data]);
       }

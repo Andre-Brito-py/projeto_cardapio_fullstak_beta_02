@@ -29,6 +29,8 @@ import orderStatsRouter from './routes/orderStatsRoutes.js';
 import paymentStatsRouter from './routes/paymentStatsRoute.js'
 import counterAttendantRouter from './routes/counterAttendantRoute.js'
 import counterOrderRouter from './routes/counterOrderRoute.js';
+import cashbackRouter from './routes/cashbackRoute.js';
+import analyticsRouter from './routes/analytics.js';
 
 import productSuggestionRouter from './routes/productSuggestionRoute.js';
 import asaasRouter from './routes/asaasRoutes.js';
@@ -78,6 +80,8 @@ app.use('/api/order-stats', orderStatsRouter); // Rotas para estatísticas de pe
 app.use('/api/payment-stats', paymentStatsRouter)
 app.use('/api/counter-attendant', counterAttendantRouter)
 app.use('/api/counter-orders', counterOrderRouter); // Rotas para estatísticas de pagamento
+app.use('/api/cashback', cashbackRouter); // Rotas para sistema de cashback
+app.use('/api/analytics', validateStoreActive, analyticsRouter); // Rotas para analytics e campanhas da Liza
 
 app.use('/api/product-suggestions', productSuggestionRouter); // Rotas para sugestões de produtos
 app.use('/api/asaas', asaasRouter); // Rotas para integração com Asaas

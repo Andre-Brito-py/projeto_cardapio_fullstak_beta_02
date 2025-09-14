@@ -5,32 +5,34 @@
 .store-header {
     background: linear-gradient(135deg, var(--primary-color, #ff6b35) 0%, var(--secondary-color, #2c3e50) 100%);
     color: white;
-    padding: 2rem 5%;
-    margin-bottom: 2rem;
+    padding: 1.2rem 5%;
+    margin-bottom: 1.5rem;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .store-info {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .store-logo {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
     object-fit: cover;
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .store-details {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .store-info-content {
@@ -38,9 +40,10 @@
 }
 
 .store-details h1 {
-    font-size: 2.5rem;
-    margin: 0 0 0.5rem 0;
-    font-weight: 700;
+    font-size: 1.8rem;
+    margin: 0 0 0.3rem 0;
+    font-weight: 600;
+    letter-spacing: -0.5px;
 }
 
 .store-actions {
@@ -152,26 +155,28 @@
 /* Responsive */
 @media (max-width: 768px) {
     .store-header {
-        padding: 1.5rem 5%;
+        padding: 1rem 4%;
+        border-radius: 0 0 16px 16px;
     }
     
     .store-info {
         flex-direction: column;
         text-align: center;
-        gap: 1rem;
+        gap: 0.8rem;
     }
     
     .store-logo {
-        width: 100px;
-        height: 100px;
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
     }
     
     .store-details h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
     
     .store-description {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 }
 

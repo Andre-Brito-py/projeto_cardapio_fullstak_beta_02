@@ -17,8 +17,10 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 
 ### 🔧 Para Administradores de Loja
 - **Painel Administrativo**: Interface dedicada para gestão da loja
+- **🌙 Modo Escuro/Claro**: Toggle de tema com persistência de preferência
 - **Gerenciamento de Produtos**: CRUD completo de pratos e categorias
 - **Gestão de Banners**: Sistema completo de banners com direcionamento para produtos
+- **🏷️ Banners Padrão**: Identificação e gerenciamento especial de banners padrão
 - **Controle de Pedidos**: Visualização e atualização de status
 - **Gestão de Usuários**: Controle de clientes cadastrados
 - **Upload de Imagens**: Sistema integrado para imagens de produtos e banners

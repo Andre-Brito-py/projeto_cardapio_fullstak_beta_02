@@ -6,6 +6,11 @@
 body {
     background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
     min-height: 100vh;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] body {
+    background: linear-gradient(135deg, var(--surface-primary) 0%, var(--surface-secondary) 100%);
 }
 
 hr {
@@ -19,6 +24,11 @@ hr {
     display: flex;
     min-height: 100vh;
     background-color: var(--gray-50);
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .app-content {
+    background-color: var(--surface-primary);
 }
 
 .flex-col {
@@ -40,6 +50,12 @@ hr {
     border-radius: var(--border-radius-xl);
     box-shadow: var(--shadow-sm);
     overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .admin-main {
+    background-color: var(--surface-secondary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 /* Cabeçalho das páginas */
@@ -73,6 +89,12 @@ hr {
     border: var(--border-width) solid var(--gray-200);
     overflow: hidden;
     transition: var(--transition-normal);
+}
+
+[data-theme="dark"] .admin-card {
+    background: var(--surface-tertiary);
+    border-color: var(--border-primary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 .admin-card:hover {
@@ -120,6 +142,17 @@ hr {
     background-color: var(--white);
 }
 
+[data-theme="dark"] .form-input {
+    background-color: var(--surface-tertiary);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .form-input:focus {
+    border-color: var(--primary-400);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 .form-input:focus {
     outline: none;
     border-color: var(--primary-color);
@@ -141,6 +174,11 @@ hr {
     box-shadow: var(--shadow-sm);
 }
 
+[data-theme="dark"] .admin-table {
+    background: var(--surface-tertiary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
 .admin-table th {
     background: var(--gray-100);
     padding: var(--spacing-lg);
@@ -152,14 +190,28 @@ hr {
     letter-spacing: 0.5px;
 }
 
+[data-theme="dark"] .admin-table th {
+    background: var(--surface-primary);
+    color: var(--text-secondary);
+}
+
 .admin-table td {
     padding: var(--spacing-lg);
     border-top: var(--border-width) solid var(--gray-200);
     color: var(--gray-800);
 }
 
+[data-theme="dark"] .admin-table td {
+    border-top-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
 .admin-table tr:hover {
     background-color: var(--gray-50);
+}
+
+[data-theme="dark"] .admin-table tr:hover {
+    background-color: var(--surface-secondary);
 }
 
 /* Status badges */

@@ -48,9 +48,17 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.add_icon} alt="" />
           <p>Cupons</p>
         </NavLink>
+        <NavLink to='/cashback' className="sidebar-option" onClick={onClose}>
+          <img src={assets.add_icon} alt="" />
+          <p>💰 Cashback</p>
+        </NavLink>
         <NavLink to='/customers' className="sidebar-option" onClick={onClose}>
           <img src={assets.order_icon} alt="" />
           <p>Clientes</p>
+        </NavLink>
+        <NavLink to='/customer-analytics' className="sidebar-option" onClick={onClose}>
+          <img src={assets.order_icon} alt="" />
+          <p>📊 Analytics Liza</p>
         </NavLink>
         <NavLink to='/waiter-management' className="sidebar-option" onClick={onClose}>
           <img src={assets.order_icon} alt="" />

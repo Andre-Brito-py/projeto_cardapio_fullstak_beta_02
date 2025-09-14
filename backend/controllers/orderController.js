@@ -3,6 +3,7 @@ import userModel from './../models/userModel.js';
 import Store from './../models/storeModel.js';
 import tableModel from './../models/tableModel.js';
 import couponModel from './../models/couponModel.js';
+import { processCashback } from './cashbackController.js';
 import Stripe from "stripe"
 
 const stripe =  new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -207,6 +208,17 @@ const verifyOrder = async (req, res) =>{
                     { code: order.couponCode },
                     { $inc: { usedCount: 1 } }
                 );
+            }
+            
+            // Processar cashback após confirmação do pagamento
+            try {
+                const cashbackResult = await processCashback(orderId, order.storeId);
+                if (cashbackResult.success && cashbackResult.cashbackAmount > 0) {
+                    console.log(`Cashback processado: R$ ${cashbackResult.cashbackAmount} para pedido ${orderId}`);
+                }
+            } catch (cashbackError) {
+                console.error('Erro ao processar cashback:', cashbackError);
+                // Não falhar o pedido por erro de cashback
             }
             
             // Limpar carrinho apenas após confirmação do pagamento

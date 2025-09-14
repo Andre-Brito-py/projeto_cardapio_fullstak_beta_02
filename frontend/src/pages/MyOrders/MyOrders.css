@@ -3,6 +3,143 @@
     animation: fadeInUp var(--animation-duration-normal) var(--animation-timing-ease);
 }
 
+/* Cashback Section Styles */
+.cashback-section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+}
+
+.cashback-section h2 {
+    color: #495057;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.cashback-balance {
+    margin-bottom: 30px;
+}
+
+.balance-card {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.balance-card:hover {
+    transform: translateY(-2px);
+}
+
+.balance-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.balance-amount {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cashback-history h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.transactions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.transaction-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateX(5px);
+}
+
+.transaction-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.transaction-type {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.transaction-type.earned {
+    color: #28a745;
+}
+
+.transaction-type.used {
+    color: #dc3545;
+}
+
+.transaction-date {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.transaction-amount {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.transaction-amount.earned {
+    color: #28a745;
+}
+
+.transaction-amount.used {
+    color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .cashback-section {
+        padding: 15px;
+        margin: 0 10px 30px 10px;
+    }
+    
+    .balance-card {
+        padding: 20px;
+    }
+    
+    .balance-amount {
+        font-size: 28px;
+    }
+    
+    .transaction-item {
+        padding: 12px;
+    }
+    
+    .transaction-info {
+        gap: 3px;
+    }
+}
+
 .my-orders .container{
     display: flex;
     flex-direction: column;

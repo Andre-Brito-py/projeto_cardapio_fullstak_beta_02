@@ -18,6 +18,7 @@ import BluetoothPrint from './components/BluetoothPrint/BluetoothPrint';
 import StoreManagement from './pages/SuperAdmin/StoreManagement/StoreManagement';
 import SystemSettings from './pages/SuperAdmin/SystemSettings/SystemSettings';
 import Analytics from './pages/SuperAdmin/Analytics/Analytics';
+import CustomerAnalytics from './pages/Analytics/Analytics';
 import UserManagement from './pages/SuperAdmin/UserManagement/UserManagement';
 import SuperAdminDashboard from './pages/SuperAdmin/Dashboard/SuperAdminDashboard';
 import StoreLinks from './pages/StoreLinks/StoreLinks';
@@ -40,6 +41,7 @@ import TelegramContacts from './pages/TelegramContacts/TelegramContacts';
 import TelegramCampaigns from './pages/TelegramCampaigns/TelegramCampaigns';
 import TelegramStats from './pages/TelegramStats/TelegramStats';
 import TelegramMessages from './pages/TelegramMessages/TelegramMessages';
+import Cashback from './pages/Cashback/Cashback';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -165,7 +167,9 @@ const App = () => {
           <Route path='/banners' element={<Banners url={url}/>} />
           <Route path='/tables' element={<Tables url={url}/>} />
           <Route path='/coupons' element={<Coupons url={url}/>} />
+          <Route path='/cashback' element={<Cashback url={url} token={token}/>} />
           <Route path='/customers' element={<Customers url={url} token={token}/>} />
+          <Route path='/customer-analytics' element={<CustomerAnalytics url={url} token={token}/>} />
           <Route path='/waiter-management' element={<WaiterManagement url={url}/>} />
 
           <Route path='/bluetooth-print' element={<BluetoothPrint url={url} token={token}/>} />

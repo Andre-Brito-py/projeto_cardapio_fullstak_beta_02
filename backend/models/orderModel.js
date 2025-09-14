@@ -31,6 +31,26 @@ const orderSchema = new mongoose.Schema({
         required: false
     }, // Método de pagamento escolhido pelo cliente
     notes:{type:String, required: false}, // Observações do pedido
+    // Campos relacionados ao cashback
+    cashback: {
+        earned: {
+            type: Number,
+            default: 0
+        },
+        used: {
+            type: Number,
+            default: 0
+        },
+        percentage: {
+            type: Number,
+            default: 0
+        },
+        transactionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'CashbackTransaction',
+            required: false
+        }
+    },
     // Campos relacionados ao frete
     shipping: {
         fee: {
