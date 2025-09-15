@@ -179,6 +179,95 @@
     }
 }
 
+/* Dark Theme Styles */
+[data-theme="dark"] .settings {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .settings-section {
+    background: #2d2d2d;
+    border: 1px solid #404040;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .settings h2,
+[data-theme="dark"] .settings-section h3 {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .section-description {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .form-group label {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .settings-input,
+[data-theme="dark"] .settings-textarea {
+    background-color: #404040;
+    border: 2px solid #555;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .settings-input:focus,
+[data-theme="dark"] .settings-textarea:focus {
+    border-color: #6c5ce7;
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+[data-theme="dark"] .current-image {
+    background-color: #404040;
+    border: 1px solid #555;
+}
+
+[data-theme="dark"] .current-image p {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .current-setting {
+    background-color: #404040;
+    border-left: 4px solid #6c5ce7;
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .current-setting strong {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .settings-btn {
+    background-color: #6c5ce7;
+}
+
+[data-theme="dark"] .settings-btn:hover:not(:disabled) {
+    background-color: #5a4fcf;
+    box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+}
+
+[data-theme="dark"] .delivery-zone {
+    background-color: #404040;
+    border: 1px solid #555;
+}
+
+[data-theme="dark"] .settings-section h4 {
+    color: #e0e0e0;
+    border-bottom: 1px solid #555;
+}
+
+/* Dark theme toggle slider customization */
+[data-theme="dark"] input:checked + .slider {
+    background-color: #6c5ce7;
+}
+
+[data-theme="dark"] input:focus + .slider {
+    box-shadow: 0 0 1px #6c5ce7;
+}
+
+[data-theme="dark"] .slider {
+    background-color: #555;
+}
+
 /* Store Status Toggle Styles */
 .store-status-toggle {
     display: flex;
@@ -248,6 +337,14 @@ input:checked + .slider:before {
 
 .status-text.closed {
     color: #f44336;
+}
+
+.status-text.dark {
+    color: #6c5ce7;
+}
+
+.status-text.light {
+    color: #fdcb6e;
 }
 
 /* Google Maps specific styles */

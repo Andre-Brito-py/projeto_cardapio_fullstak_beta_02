@@ -7,6 +7,7 @@ const Settings = ({ url }) => {
   const [pixKey, setPixKey] = useState('');
   const [isOpen, setIsOpen] = useState(true);
   const [autoAcceptOrders, setAutoAcceptOrders] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(true);
   
@@ -158,6 +159,8 @@ const Settings = ({ url }) => {
     }
   };
 
+
+
   // Atualizar configuração de aceitar pedidos automaticamente
   const handleAutoAcceptOrdersChange = async (newStatus) => {
     try {
@@ -188,6 +191,7 @@ const Settings = ({ url }) => {
 
   useEffect(() => {
     fetchSettings();
+
   }, []);
 
   if (loadingSettings) {

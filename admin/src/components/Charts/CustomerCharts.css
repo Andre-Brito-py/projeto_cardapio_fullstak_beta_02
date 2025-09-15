@@ -1,8 +1,28 @@
 .customer-charts {
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  margin: 20px 0;
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24px;
+  margin: var(--spacing-xl) 0;
+  border: none;
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.customer-charts::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(var(--primary-500-rgb), 0.03), transparent);
+  transition: left var(--transition-smooth);
+}
+
+.customer-charts:hover::before {
+  left: 100%;
 }
 
 .charts-loading {
@@ -10,159 +30,258 @@
   justify-content: center;
   align-items: center;
   height: 200px;
-  font-size: 18px;
-  color: #666;
-  background: #f8f9fa;
-  border-radius: 8px;
+  font-size: var(--font-size-lg);
+  color: var(--neutral-600);
+  background: var(--gradient-card);
+  border-radius: var(--border-radius-lg);
+  border: 2px dashed var(--neutral-300);
+  font-weight: var(--font-weight-medium);
 }
 
 .charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 25px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 }
 
 .chart-container {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+  border-radius: 20px;
+  padding: var(--spacing-xl);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(var(--primary-500-rgb), 0.03), transparent);
+  transition: left var(--transition-smooth);
 }
 
 .chart-container:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-.chart-container h3 {
-  margin: 0 0 20px 0;
-  color: #333;
-  font-size: 18px;
-  font-weight: 600;
+.chart-container:hover::before {
+  left: 100%;
+}
+
+.chart-container h3,
+.chart-container h4 {
+  margin: 0 0 var(--spacing-xl) 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 1.5rem;
+  font-weight: 700;
   text-align: center;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+  text-transform: none;
+  letter-spacing: -0.025em;
+  filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.2));
+}
+
+.customer-charts h3 {
+  color: white;
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Liza Insights Section */
 .liza-insights {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  padding: 25px;
+  background: var(--gradient-primary-theme);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-xl);
   color: white;
-  margin-top: 30px;
+  margin-top: var(--spacing-2xl);
+  border: 1px solid var(--primary-600);
+  box-shadow: var(--shadow-primary), 0 12px 30px -8px rgba(var(--primary-500-rgb), 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.liza-insights::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left var(--transition-smooth);
+}
+
+.liza-insights:hover::before {
+  left: 100%;
 }
 
 .liza-insights h3 {
-  margin: 0 0 20px 0;
-  font-size: 22px;
-  font-weight: 700;
+  margin: 0 0 var(--spacing-xl) 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
   text-align: center;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
 .insights-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  gap: var(--spacing-xl);
 }
 
 .insight-card {
   background: rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
-  padding: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: transform 0.2s ease;
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.insight-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left var(--transition-smooth);
 }
 
 .insight-card:hover {
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-4px) var(--scale-hover);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.insight-card:hover::before {
+  left: 100%;
 }
 
 .insight-card h4 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-  font-weight: 600;
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
   color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .insight-card p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-size-sm);
   color: rgba(255, 255, 255, 0.9);
-  line-height: 1.4;
+  line-height: 1.5;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .customer-charts {
-    padding: 15px;
-    margin: 15px 0;
+    padding: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
   }
 
   .charts-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: var(--spacing-xl);
   }
 
   .chart-container {
-    padding: 15px;
+    padding: var(--spacing-lg);
   }
 
   .chart-container h3 {
-    font-size: 16px;
+    font-size: var(--font-size-md);
   }
 
   .liza-insights {
-    padding: 20px;
+    padding: var(--spacing-xl);
   }
 
   .liza-insights h3 {
-    font-size: 20px;
+    font-size: var(--font-size-xl);
   }
 
   .insights-grid {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: var(--spacing-lg);
   }
 
   .insight-card {
-    padding: 15px;
+    padding: var(--spacing-lg);
   }
 }
 
 @media (max-width: 480px) {
+  .customer-charts {
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+  }
+
   .charts-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
   }
 
   .chart-container {
-    padding: 10px;
+    padding: var(--spacing-md);
   }
 
   .chart-container h3 {
-    font-size: 14px;
-    margin-bottom: 15px;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-lg);
   }
 
   .liza-insights {
-    padding: 15px;
+    padding: var(--spacing-lg);
+  }
+
+  .liza-insights h3 {
+    font-size: var(--font-size-lg);
   }
 
   .insight-card {
-    padding: 12px;
+    padding: var(--spacing-md);
   }
 
   .insight-card h4 {
-    font-size: 14px;
+    font-size: var(--font-size-sm);
   }
 
   .insight-card p {
-    font-size: 13px;
+    font-size: var(--font-size-xs);
   }
 }
 

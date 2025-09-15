@@ -22,9 +22,16 @@ const Navbar = ({ logout, isSuperAdmin, onToggleSidebar }) => {
           )}
         </div>
         <div className='navbar-right'>
-          <button className='theme-toggle-btn' onClick={toggleTheme} title={`Alternar para modo ${isDark ? 'claro' : 'escuro'}`}>
-            {isDark ? '☀️' : '🌙'}
-          </button>
+          <div className='theme-toggle-container' title={`Alternar para modo ${isDark ? 'claro' : 'escuro'}`}>
+            <label className='theme-toggle-switch'>
+              <input
+                type="checkbox"
+                checked={isDark}
+                onChange={toggleTheme}
+              />
+              <span className='theme-slider'></span>
+            </label>
+          </div>
           <img src={assets.profile_image} alt="" className="profile" />
           <button onClick={logout} className='logout-btn'>Sair</button>
         </div>

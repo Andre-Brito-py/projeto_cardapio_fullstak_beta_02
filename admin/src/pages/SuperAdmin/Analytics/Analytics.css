@@ -233,17 +233,28 @@
 
 .chart-header h3 {
   margin: 0;
-  color: #2c3e50;
-  font-size: 1.3rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  filter: drop-shadow(0 2px 4px rgba(var(--primary-500-rgb), 0.2));
 }
 
 .chart-period {
-  background: #e9ecef;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  color: #6c757d;
-  text-transform: capitalize;
+  background: var(--gradient-secondary-theme);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: var(--shadow-secondary);
+  border: 1px solid var(--secondary-600);
 }
 
 .chart-content {
@@ -251,6 +262,28 @@
   display: flex;
   align-items: end;
   justify-content: center;
+  background: var(--gradient-card);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-md);
+  border: 1px solid var(--neutral-200);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(var(--primary-500-rgb), 0.03), transparent);
+  transition: left var(--transition-smooth);
+}
+
+.chart-content:hover::before {
+  left: 100%;
 }
 
 /* Simple Chart */
@@ -274,36 +307,61 @@
 .bar {
   width: 100%;
   max-width: 40px;
-  border-radius: 4px 4px 0 0;
-  transition: all 0.3s ease;
+  border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+  transition: all var(--transition-smooth);
   cursor: pointer;
   min-height: 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity var(--transition-smooth);
 }
 
 .bar:hover {
-  opacity: 0.8;
-  transform: scaleY(1.05);
+  transform: scaleY(1.05) var(--scale-hover);
+  box-shadow: var(--shadow-card);
+}
+
+.bar:hover::before {
+  opacity: 1;
 }
 
 .bar-revenue {
-  background: linear-gradient(180deg, #28a745, #20c997);
+  background: var(--gradient-success);
+  border: 1px solid var(--success-400);
 }
 
 .bar-stores {
-  background: linear-gradient(180deg, #007bff, #6610f2);
+  background: var(--gradient-secondary-theme);
+  border: 1px solid var(--secondary-400);
 }
 
 .bar-users {
-  background: linear-gradient(180deg, #fd7e14, #e83e8c);
+  background: var(--gradient-warning);
+  border: 1px solid var(--warning-400);
 }
 
 .bar-label {
-  margin-top: 0.5rem;
-  font-size: 0.7rem;
-  color: #6c757d;
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--neutral-600);
   text-align: center;
   transform: rotate(-45deg);
   white-space: nowrap;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .no-chart-data {
@@ -311,13 +369,21 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #6c757d;
+  color: var(--neutral-500);
   font-style: italic;
+  font-size: var(--font-size-sm);
+  background: var(--gradient-card);
+  border-radius: var(--border-radius-lg);
+  border: 2px dashed var(--neutral-300);
+  padding: var(--spacing-lg);
+  text-align: center;
 }
 
 /* Analytics Detailed */
 .analytics-detailed {
   display: grid;
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
@@ -626,7 +692,8 @@
   
   .bar-label {
     transform: none;
-    font-size: 0.6rem;
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-xs);
   }
 }
 

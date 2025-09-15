@@ -1,11 +1,12 @@
 .super-admin-sidebar {
-  width: 18%;
+  width: 280px;
   min-height: 100vh;
-  border: 2px solid var(--neutral-300);
-  border-top: 0;
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--accent-600) 100%);
+  border: none;
+  border-right: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
   position: relative;
   backdrop-filter: blur(10px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .super-admin-sidebar::before {
@@ -20,10 +21,10 @@
 }
 
 .super-admin-sidebar-options {
-  padding-top: var(--spacing-3xl);
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 0.5rem;
   position: relative;
   z-index: 1;
 }
@@ -31,16 +32,15 @@
 .super-admin-sidebar-option {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-right: 0;
-  padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) var(--spacing-lg);
-  border-radius: 0 0 0 var(--radius-lg);
+  gap: 1rem;
+  border: 2px solid transparent;
+  padding: 0.875rem 1.25rem;
+  border-radius: 12px;
   cursor: pointer;
   text-decoration: none;
-  color: var(--surface-primary);
-  transition: var(--transition-base);
-  margin-right: var(--spacing-lg);
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 0.25rem;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   position: relative;
@@ -54,17 +54,17 @@
   top: 50%;
   width: 4px;
   height: 0;
-  background: linear-gradient(180deg, var(--accent-400), var(--primary-400));
+  background: linear-gradient(180deg, #60a5fa, #3b82f6);
   transform: translateY(-50%);
-  transition: var(--transition-base);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 0 2px 2px 0;
 }
 
 .super-admin-sidebar-option:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateX(var(--spacing-xs));
-  box-shadow: var(--shadow-md);
-  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateX(4px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .super-admin-sidebar-option:hover::after {
@@ -72,42 +72,46 @@
 }
 
 .super-admin-sidebar-option.active {
-  border-color: var(--accent-300);
+  border-color: rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.25);
-  transform: translateX(var(--spacing-sm));
-  box-shadow: var(--shadow-lg);
+  transform: translateX(4px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  color: #ffffff;
 }
 
 .super-admin-sidebar-option.active::after {
   height: 80%;
-  background: linear-gradient(180deg, var(--accent-300), var(--primary-300));
+  background: linear-gradient(180deg, #ffffff, rgba(255, 255, 255, 0.8));
 }
 
 .super-admin-sidebar-option img {
-  width: var(--icon-size-sm);
-  height: var(--icon-size-sm);
-  margin-right: var(--spacing-sm);
-  transition: all var(--transition-normal) ease;
+  width: 22px;
+  height: 22px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   filter: brightness(0) invert(1);
+  opacity: 0.9;
 }
 
 .super-admin-sidebar-option:hover img {
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.1);
+  opacity: 1;
 }
 
 .super-admin-sidebar-option.active img {
   transform: scale(1.15);
   filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255,255,255,0.5));
+  opacity: 1;
 }
 
 .super-admin-sidebar-option p {
   margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-secondary);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  transition: all var(--transition-normal) ease;
-  letter-spacing: 0.5px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.025em;
+  line-height: 1.25;
 }
 
 .super-admin-sidebar-option:hover p {
@@ -122,8 +126,8 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
-  transition: left var(--transition-slow) ease;
+  background: linear-gradient(90deg, transparent, #93c5fd, transparent);
+  transition: left 0.4s ease;
   z-index: 1;
 }
 
@@ -138,11 +142,11 @@
   }
   
   .super-admin-sidebar-option {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 0.5rem 0.75rem;
   }
   
   .super-admin-sidebar-option p {
-    font-size: calc(var(--font-size-sm) - 1px);
+    font-size: 0.8125rem;
   }
   
   .super-admin-sidebar-option img {
@@ -156,8 +160,8 @@
     position: fixed;
     left: -180px;
     z-index: 51;
-    transition: left var(--transition-normal) ease;
-    box-shadow: var(--shadow-lg);
+    transition: left 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     min-height: auto;
     border-bottom: 1.5px solid #a9a9a9;
     border-right: 1.5px solid #a9a9a9;
@@ -183,7 +187,7 @@
     text-align: center;
     flex-direction: column;
     gap: 5px;
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: 0.25rem 0.5rem;
   }
   
   .super-admin-sidebar-option:hover,
@@ -192,12 +196,12 @@
   }
   
   .super-admin-sidebar-option img {
-    width: calc(var(--icon-size-sm) - 2px);
-    height: calc(var(--icon-size-sm) - 2px);
+    width: 18px;
+    height: 18px;
   }
   
   .super-admin-sidebar-option p {
-    font-size: calc(var(--font-size-sm) - 2px);
+    font-size: 0.75rem;
   }
 }
 
@@ -210,7 +214,7 @@
   z-index: 50;
   opacity: 1;
   visibility: visible;
-  transition: var(--transition-base);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: auto;
 }
 
@@ -222,16 +226,16 @@
   
   .super-admin-sidebar-option {
     min-width: 100px;
-    padding: calc(var(--spacing-xs) - 2px) var(--spacing-xs);
+    padding: 0.125rem 0.25rem;
   }
   
   .super-admin-sidebar-option img {
-    width: calc(var(--icon-size-sm) - 4px);
-    height: calc(var(--icon-size-sm) - 4px);
-    margin-right: calc(var(--spacing-xs) - 2px);
+    width: 14px;
+    height: 14px;
+    margin-right: 0.125rem;
   }
   
   .super-admin-sidebar-option p {
-    font-size: calc(var(--font-size-sm) - 3px);
+    font-size: 0.6875rem;
   }
 }

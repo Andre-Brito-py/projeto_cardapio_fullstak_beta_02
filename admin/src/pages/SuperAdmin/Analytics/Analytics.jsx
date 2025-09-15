@@ -3,6 +3,7 @@ import './Analytics.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { BACKEND_URL } from '../../../config/urls';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const Analytics = ({ token }) => {
   const [stats, setStats] = useState({
@@ -89,24 +90,84 @@ const Analytics = ({ token }) => {
     return 'neutral';
   };
 
-  const renderSimpleChart = (data, type) => {
+  const renderModernChart = (data, type) => {
     if (!data || data.length === 0) return <div className="no-chart-data">Sem dados</div>;
     
-    const maxValue = Math.max(...data.map(item => item.value));
+    const chartData = data.slice(-7).map(item => ({
+      name: item.label,
+      value: item.value
+    }));
+
+    const getGradientId = (type) => {
+      const gradients = {
+        revenue: 'revenueGradient',
+        stores: 'storesGradient', 
+        users: 'usersGradient'
+      };
+      return gradients[type] || 'defaultGradient';
+    };
+
+    const getStrokeColor = (type) => {
+      const colors = {
+        revenue: '#667eea',
+        stores: '#f093fb',
+        users: '#4facfe'
+      };
+      return colors[type] || '#667eea';
+    };
     
     return (
-      <div className="simple-chart">
-        {data.slice(-7).map((item, index) => (
-          <div key={index} className="chart-bar">
-            <div 
-              className={`bar bar-${type}`}
-              style={{ height: `${(item.value / maxValue) * 100}%` }}
-              title={`${item.label}: ${type === 'revenue' ? formatCurrency(item.value) : formatNumber(item.value)}`}
-            ></div>
-            <div className="bar-label">{item.label}</div>
-          </div>
-        ))}
-      </div>
+      <ResponsiveContainer width="100%" height={200}>
+        <AreaChart data={chartData}>
+          <defs>
+            <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#667eea" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#764ba2" stopOpacity={0.1}/>
+            </linearGradient>
+            <linearGradient id="storesGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#f093fb" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#f5576c" stopOpacity={0.1}/>
+            </linearGradient>
+            <linearGradient id="usersGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#4facfe" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="#00f2fe" stopOpacity={0.1}/>
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
+          <XAxis 
+            dataKey="name" 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: getStrokeColor(type), fontSize: 11, fontWeight: 500 }}
+          />
+          <YAxis 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: getStrokeColor(type), fontSize: 11, fontWeight: 500 }}
+          />
+          <Tooltip 
+            contentStyle={{
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              border: 'none',
+              borderRadius: '12px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+              fontSize: '12px'
+            }}
+            formatter={(value) => [
+              type === 'revenue' ? formatCurrency(value) : formatNumber(value),
+              type === 'revenue' ? 'Receita' : type === 'stores' ? 'Lojas' : 'Usuários'
+            ]}
+          />
+          <Area 
+            type="monotone" 
+            dataKey="value" 
+            stroke={getStrokeColor(type)}
+            strokeWidth={2}
+            fillOpacity={1} 
+            fill={`url(#${getGradientId(type)})`}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     );
   };
 
@@ -200,7 +261,7 @@ const Analytics = ({ token }) => {
             <span className="chart-period">{selectedPeriod}</span>
           </div>
           <div className="chart-content">
-            {renderSimpleChart(chartData.revenue, 'revenue')}
+            {renderModernChart(chartData.revenue, 'revenue')}
           </div>
         </div>
 
@@ -210,7 +271,7 @@ const Analytics = ({ token }) => {
             <span className="chart-period">{selectedPeriod}</span>
           </div>
           <div className="chart-content">
-            {renderSimpleChart(chartData.stores, 'stores')}
+            {renderModernChart(chartData.stores, 'stores')}
           </div>
         </div>
 
@@ -220,7 +281,7 @@ const Analytics = ({ token }) => {
             <span className="chart-period">{selectedPeriod}</span>
           </div>
           <div className="chart-content">
-            {renderSimpleChart(chartData.users, 'users')}
+            {renderModernChart(chartData.users, 'users')}
           </div>
         </div>
       </div>
