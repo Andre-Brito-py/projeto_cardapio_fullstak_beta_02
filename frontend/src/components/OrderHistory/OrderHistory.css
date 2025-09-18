@@ -1,0 +1,343 @@
+.order-history {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.order-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.order-history-header h3 {
+    color: #2c3e50;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.expand-toggle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.expand-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.login-prompt, .no-orders {
+    color: #6c757d;
+    font-style: italic;
+    margin: 0;
+    text-align: center;
+    padding: 20px;
+}
+
+.order-history-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    gap: 12px;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Visualização compacta - itens favoritos */
+.frequent-items h4 {
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.frequent-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.frequent-item {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.frequent-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
+}
+
+.item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-name {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.item-stats {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.reorder-btn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.reorder-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+/* Visualização expandida - histórico completo */
+.order-history-expanded h4 {
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.order-item {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.order-date {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.order-total {
+    font-weight: 600;
+    color: #28a745;
+    font-size: 14px;
+}
+
+.order-status {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.order-status.entregue {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.order-status.preparando {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.order-status.pendente {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.order-item-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.order-item-detail:hover {
+    background: #e9ecef;
+    transform: translateX(4px);
+}
+
+.order-item-detail .item-name {
+    flex: 1;
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.item-quantity {
+    color: #6c757d;
+    font-weight: 500;
+    margin-right: 12px;
+}
+
+.reorder-item-btn {
+    background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reorder-item-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .order-history {
+        padding: 16px;
+        margin: 16px 0;
+    }
+
+    .order-history-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .order-history-header h3 {
+        text-align: center;
+        font-size: 18px;
+    }
+
+    .expand-toggle {
+        align-self: center;
+        width: fit-content;
+    }
+
+    .frequent-items-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .frequent-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .reorder-btn {
+        align-self: center;
+        width: fit-content;
+    }
+
+    .order-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .order-item-detail {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .order-item-detail .item-name {
+        flex-basis: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .order-history {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .order-history-header h3 {
+        font-size: 16px;
+    }
+
+    .frequent-item {
+        padding: 12px;
+    }
+
+    .order-item {
+        padding: 12px;
+    }
+}

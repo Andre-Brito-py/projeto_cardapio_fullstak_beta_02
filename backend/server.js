@@ -19,6 +19,7 @@ import printRouter from './routes/printRoute.js';
 import deliveryRouter from './routes/deliveryRoute.js';
 import systemRouter from './routes/systemRoute.js';
 import storeRouter from './routes/storeRoute.js';
+import storeTelegramRouter from './routes/storeRoutes.js';
 import tableRouter from './routes/tableRoute.js';
 import couponRouter from './routes/couponRoute.js';
 import waiterRouter from './routes/waiterRoute.js';
@@ -38,8 +39,9 @@ import apiRouter from './routes/apiRoutes.js';
 import whatsappRouter from './routes/whatsappRoute.js';
 import whatsappWebhookRouter from './routes/whatsappWebhook.js';
 import telegramRouter from './routes/telegramRoutes.js';
-import telegramAdminRouter from './routes/telegramRoute.js';
 import lizaRouter from './routes/lizaRoutes.js';
+import lizaCustomerRouter from './routes/lizaCustomerRoutes.js';
+import lizaTelegramRouter from './routes/lizaTelegramRoutes.js';
 import reportRouter from './routes/reportRoutes.js';
 import dailyReportScheduler from './services/dailyReportScheduler.js';
 import telegramCampaignScheduler from './services/telegramCampaignScheduler.js';
@@ -54,7 +56,7 @@ const port = process.env.PORT || 4001;
 app.use(express.json()); // Parser para JSON
 app.use(cors()); // Habilita CORS para requisições cross-origin
 
-// Middleware de simulação desabilitado para permitir conexão real com MongoDB
+// Middleware de simulação desabilitado temporariamente para permitir APIs funcionarem
 // if (process.env.NODE_ENV === 'development') {
 //     app.use(simulateAuth);
 //     app.use(simulateDatabase);
@@ -70,6 +72,7 @@ connectDB();
 // Rotas do sistema multi-tenant
 app.use('/api/system', systemRouter); // Rotas para Super Admin
 app.use('/api/store', storeRouter); // Rotas para gerenciamento de lojas
+app.use('/api/store', storeTelegramRouter); // Rotas para configurações do Telegram por loja
 app.use('/api/tables', tableRouter); // Rotas para gerenciamento de mesas
 app.use('/api/coupons', couponRouter); // Rotas para gerenciamento de cupons
 app.use('/api/waiter', waiterRouter); // Rotas para funcionalidades do garçom
@@ -88,9 +91,11 @@ app.use('/api/asaas', asaasRouter); // Rotas para integração com Asaas
 app.use('/api/system/api', apiRouter); // Rotas para gerenciamento de APIs
 app.use('/api/whatsapp', validateStoreActive, whatsappRouter); // Rotas para integração com WhatsApp
 app.use('/api/whatsapp-webhook', whatsappWebhookRouter); // Webhook não precisa validar loja ativa
-app.use('/api/telegram', telegramRouter); // Rotas para integração com Telegram (Super Admin)
-app.use('/api/telegram', validateStoreActive, telegramAdminRouter); // Rotas para integração com Telegram (Admin Regular)
+// Rotas mais específicas devem vir antes das genéricas
+app.use('/api/liza/customers', validateStoreActive, lizaCustomerRouter); // Rotas para Liza consultar clientes
+app.use('/api/liza/telegram', validateStoreActive, lizaTelegramRouter); // Rotas para Liza enviar mensagens via Telegram
 app.use('/api/liza', lizaRouter); // Rotas para chat com IA Liza
+app.use('/api/telegram', telegramRouter); // Rotas para integração com Telegram (Super Admin)
 app.use('/api/reports', reportRouter); // Rotas para relatórios diários
 
 // Rotas existentes (mantidas para compatibilidade)

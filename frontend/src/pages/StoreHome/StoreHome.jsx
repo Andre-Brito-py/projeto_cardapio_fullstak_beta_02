@@ -4,6 +4,7 @@ import { StoreContext } from '../../components/context/StoreContext';
 import FoodDisplay from '../../components/FoodDisplay/FoodDisplay';
 import ExploreMenu from '../../components/ExploreMenu/ExploreMenu';
 import Header from '../../components/Header/Header';
+import OrderHistory from '../../components/OrderHistory/OrderHistory';
 
 import ShareStore from '../../components/ShareStore/ShareStore';
 import SEO from '../../components/SEO/SEO';
@@ -47,7 +48,7 @@ const StoreHome = () => {
         return () => {
             clearStoreData();
         };
-    }, [storeSlug, handleLoadStoreData, clearStoreData]);
+    }, [storeSlug, handleLoadStoreData]);
 
     // Aplicar customização da loja
     useEffect(() => {
@@ -153,6 +154,9 @@ const StoreHome = () => {
                         setCategory={setCategory}
                         categories={storeMenu.categories.length > 0 ? storeMenu.categories : null}
                     />
+                    
+                    {/* Histórico de pedidos */}
+                    <OrderHistory />
                     
                     {/* Exibição de produtos */}
                     <FoodDisplay 

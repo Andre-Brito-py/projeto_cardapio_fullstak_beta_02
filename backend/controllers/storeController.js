@@ -1,7 +1,6 @@
 import Store from '../models/storeModel.js';
 import userModel from '../models/userModel.js';
 import SystemSettings from '../models/systemSettingsModel.js';
-import { setupDefaultCategories } from '../setup-default-categories.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
@@ -131,14 +130,8 @@ const createStore = async (req, res) => {
         store.owner = owner._id;
         await store.save();
 
-        // Configurar categorias padrão para a nova loja
-        try {
-            await setupDefaultCategories(store._id, false); // Não fechar conexão
-            console.log('Categorias padrão configuradas para a loja:', store.name);
-        } catch (categoryError) {
-            console.error('Erro ao configurar categorias padrão:', categoryError);
-            // Não falha a criação da loja se houver erro nas categorias
-        }
+        // Loja criada com sucesso - categorias podem ser adicionadas posteriormente via admin
+        console.log('Loja criada com sucesso:', store.name);
 
         res.json({
             success: true,

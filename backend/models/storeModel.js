@@ -220,6 +220,41 @@ const storeSchema = new mongoose.Schema({
       default: false
     }
   },
+  // Configurações do Telegram específicas da loja
+  telegram: {
+    phoneNumber: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    isActive: {
+      type: Boolean,
+      default: false
+    },
+    adminChatId: {
+      type: String,
+      trim: true,
+      default: ''
+    },
+    welcomeMessage: {
+      type: String,
+      default: 'Olá! Bem-vindo ao nosso delivery. Como posso ajudá-lo hoje?'
+    },
+    autoReply: {
+      type: Boolean,
+      default: true
+    },
+    businessHours: {
+      enabled: {
+        type: Boolean,
+        default: false
+      },
+      message: {
+        type: String,
+        default: 'Desculpe, estamos fechados no momento. Nosso horário de funcionamento é das 18h às 23h.'
+      }
+    }
+  },
   analytics: {
     totalOrders: {
       type: Number,

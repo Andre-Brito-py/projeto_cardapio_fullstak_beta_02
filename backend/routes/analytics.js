@@ -1,6 +1,6 @@
 import express from 'express';
 import customerModel from '../models/customerModel.js';
-import { authMiddleware } from '../middleware/auth.js';
+import authMiddleware from '../middleware/auth.js';
 
 const analyticsRouter = express.Router();
 

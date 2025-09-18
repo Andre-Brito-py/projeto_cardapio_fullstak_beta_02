@@ -16,8 +16,8 @@ export const connectDB = async () =>{
         const mongoOptions = {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 5000, // Timeout de 5 segundos
-            socketTimeoutMS: 45000, // Timeout de socket de 45 segundos
+            serverSelectionTimeoutMS: 10000, // Timeout de 10 segundos
+            socketTimeoutMS: 60000, // Timeout de socket de 60 segundos
             maxPoolSize: 10, // Máximo de 10 conexões no pool
         };
         

@@ -246,6 +246,84 @@ class BackendService {
       };
     }
   }
+
+  // === MÉTODOS DE SUGESTÕES DE PRODUTOS ===
+
+  // Listar todas as sugestões de produtos
+  async getProductSuggestions(productId = null) {
+    try {
+      const params = productId ? `?productId=${productId}` : '';
+      const response = await axios.get(`${this.baseUrl}/product-suggestions/list${params}`, {
+        headers: this.getHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Erro ao buscar sugestões'
+      };
+    }
+  }
+
+  // Criar nova sugestão de produto
+  async createProductSuggestion(suggestionData) {
+    try {
+      const response = await axios.post(`${this.baseUrl}/product-suggestions/create`, suggestionData, {
+        headers: this.getHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Erro ao criar sugestão'
+      };
+    }
+  }
+
+  // Atualizar sugestão de produto
+  async updateProductSuggestion(suggestionId, suggestionData) {
+    try {
+      const response = await axios.put(`${this.baseUrl}/product-suggestions/${suggestionId}`, suggestionData, {
+        headers: this.getHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Erro ao atualizar sugestão'
+      };
+    }
+  }
+
+  // Excluir sugestão de produto
+  async deleteProductSuggestion(suggestionId) {
+    try {
+      const response = await axios.delete(`${this.baseUrl}/product-suggestions/${suggestionId}`, {
+        headers: this.getHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Erro ao excluir sugestão'
+      };
+    }
+  }
+
+  // Obter sugestão específica
+  async getProductSuggestion(suggestionId) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/product-suggestions/${suggestionId}`, {
+        headers: this.getHeaders()
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Erro ao buscar sugestão'
+      };
+    }
+  }
 }
 
 export default new BackendService();

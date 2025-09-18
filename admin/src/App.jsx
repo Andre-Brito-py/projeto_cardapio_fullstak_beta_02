@@ -28,6 +28,7 @@ import Customers from './pages/Customers/Customers';
 import AsaasDashboard from './pages/AsaasDashboard/AsaasDashboard';
 import ApiManagement from './pages/SuperAdmin/ApiManagement/ApiManagement';
 import TelegramManagement from './pages/SuperAdmin/TelegramManagement/TelegramManagement';
+import TelegramSettings from './pages/TelegramManagement';
 import SystemLogs from './pages/SuperAdmin/SystemLogs/SystemLogs';
 import StockManagement from './pages/StockManagement/StockManagement';
 import WhatsAppSettings from './pages/WhatsAppSettings/WhatsAppSettings';
@@ -42,6 +43,7 @@ import TelegramCampaigns from './pages/TelegramCampaigns/TelegramCampaigns';
 import TelegramStats from './pages/TelegramStats/TelegramStats';
 import TelegramMessages from './pages/TelegramMessages/TelegramMessages';
 import Cashback from './pages/Cashback/Cashback';
+import ProductSuggestions from './pages/ProductSuggestions/ProductSuggestions';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -157,6 +159,7 @@ const App = () => {
           <Route path='/add' element={<Add url={url} />} />
           <Route path='/list' element={<List url={url}/>} />
           <Route path='/categories' element={<Categories url={url}/>} />
+          <Route path='/product-suggestions' element={<ProductSuggestions url={url} token={token}/>} />
 
           <Route path='/orders' element={<Orders url={url} token={token}/>} />
           <Route path='/order-stats' element={<OrderStats url={url} token={token}/>} />
@@ -180,6 +183,7 @@ const App = () => {
           <Route path='/telegram-campaigns' element={<TelegramCampaigns url={url} token={token}/>} />
           <Route path='/telegram-stats' element={<TelegramStats url={url} token={token}/>} />
           <Route path='/telegram-messages' element={<TelegramMessages url={url} token={token}/>} />
+          <Route path='/telegram-settings' element={<TelegramSettings url={url} token={token}/>} />
           <Route path='/counter-attendants' element={<CounterAttendants url={url}/>} />
           <Route path='/liza-chat' element={<LizaChat url={url} token={token}/>} />
           

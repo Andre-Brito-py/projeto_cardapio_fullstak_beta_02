@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import TelegramCampaign from '../models/telegramCampaignModel.js';
-import TelegramService from './telegramService.js';
+import MultiStoreTelegramService from './multiStoreTelegramService.js';
 import TelegramClient from '../models/telegramClientModel.js';
 import logger from '../utils/logger.js';
 
@@ -36,20 +36,31 @@ class TelegramCampaignScheduler {
      */
     async checkScheduledCampaigns() {
         try {
+            // Verificar se estamos em modo simulação
+            if (process.env.NODE_ENV === 'development' && !process.env.MONGODB_URI) {
+                // Em modo simulação, não executar verificações de banco
+                return;
+            }
+
             const now = new Date();
             
-            // Buscar campanhas agendadas para execução
+            // Buscar campanhas agendadas para execução com timeout personalizado
             const scheduledCampaigns = await TelegramCampaign.find({
                 status: 'scheduled',
                 scheduledDate: { $lte: now }
-            });
+            }).maxTimeMS(10000); // Timeout de 10 segundos para esta operação
 
             for (const campaign of scheduledCampaigns) {
                 await this.executeCampaign(campaign._id);
             }
 
         } catch (error) {
-            logger.error('Erro ao verificar campanhas agendadas:', error);
+            // Log do erro mas não interrompe o agendador
+            if (error.name === 'MongooseError' && error.message.includes('timeout')) {
+                logger.warn('Timeout ao verificar campanhas agendadas - continuando...');
+            } else {
+                logger.error('Erro ao verificar campanhas agendadas:', error);
+            }
         }
     }
 
@@ -119,8 +130,8 @@ class TelegramCampaignScheduler {
             logger.info(`Enviando para ${clients.length} clientes`);
 
             // Inicializar serviço do Telegram
-            const telegramService = new TelegramService();
-            await telegramService.initialize();
+            const multiStoreTelegramService = new MultiStoreTelegramService();
+            await multiStoreTelegramService.initialize();
 
             // Enviar mensagens com controle de taxa
             for (let i = 0; i < clients.length; i++) {
@@ -135,7 +146,7 @@ class TelegramCampaignScheduler {
                     }
 
                     // Enviar mensagem
-                    await telegramService.sendMessage(client.chatId, campaign.message, {
+                    await multiStoreTelegramService.sendMessage(client.chatId, campaign.message, {
                         parse_mode: 'HTML'
                     });
                     

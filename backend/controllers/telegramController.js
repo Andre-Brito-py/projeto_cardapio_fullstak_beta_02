@@ -1,8 +1,12 @@
-import TelegramService from '../services/telegramService.js';
+import MultiStoreTelegramService from '../services/multiStoreTelegramService.js';
 import TelegramClient from '../models/telegramClientModel.js';
 import TelegramConversation from '../models/telegramConversationModel.js';
 import TelegramCampaign from '../models/telegramCampaignModel.js';
+import SystemSettings from '../models/systemSettingsModel.js';
 import logger from '../utils/logger.js';
+
+// Instância do serviço multi-loja
+const multiStoreTelegramService = new MultiStoreTelegramService();
 
 class TelegramController {
     /**
@@ -24,10 +28,19 @@ class TelegramController {
                 });
             }
 
-            // Processar mensagem de forma assíncrona
+            // Processar mensagem de forma assíncrona usando o serviço multi-loja
             setImmediate(async () => {
                 try {
-                    await telegramService.processMessage(update);
+                    // Inicializar serviço multi-loja se necessário
+                    await multiStoreTelegramService.initialize();
+                    
+                    // Processar mensagem
+                    if (update.message) {
+                        await multiStoreTelegramService.processMessage(update.message);
+                    } else if (update.callback_query) {
+                        // Processar callback query (botões inline)
+                        await multiStoreTelegramService.processCallbackQuery(update.callback_query);
+                    }
                 } catch (error) {
                     logger.error('Erro ao processar mensagem do Telegram:', error);
                 }
@@ -59,8 +72,8 @@ class TelegramController {
                 });
             }
 
-            // Inicializar serviço se necessário
-            const initialized = await telegramService.initialize();
+            // Inicializar serviço multi-loja
+            const initialized = await multiStoreTelegramService.initialize();
             if (!initialized) {
                 return res.status(500).json({
                     success: false,
@@ -69,7 +82,7 @@ class TelegramController {
             }
 
             // Configurar webhook
-            const result = await telegramService.setWebhook();
+            const result = await multiStoreTelegramService.setWebhook();
 
             if (result) {
                 logger.info('Webhook configurado com sucesso:', webhookUrl);
@@ -100,7 +113,7 @@ class TelegramController {
      */
     async removeWebhook(req, res) {
         try {
-            const result = await telegramService.removeWebhook();
+            const result = await multiStoreTelegramService.removeWebhook();
 
             if (result) {
                 logger.info('Webhook removido com sucesso');
@@ -139,22 +152,21 @@ class TelegramController {
                 });
             }
 
-            const telegramService = new TelegramService();
-            await telegramService.initialize();
+            await multiStoreTelegramService.initialize();
             
             let result;
             let messageContent = message;
             
             switch (type) {
                 case 'text':
-                    result = await telegramService.sendMessage(chatId, message);
+                    result = await multiStoreTelegramService.sendMessage(chatId, message);
                     break;
                 case 'photo':
-                    result = await telegramService.sendPhoto(chatId, message.photo, message.caption);
+                    result = await multiStoreTelegramService.sendPhoto(chatId, message.photo, message.caption);
                     messageContent = message.caption || 'Foto enviada';
                     break;
                 case 'document':
-                    result = await telegramService.sendDocument(chatId, message.document, message.caption);
+                    result = await multiStoreTelegramService.sendDocument(chatId, message.document, message.caption);
                     messageContent = message.caption || 'Documento enviado';
                     break;
                 default:
@@ -232,7 +244,7 @@ class TelegramController {
             // Executar disparo de forma assíncrona
             setImmediate(async () => {
                 try {
-                    await telegramService.sendBroadcast(message, adminChatId);
+                    await multiStoreTelegramService.sendBroadcast(message, adminChatId);
                 } catch (error) {
                     logger.error('Erro no disparo em massa:', error);
                 }
@@ -398,7 +410,7 @@ class TelegramController {
             }
 
             // Enviar status via Telegram
-            await telegramService.sendBotStatus(adminChatId);
+            await multiStoreTelegramService.sendBotStatus(adminChatId);
 
             res.json({
                 success: true,
@@ -420,7 +432,7 @@ class TelegramController {
      */
     async testConnection(req, res) {
         try {
-            const initialized = await telegramService.initialize();
+            const initialized = await multiStoreTelegramService.initialize();
 
             if (initialized) {
                 res.json({
@@ -577,8 +589,7 @@ class TelegramController {
      */
     async executeCampaignInBackground(campaign) {
         try {
-            const telegramService = new TelegramService();
-            await telegramService.initialize();
+            await multiStoreTelegramService.initialize();
             
             // Buscar clientes baseado na segmentação
             const filters = this.buildSegmentationFilters(campaign.segmentation);
@@ -589,7 +600,7 @@ class TelegramController {
             
             for (const client of clients) {
                 try {
-                    await telegramService.sendMessage(client.telegramId, campaign.content.message);
+                    await multiStoreTelegramService.sendMessage(client.telegramId, campaign.content.message);
                     sent++;
                     
                     // Salvar no histórico
@@ -1005,7 +1016,7 @@ class TelegramController {
                         break;
                     }
 
-                    await TelegramService.sendMessage(client.chatId, campaign.message);
+                    await multiStoreTelegramService.sendMessage(client.chatId, campaign.message);
                     
                     campaign.stats.sent += 1;
                     campaign.stats.delivered += 1;
@@ -1193,6 +1204,78 @@ class TelegramController {
                 message: 'Erro interno do servidor',
                 error: error.message
             });
+        }
+    }
+    /**
+     * Obter configuração global do bot (Super Admin)
+     */
+    async getBotConfig(req, res) {
+        try {
+            const settings = await SystemSettings.getInstance();
+            
+            const config = {
+                token: settings.telegramBotToken ? settings.telegramBotToken.substring(0, 10) + '...' : '',
+                webhookUrl: settings.telegramWebhookUrl || '',
+                enabled: settings.telegramEnabled || false
+            };
+            
+            res.json({ success: true, config });
+        } catch (error) {
+            logger.error('Erro ao obter configuração do bot:', error);
+            res.status(500).json({ success: false, message: 'Erro interno do servidor' });
+        }
+    }
+
+    /**
+     * Configurar bot global (Super Admin)
+     */
+    async setBotConfig(req, res) {
+        try {
+            const { token, webhookUrl, isActive } = req.body;
+            
+            if (!token || !token.trim()) {
+                return res.status(400).json({ success: false, message: 'Token é obrigatório' });
+            }
+            
+            const settings = await SystemSettings.getInstance();
+            settings.telegramBotToken = token;
+            settings.telegramWebhookUrl = webhookUrl || '';
+            settings.telegramEnabled = isActive !== false;
+            
+            await settings.save();
+            
+            res.json({ success: true, message: 'Configuração salva com sucesso' });
+        } catch (error) {
+            logger.error('Erro ao salvar configuração do bot:', error);
+            res.status(500).json({ success: false, message: 'Erro interno do servidor' });
+        }
+    }
+
+    /**
+     * Testar conexão do bot (Super Admin)
+     */
+    async testBot(req, res) {
+        try {
+            const { token } = req.body;
+            
+            if (!token) {
+                return res.status(400).json({ success: false, message: 'Token é obrigatório' });
+            }
+            
+            const response = await axios.get(`https://api.telegram.org/bot${token}/getMe`);
+            
+            if (response.data.ok) {
+                res.json({ 
+                    success: true, 
+                    botInfo: response.data.result,
+                    message: 'Bot conectado com sucesso'
+                });
+            } else {
+                res.status(400).json({ success: false, message: 'Token inválido' });
+            }
+        } catch (error) {
+            logger.error('Erro ao testar bot:', error);
+            res.status(400).json({ success: false, message: 'Erro ao conectar com o bot' });
         }
     }
 }

@@ -9,5 +9,8 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:4001'
     }
+  },
+  define: {
+    'process.env': {}
   }
 })

@@ -29,6 +29,11 @@ const authMiddleware = async (req, res, next) => {
         const token_decode = jwt.verify(token, process.env.JWT_SECRET);
         // Token decodificado com sucesso
         
+        req.user = { 
+            id: token_decode.id,
+            role: token_decode.role,
+            storeId: token_decode.storeId
+        };
         req.body.userId = token_decode.id;
         next();
     } catch (error) {

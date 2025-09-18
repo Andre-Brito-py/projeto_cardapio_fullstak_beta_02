@@ -16,7 +16,13 @@ export const isSuperAdmin = async (req, res, next) => {
       });
     }
 
-    // Buscar dados completos do usuário
+    // Se o role já está no token, usar diretamente para otimização
+    if (req.user.role === 'super_admin') {
+      req.superAdmin = req.user;
+      return next();
+    }
+
+    // Buscar dados completos do usuário se o role não estiver no token
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({

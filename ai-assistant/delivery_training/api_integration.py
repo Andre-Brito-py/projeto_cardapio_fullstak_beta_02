@@ -156,13 +156,18 @@ class DeliveryAPIClient:
     
     # === MÉTODOS DE CLIENTES ===
     
-    async def get_customer_by_phone(self, phone: str) -> Optional[Dict[str, Any]]:
+    async def get_customer_by_phone(self, phone: str, store_id: str = None) -> Optional[Dict[str, Any]]:
         """Buscar cliente por número de telefone"""
         try:
-            params = {'phone': phone}
-            result = await self._make_request('GET', f'api/customers/search', params=params)
-            customers = result.get('customers', []) if result else []
-            return customers[0] if customers else None
+            endpoint = f'api/liza/customers/phone/{phone}'
+            if store_id:
+                # Se store_id for fornecido, adicionar como header para identificação da loja
+                headers = {'X-Store-ID': store_id}
+                result = await self._make_request('GET', endpoint, headers=headers)
+            else:
+                result = await self._make_request('GET', endpoint)
+            
+            return result.get('data') if result and result.get('success') else None
         except Exception as e:
             logger.error(f"Erro ao buscar cliente por telefone {phone}: {e}")
             return None

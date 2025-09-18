@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 // Configurações
-const BACKEND_URL = 'http://localhost:4000';
+const BACKEND_URL = 'http://localhost:4001';
 const TELEGRAM_BOT_TOKEN = '8337588749:AAGxcGgyw3qpKEgvzwEUYeW0PWexJrFuMGI';
 
-// Credenciais do super admin (do script create-superadmin.js)
-const SUPER_ADMIN_EMAIL = 'superadmin@fooddelivery.com';
+// Credenciais do super admin (corretas)
+const SUPER_ADMIN_EMAIL = 'superadmin@admin.com';
 const SUPER_ADMIN_PASSWORD = 'admin123';
 
 async function configureTelegramViaAPI() {

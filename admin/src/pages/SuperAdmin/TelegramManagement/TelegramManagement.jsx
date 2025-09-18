@@ -36,7 +36,7 @@ const TelegramManagement = () => {
   const [showBotConfig, setShowBotConfig] = useState(false);
 
   const token = localStorage.getItem('token');
-  const url = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  const url = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
 
   useEffect(() => {
     loadContacts();

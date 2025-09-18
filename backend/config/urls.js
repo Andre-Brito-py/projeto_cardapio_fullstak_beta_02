@@ -3,9 +3,9 @@
 
 const URLS = {
   // URLs de desenvolvimento
-  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5175', // Frontend onde roda a aplicação do cliente e garçom
+  FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:5173', // Frontend onde roda a aplicação do cliente e garçom
   ADMIN_URL: process.env.ADMIN_URL || 'http://localhost:5174',       // Admin onde roda o painel administrativo
-  BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3000',   // Backend API
+  BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:4001',   // Backend API
   
   // URLs de produção (configuradas via variáveis de ambiente)
   PRODUCTION: {

@@ -23,6 +23,10 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img src={assets.categoryIcon} alt="" />
           <p>Categories</p>
         </NavLink>
+        <NavLink to='/product-suggestions' className="sidebar-option" onClick={onClose}>
+          <img src={assets.listIcon} alt="" />
+          <p>Sugestões de Produtos</p>
+        </NavLink>
 
         <NavLink to='/banners' className="sidebar-option" onClick={onClose}>
           <img src={assets.bannersIcon} alt="" />
@@ -108,6 +112,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         <NavLink to='/telegram-messages' className="sidebar-option" onClick={onClose}>
           <img src={assets.whatsappIcon} alt="" />
           <p>Mensagens Telegram</p>
+        </NavLink>
+        <NavLink to='/telegram-settings' className="sidebar-option" onClick={onClose}>
+          <img src={assets.settingsIcon} alt="" />
+          <p>Config. Telegram</p>
         </NavLink>
         <NavLink to='/liza-chat' className="sidebar-option" onClick={onClose}>
           <img src={assets.liza_chat_icon} alt="" />

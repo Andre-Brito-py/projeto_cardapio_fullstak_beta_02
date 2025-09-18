@@ -37,6 +37,11 @@ router.delete('/clients/:clientId', authMiddleware, isSuperAdmin, telegramContro
 // Teste de conexão
 router.get('/test', authMiddleware, isSuperAdmin, telegramController.testConnection);
 
+// Configuração global do bot (Super Admin)
+router.get('/bot-config', authMiddleware, isSuperAdmin, telegramController.getBotConfig);
+router.post('/bot-config', authMiddleware, isSuperAdmin, telegramController.setBotConfig);
+router.post('/test-bot', authMiddleware, isSuperAdmin, telegramController.testBot);
+
 // Rotas de campanhas
 router.post('/campaigns', authMiddleware, isSuperAdmin, telegramController.createCampaign);
 router.get('/campaigns', authMiddleware, isSuperAdmin, telegramController.getCampaigns);

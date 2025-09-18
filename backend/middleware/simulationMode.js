@@ -1,21 +1,20 @@
 import jwt from 'jsonwebtoken';
 
-// Dados simulados para desenvolvimento
+// Dados simulados de usuários
 const mockUsers = {
-    'admin@fooddelivery.com': {
-        _id: '507f1f77bcf86cd799439011',
-        name: 'Admin User',
-        email: 'admin@fooddelivery.com',
-        role: 'store_admin',
-        storeId: '507f1f77bcf86cd799439012',
-        isActive: true
-    },
     'superadmin@fooddelivery.com': {
-        _id: '507f1f77bcf86cd799439013',
+        _id: '68c9fc1ecd24a0be3ba2e0f9',
         name: 'Super Admin',
         email: 'superadmin@fooddelivery.com',
         role: 'super_admin',
-        isActive: true
+        storeId: null
+    },
+    'admin@loja1.com': {
+        _id: '507f1f77bcf86cd799439012',
+        name: 'Admin Loja 1',
+        email: 'admin@loja1.com',
+        role: 'store_admin',
+        storeId: '507f1f77bcf86cd799439012'
     }
 };
 
@@ -59,11 +58,11 @@ export const simulateAuth = (req, res, next) => {
     }
 
     // Interceptar TODAS as rotas de login primeiro
-    if ((req.path === '/api/user/login' || req.path.includes('/login')) && req.method === 'POST') {
+    if ((req.path === '/api/user/login' || req.path.includes('/login') || req.path === '/api/system/super-admin/login') && req.method === 'POST') {
         const { email, password } = req.body;
         const user = mockUsers[email];
         
-        if (user && (password === 'admin123' || password === 'superadmin123')) {
+        if (user && (password === 'admin123' || password === 'superadmin123' || password === '123456')) {
             const token = jwt.sign(
                 { 
                     id: user._id, 
