@@ -131,7 +131,36 @@ const authMultiTenant = async (req, res, next) => {
         // Verificando token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
-        const user = await userModel.findById(decoded.id).populate('storeId');
+        let user = null;
+        
+        // Tentar buscar no banco de dados primeiro
+        try {
+            user = await userModel.findById(decoded.id).populate('storeId');
+        } catch (dbError) {
+            console.log('🔍 Erro no banco de dados, usando dados simulados:', dbError.message);
+            
+            // Se falhar, usar dados simulados (modo desenvolvimento)
+            if (process.env.NODE_ENV === 'development') {
+                // Importar dados simulados
+                const { mockUsers, mockStore } = await import('./simulationMode.js');
+                
+                // Buscar usuário simulado pelo ID do token
+                const mockUserEntries = Object.entries(mockUsers);
+                const foundUser = mockUserEntries.find(([email, userData]) => userData._id === decoded.id);
+                
+                if (foundUser) {
+                    user = {
+                        _id: foundUser[1]._id,
+                        name: foundUser[1].name,
+                        email: foundUser[1].email,
+                        role: foundUser[1].role,
+                        storeId: foundUser[1].storeId ? mockStore : null,
+                        isActive: true
+                    };
+                    console.log('🔍 Usuário simulado encontrado:', user.email, 'Role:', user.role);
+                }
+            }
+        }
         
         if (!user || !user.isActive) {
             // Usuário não encontrado ou inativo
@@ -159,6 +188,7 @@ const authMultiTenant = async (req, res, next) => {
         // Autenticação bem-sucedida
         next();
     } catch (error) {
+        console.log('🔍 Erro na autenticação multi-tenant:', error.message);
         // Erro na autenticação multi-tenant
         res.status(401).json({ success: false, message: "Token inválido" });
     }

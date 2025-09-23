@@ -136,6 +136,11 @@ const systemSettingsSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  telegramAllowedUsers: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   
   // Configurações de frete
   shippingEnabled: {

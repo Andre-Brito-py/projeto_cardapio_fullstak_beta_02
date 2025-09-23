@@ -67,16 +67,28 @@ const ApiManagement = ({ url, token }) => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Iniciando fetchSettings...');
+      console.log('🔍 URL:', `${url}/api/system/api/settings`);
+      console.log('🔍 Token:', token ? 'Token presente' : 'Token ausente');
+      
       const response = await axios.get(`${url}/api/system/api/settings`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
+      console.log('🔍 Resposta recebida:', response.data);
+      
       if (response.data.success) {
         setSettings(response.data.settings);
+        console.log('🔍 Settings atualizadas:', response.data.settings);
+      } else {
+        console.error('🔍 Resposta sem sucesso:', response.data);
+        toast.error('Erro: Resposta da API sem sucesso');
       }
     } catch (error) {
-      console.error('Erro ao buscar configurações:', error);
-      toast.error('Erro ao carregar configurações das APIs');
+      console.error('🔍 Erro detalhado ao buscar configurações:', error);
+      console.error('🔍 Status do erro:', error.response?.status);
+      console.error('🔍 Dados do erro:', error.response?.data);
+      toast.error(`Erro ao carregar configurações das APIs: ${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -90,6 +102,7 @@ const ApiManagement = ({ url, token }) => {
     }));
   };
 
+  // Função para salvar todas as configurações
   const saveSettings = async () => {
     try {
       setLoading(true);
@@ -105,6 +118,41 @@ const ApiManagement = ({ url, token }) => {
     } catch (error) {
       console.error('Erro ao salvar configurações:', error);
       toast.error('Erro ao salvar configurações');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Função para salvar configurações específicas de uma API
+  const saveSpecificApiSettings = async (apiType) => {
+    try {
+      setLoading(true);
+      let response;
+      
+      if (apiType === 'Telegram') {
+        // Usar rota específica do Telegram
+        response = await axios.post(`${url}/api/telegram/bot-config`, {
+          token: settings.telegramBotToken,
+          webhookUrl: settings.telegramWebhookUrl,
+          isActive: settings.telegramEnabled
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        // Usar rota geral para outras APIs
+        response = await axios.put(`${url}/api/system/api/settings`, settings, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      
+      if (response.data.success) {
+        toast.success(`Configurações da ${apiType} salvas com sucesso!`);
+      } else {
+        toast.error(`Erro ao salvar configurações da ${apiType}`);
+      }
+    } catch (error) {
+      console.error(`Erro ao salvar configurações da ${apiType}:`, error);
+      toast.error(`Erro ao salvar configurações da ${apiType}`);
     } finally {
       setLoading(false);
     }
@@ -211,6 +259,23 @@ const ApiManagement = ({ url, token }) => {
 
     try {
       setTestingTelegram(true);
+      
+      // Primeiro tentar a rota direta
+      try {
+        const directResponse = await axios.post(`${url}/api/telegram-direct/test-telegram-direct`, {
+          telegramBotToken: settings.telegramBotToken
+        });
+        
+        if (directResponse.data.success) {
+          setTelegramStatus({ success: true, message: directResponse.data.message });
+          toast.success('API do Telegram Bot funcionando corretamente!');
+          return;
+        }
+      } catch (directError) {
+        console.log('Rota direta falhou, tentando rota original:', directError.message);
+      }
+      
+      // Fallback para a rota original
       const response = await axios.post(`${url}/api/system/api/test-telegram`, {
         botToken: settings.telegramBotToken,
         webhookUrl: settings.telegramWebhookUrl,
@@ -466,6 +531,17 @@ const ApiManagement = ({ url, token }) => {
               </div>
             </div>
           </div>
+
+          <div className="section-actions">
+            <button
+              type="button"
+              onClick={() => saveSpecificApiSettings('Google Maps')}
+              disabled={loading || !settings.googleMapsEnabled}
+              className="save-api-button"
+            >
+              {loading ? 'Salvando...' : '💾 Salvar Configurações Google Maps'}
+            </button>
+          </div>
         </div>
 
         {/* Asaas API */}
@@ -547,6 +623,17 @@ const ApiManagement = ({ url, token }) => {
                 }
               </p>
             </div>
+          </div>
+
+          <div className="section-actions">
+            <button
+              type="button"
+              onClick={() => saveSpecificApiSettings('Asaas')}
+              disabled={loading || !settings.asaasEnabled}
+              className="save-api-button"
+            >
+              {loading ? 'Salvando...' : '💾 Salvar Configurações Asaas'}
+            </button>
           </div>
         </div>
 
@@ -657,6 +744,17 @@ const ApiManagement = ({ url, token }) => {
               </ul>
             </div>
           </div>
+
+          <div className="section-actions">
+            <button
+              type="button"
+              onClick={() => saveSpecificApiSettings('WhatsApp')}
+              disabled={loading || !settings.whatsappEnabled}
+              className="save-api-button"
+            >
+              {loading ? 'Salvando...' : '💾 Salvar Configurações WhatsApp'}
+            </button>
+          </div>
         </div>
 
         {/* Telegram Bot API */}
@@ -766,6 +864,17 @@ const ApiManagement = ({ url, token }) => {
               </ul>
             </div>
           </div>
+
+          <div className="section-actions">
+            <button
+              type="button"
+              onClick={() => saveSpecificApiSettings('Telegram')}
+              disabled={loading || !settings.telegramEnabled}
+              className="save-api-button"
+            >
+              {loading ? 'Salvando...' : '💾 Salvar Configurações Telegram'}
+            </button>
+          </div>
         </div>
 
         {/* Configurações de Frete */}
@@ -828,6 +937,17 @@ const ApiManagement = ({ url, token }) => {
                 disabled={!settings.shippingEnabled}
               />
             </div>
+          </div>
+
+          <div className="section-actions">
+            <button
+              type="button"
+              onClick={() => saveSpecificApiSettings('Frete')}
+              disabled={loading || !settings.shippingEnabled}
+              className="save-api-button"
+            >
+              {loading ? 'Salvando...' : '💾 Salvar Configurações de Frete'}
+            </button>
           </div>
         </div>
 
@@ -1048,6 +1168,17 @@ const ApiManagement = ({ url, token }) => {
                 <li>Interface web disponível em: <code>http://localhost:{settings.lisaPort}</code></li>
               </ul>
             </div>
+          </div>
+
+          <div className="section-actions">
+            <button
+              type="button"
+              onClick={() => saveSpecificApiSettings('Lisa AI')}
+              disabled={loading || !settings.lisaEnabled}
+              className="save-api-button"
+            >
+              {loading ? 'Salvando...' : '💾 Salvar Configurações Lisa AI'}
+            </button>
           </div>
         </div>
       </div>

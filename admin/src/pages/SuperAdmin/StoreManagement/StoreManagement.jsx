@@ -45,7 +45,11 @@ const StoreManagement = ({ url, token }) => {
     subscriptionPlan: 'Básico',
     language: 'pt-BR',
     currency: 'BRL',
-    timezone: 'America/Sao_Paulo'
+    timezone: 'America/Sao_Paulo',
+    // Campos do Telegram
+    telegramChatId: '',
+    telegramPhoneNumber: '',
+    telegramIsActive: false
   });
 
   
@@ -247,7 +251,11 @@ const StoreManagement = ({ url, token }) => {
       subscriptionPlan: store.subscriptionPlan || 'Básico',
       language: store.language || 'pt-BR',
       currency: store.currency || 'BRL',
-      timezone: store.timezone || 'America/Sao_Paulo'
+      timezone: store.timezone || 'America/Sao_Paulo',
+      // Campos do Telegram
+      telegramChatId: store.telegram?.chatId || '',
+      telegramPhoneNumber: store.telegram?.phoneNumber || '',
+      telegramIsActive: store.telegram?.isActive || false
     });
     setShowForm(true);
   };
@@ -349,7 +357,11 @@ const StoreManagement = ({ url, token }) => {
       subscriptionPlan: 'Básico',
       language: 'pt-BR',
       currency: 'BRL',
-      timezone: 'America/Sao_Paulo'
+      timezone: 'America/Sao_Paulo',
+      // Campos do Telegram
+      telegramChatId: '',
+      telegramPhoneNumber: '',
+      telegramIsActive: false
     });
     setEditingStore(null);
     setShowForm(false);
@@ -707,6 +719,51 @@ const StoreManagement = ({ url, token }) => {
                   ))}
                 </select>
                 <small>A moeda será usada para preços e transações na loja</small>
+              </div>
+
+              {/* Seção de Configurações do Telegram */}
+              <div className='form-section'>
+                <h4>📱 Configurações do Telegram</h4>
+                
+                <div className='form-group'>
+                  <label>Chat ID da Loja no Telegram</label>
+                  <input
+                    type='text'
+                    name='telegramChatId'
+                    value={formData.telegramChatId}
+                    onChange={handleInputChange}
+                    placeholder='123456789'
+                  />
+                  <small>ID do chat da loja para autorização automática no bot Telegram</small>
+                </div>
+
+                <div className='form-group'>
+                  <label>Número do Telegram</label>
+                  <input
+                    type='text'
+                    name='telegramPhoneNumber'
+                    value={formData.telegramPhoneNumber}
+                    onChange={handleInputChange}
+                    placeholder='(11) 99999-9999'
+                  />
+                  <small>Número de telefone associado ao Telegram da loja</small>
+                </div>
+
+                <div className='form-group'>
+                  <label className='checkbox-label'>
+                    <input
+                      type='checkbox'
+                      name='telegramIsActive'
+                      checked={formData.telegramIsActive}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        telegramIsActive: e.target.checked
+                      }))}
+                    />
+                    Ativar integração com Telegram
+                  </label>
+                  <small>Permite que a loja seja autorizada automaticamente no bot</small>
+                </div>
               </div>
               
               <div className='form-actions'>

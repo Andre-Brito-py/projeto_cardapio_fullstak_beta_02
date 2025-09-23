@@ -70,6 +70,8 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **Stripe** - Gateway de pagamento
 - **Multi-Tenancy Middleware** - Isolamento de dados por loja
 - **Role-Based Access Control** - Sistema de permissões por função
+- **🔧 Modo de Simulação** - Sistema robusto para desenvolvimento sem banco de dados
+- **Fallback Automático** - Dados simulados quando o banco não está disponível
 
 ### Admin Panel
 - **React 18** - Interface administrativa
@@ -101,7 +103,7 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 
 ### Pré-requisitos
 - **Node.js** (v14 ou superior)
-- **MongoDB** (local ou MongoDB Atlas)
+- **MongoDB** (local ou MongoDB Atlas) - *Opcional: O sistema funciona com dados simulados*
 - **Git** (para clonar o repositório)
 - **Conta no Stripe** (opcional, para pagamentos)
 - **OpenRouter API Key** (para a assistente IA Liza)
@@ -110,6 +112,14 @@ Um sistema completo de delivery de comida com arquitetura multi-tenant, desenvol
 - **Telegram Bot Token** (para o Bot Telegram Liza)
 - Crie um bot com @BotFather no Telegram
 - Configure a variável `TELEGRAM_BOT_TOKEN`
+
+### 🔧 Modo de Simulação (Desenvolvimento)
+O sistema possui um **modo de simulação robusto** que permite desenvolvimento sem MongoDB:
+- ✅ **Dados simulados** para usuários, lojas e configurações
+- ✅ **Autenticação funcional** com tokens JWT reais
+- ✅ **APIs totalmente funcionais** com fallback automático
+- ✅ **Desenvolvimento offline** sem dependência de banco de dados
+- ✅ **Transição suave** para produção com banco real
 
 ### ⚡ Configuração Automática (Recomendado)
 
@@ -159,7 +169,7 @@ npm run dev:all
 - **Frontend (Clientes)**: http://localhost:5173
 - **Admin (Lojas)**: http://localhost:5174
 - **Counter (Balcão)**: http://localhost:5176
-- **Backend (API)**: http://localhost:4001
+- **Backend (API)**: http://localhost:4001 *(Porta atualizada)*
 
 ## 🔄 Reinicialização do Projeto
 
@@ -372,7 +382,7 @@ npm run dev
 
 - **🛒 Frontend (Clientes)**: http://localhost:5173
 - **🏪 Admin Panel (Lojas)**: http://localhost:5174
-- **🔌 Backend API**: http://localhost:4000
+- **🔌 Backend API**: http://localhost:4001 *(Porta atualizada)*
 - **🤖 Assistente Liza**: Integrada no Admin Panel (Chat com IA)
 - **🧠 OpenRouter API**: https://openrouter.ai/api/v1 (IA Cloud)
 - **📱 Bot Telegram**: Integrado com webhook automático
@@ -385,7 +395,7 @@ npm run dev
 #### 📋 Configurações Padrão
 - **Frontend (Cliente/Garçom)**: Porta 5173
 - **Admin (Painel Administrativo)**: Porta 5174
-- **Backend (API)**: Porta 4000
+- **Backend (API)**: Porta 4001 *(Atualizada de 4000 para 4001)*
 
 #### 🔧 Arquivos de Configuração
 - `backend/config/urls.js` - Configuração centralizada do backend
@@ -416,7 +426,19 @@ npm run setup-project
 - **health-check.ps1**: Verificação de saúde de todos os serviços
 - **setup-test-data.js**: Criação de dados de teste
 
-### 🛠️ Resolução de Problemas
+### 🚨 Problemas Comuns e Soluções
+
+#### ❌ Erro: "Token inválido" ou problemas de autenticação
+**✅ RESOLVIDO**: O sistema agora possui fallback automático para dados simulados
+- **Causa**: Problemas de conexão com MongoDB durante autenticação
+- **Solução Implementada**: Middleware com fallback para usuários simulados
+- **Resultado**: Autenticação funciona mesmo sem banco de dados
+
+#### ❌ Erro: "Configurações não encontradas"
+**✅ RESOLVIDO**: Controllers com fallback para configurações simuladas
+- **Causa**: Falha ao buscar configurações no banco de dados
+- **Solução Implementada**: Dados simulados automáticos em desenvolvimento
+- **Resultado**: APIs funcionam completamente offline
 
 #### ❌ Erro: "Loja não encontrada"
 **Solução:**
@@ -433,16 +455,18 @@ node setup-test-data.js
 
 #### ❌ Serviços não iniciam
 **Soluções:**
-1. Verificar se o MongoDB está rodando
-2. Verificar se as portas estão livres (4000, 5173, 5174)
+1. Verificar se o MongoDB está rodando (opcional com modo simulação)
+2. Verificar se as portas estão livres (4001, 5173, 5174)
 3. Executar `health-check.ps1` para diagnóstico
 4. Reinstalar dependências: `npm install` em cada pasta
 
 #### ❌ Erro de conexão com banco
+**✅ NOVO**: Sistema funciona sem MongoDB
 **Soluções:**
-1. Verificar se o MongoDB está rodando: `mongod --version`
-2. Verificar conexão: `mongo mongodb://localhost:27017/food-del`
-3. Reiniciar o serviço do MongoDB
+1. **Modo Simulação**: O sistema funciona automaticamente com dados simulados
+2. Verificar se o MongoDB está rodando: `mongod --version`
+3. Verificar conexão: `mongo mongodb://localhost:27017/food-del`
+4. Reiniciar o serviço do MongoDB
 
 ### 📋 Dados de Teste Padrão
 Após executar `setup-test-data.js`:

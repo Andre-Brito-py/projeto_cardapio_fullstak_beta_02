@@ -83,31 +83,76 @@ class MultiStoreTelegramService {
      * Normalizar número de telefone
      */
     normalizePhoneNumber(phone) {
-        return phone.replace(/\D/g, ''); // Remove tudo que não é dígito
+        // Remove tudo que não é dígito
+        let normalized = phone.replace(/\D/g, '');
+        
+        // Remove código do país brasileiro (+55) se presente
+        if (normalized.startsWith('55') && normalized.length > 11) {
+            normalized = normalized.substring(2);
+        }
+        
+        return normalized;
     }
 
     /**
-     * Identificar loja baseada no número de telefone da mensagem
+     * Identificar loja baseada no número de telefone do cliente
      */
     async identifyStoreFromMessage(message) {
         try {
-            // Tentar identificar pela conversa existente primeiro
+            const chatId = message.chat.id.toString();
+            const clientPhone = message.from.phone_number || message.contact?.phone_number;
+            
+            // Método 1: Tentar identificar pela conversa existente primeiro
             const conversation = await TelegramConversation.findOne({
-                chatId: message.chat.id.toString()
+                chatId: chatId
             }).populate('storeId');
 
             if (conversation && conversation.storeId) {
+                console.log(`Loja identificada pela conversa existente: ${conversation.storeId.name}`);
                 return conversation.storeId;
             }
 
-            // Se não há conversa, tentar identificar pelo contexto da mensagem
-            // Por enquanto, retornar a primeira loja ativa como fallback
-            const firstStore = Array.from(this.storePhoneMap.values())[0];
-            if (firstStore) {
-                const store = await Store.findById(firstStore.storeId);
-                return store;
+            // Método 2: Identificar pelo número de telefone do cliente (se disponível)
+            if (clientPhone) {
+                const normalizedClientPhone = this.normalizePhoneNumber(clientPhone);
+                
+                // Buscar cliente existente com este telefone
+                const Customer = (await import('../models/customerModel.js')).default;
+                const customer = await Customer.findOne({
+                    phone: { $regex: normalizedClientPhone.slice(-8), $options: 'i' } // Últimos 8 dígitos
+                }).populate('storeId');
+
+                if (customer && customer.storeId) {
+                    console.log(`Loja identificada pelo telefone do cliente: ${customer.storeId.name}`);
+                    return customer.storeId;
+                }
             }
 
+            // Método 3: Identificar por contexto da mensagem (palavras-chave, menções)
+            const messageText = message.text?.toLowerCase() || '';
+            
+            // Buscar por menções de nome da loja na mensagem
+            for (const [phone, storeData] of this.storePhoneMap.entries()) {
+                const store = await Store.findById(storeData.storeId);
+                if (store && messageText.includes(store.name.toLowerCase())) {
+                    console.log(`Loja identificada por menção no texto: ${store.name}`);
+                    return store;
+                }
+            }
+
+            // Método 4: Se o cliente está iniciando conversa, tentar identificar pela primeira loja ativa
+            // Isso pode ser melhorado com um sistema de roteamento mais sofisticado
+            if (messageText.includes('/start') || messageText.includes('olá') || messageText.includes('oi')) {
+                // Retornar a primeira loja ativa como fallback temporário
+                const firstStore = Array.from(this.storePhoneMap.values())[0];
+                if (firstStore) {
+                    const store = await Store.findById(firstStore.storeId);
+                    console.log(`Loja identificada como fallback: ${store.name}`);
+                    return store;
+                }
+            }
+
+            console.log('Não foi possível identificar a loja para esta mensagem');
             return null;
         } catch (error) {
             console.error('Erro ao identificar loja:', error);
@@ -178,26 +223,244 @@ class MultiStoreTelegramService {
     }
 
     /**
-     * Processar mensagem de texto
+     * Processar mensagem de texto com Liza
      */
     async processTextMessage(message, store) {
-        const chatId = message.chat.id.toString();
+        try {
+            const chatId = message.chat.id.toString();
+            const userId = message.from.id;
+            const userName = message.from.first_name || 'Cliente';
+            const messageText = message.text;
+
+            // Verificar horário de funcionamento se habilitado
+            if (store.telegram.businessHours?.enabled && !this.isBusinessHours(store)) {
+                await this.sendMessage(chatId, store.telegram.businessHours.message);
+                return;
+            }
+
+            // Processar com Liza
+            const lizaResponse = await this.getLizaResponse({
+                message: messageText,
+                userName,
+                userId,
+                chatId,
+                store,
+                platform: 'telegram'
+            });
+
+            if (lizaResponse) {
+                // Verificar se a resposta deve incluir link da loja
+                if (this.shouldIncludeStoreLink(messageText)) {
+                    const storeLink = this.generateStoreLink(store);
+                    const responseWithLink = `${lizaResponse}\n\n🔗 **Acesse nosso cardápio completo:**\n${storeLink}`;
+                    await this.sendMessage(chatId, responseWithLink);
+                } else {
+                    await this.sendMessage(chatId, lizaResponse);
+                }
+
+                // Salvar conversa
+                await this.saveConversation(chatId, userId, messageText, lizaResponse, store._id);
+            } else {
+                // Resposta de fallback
+                await this.sendMessage(chatId, 
+                    '🤖 Desculpe, estou com dificuldades técnicas no momento. Tente novamente em alguns instantes.'
+                );
+            }
+
+        } catch (error) {
+            console.error('Erro ao processar mensagem de texto:', error);
+            await this.sendMessage(message.chat.id, 
+                '❌ Ocorreu um erro interno. Tente novamente em alguns instantes.'
+            );
+        }
+    }
+
+    /**
+     * Verificar se deve incluir link da loja na resposta
+     */
+    shouldIncludeStoreLink(messageText) {
+        const linkKeywords = [
+            'cardápio', 'menu', 'link', 'site', 'página', 'pedido', 'pedir',
+            'delivery', 'entrega', 'fazer pedido', 'ver cardápio', 'opções'
+        ];
         
-        // Verificar horário de funcionamento se habilitado
-        if (store.telegram.businessHours.enabled && !this.isBusinessHours(store)) {
-            await this.sendMessage(chatId, store.telegram.businessHours.message);
-            return;
+        const text = messageText.toLowerCase();
+        return linkKeywords.some(keyword => text.includes(keyword));
+    }
+
+    /**
+     * Gerar link específico da loja
+     */
+    generateStoreLink(store) {
+        // Usar subdomain se disponível, senão usar slug
+        if (store.domain?.subdomain) {
+            return `https://${store.domain.subdomain}.pedai.com`;
+        } else if (store.slug) {
+            return `${process.env.FRONTEND_URL || 'http://localhost:5173'}/${store.slug}`;
+        } else {
+            return `${process.env.FRONTEND_URL || 'http://localhost:5173'}/store/${store._id}`;
+        }
+    }
+
+    /**
+     * Obter resposta da Liza via OpenRouter
+     */
+    async getLizaResponse(context) {
+        try {
+            const { message, userName, store, platform } = context;
+            
+            // Construir prompt personalizado para a loja
+            const systemPrompt = this.buildStoreSystemPrompt(store);
+            const userPrompt = `Cliente: ${userName}\nMensagem: ${message}`;
+
+            // Fazer requisição para OpenRouter
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.settings.liza?.openRouterApiKey || this.settings.lisaOpenRouterApiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'mistralai/mistral-7b-instruct',
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: userPrompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`OpenRouter API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.choices?.[0]?.message?.content?.trim() || null;
+            
+        } catch (error) {
+            console.error('Erro ao obter resposta da Liza:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Construir prompt do sistema personalizado para a loja
+     */
+    buildStoreSystemPrompt(store) {
+        const storeInfo = {
+            name: store.name,
+            address: store.settings?.restaurantAddress || 'Endereço não informado',
+            phone: store.telegram?.phoneNumber || 'Telefone não informado',
+            hours: this.getBusinessHoursText(store)
+        };
+
+        return `Você é a Liza, assistente inteligente do restaurante "${storeInfo.name}" via Telegram.
+
+INFORMAÇÕES DA LOJA:
+- Nome: ${storeInfo.name}
+- Endereço: ${storeInfo.address}
+- Telefone: ${storeInfo.phone}
+- Horário: ${storeInfo.hours}
+
+SUAS FUNÇÕES:
+- Atender clientes via Telegram de forma personalizada
+- Responder perguntas sobre cardápio e produtos
+- Ajudar com pedidos e informações de entrega
+- Fornecer informações específicas desta loja
+- Ser amigável, prestativa e profissional
+
+REGRAS IMPORTANTES:
+- Você é a LIZA do restaurante ${storeInfo.name}
+- Trate o cliente pelo nome quando possível
+- Respostas SEMPRE curtas e diretas (máximo 3 frases)
+- Use emojis para deixar mais amigável
+- Seja proativa em oferecer ajuda
+- Quando perguntarem sobre cardápio, mencione que pode enviar o link
+- Para dúvidas sobre entrega, informe nossa área de cobertura
+- Se não souber algo específico, seja honesta e ofereça contato direto
+
+EXEMPLOS DE RESPOSTAS:
+- "Olá! 😊 Sou a Liza do ${storeInfo.name}. Como posso ajudar você hoje?"
+- "Temos várias opções deliciosas! 🍕 Quer que eu envie o link do nosso cardápio?"
+- "Entregamos na sua região sim! 🚚 O tempo estimado é de 30-45 minutos."`;
+    }
+
+    /**
+     * Obter texto do horário de funcionamento
+     */
+    getBusinessHoursText(store) {
+        if (!store.telegram?.businessHours?.enabled) {
+            return 'Consulte nossos horários';
         }
 
-        // Aqui você pode integrar com IA ou sistema de processamento de pedidos
-        // Por enquanto, enviar resposta automática se habilitada
-        if (store.telegram.autoReply) {
-            await this.sendMessage(chatId, 
-                `Obrigado pela sua mensagem! Em breve um de nossos atendentes entrará em contato. 
-                
-📱 Para ver nosso cardápio, digite /menu
-📞 Para falar com atendente, aguarde que entraremos em contato.`
-            );
+        const hours = store.telegram.businessHours;
+        if (hours.schedule) {
+            return `${hours.schedule}`;
+        }
+
+        return 'Segunda a Domingo - Consulte horários';
+    }
+
+    /**
+     * Verificar se está no horário de funcionamento
+     */
+    isBusinessHours(store) {
+        if (!store.telegram?.businessHours?.enabled) {
+            return true; // Se não configurado, sempre disponível
+        }
+
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentDay = now.getDay(); // 0 = domingo, 1 = segunda, etc.
+
+        // Lógica básica - pode ser expandida conforme necessário
+        const businessHours = store.telegram.businessHours;
+        
+        // Se tem horário específico configurado, usar lógica mais complexa
+        if (businessHours.startTime && businessHours.endTime) {
+            const startHour = parseInt(businessHours.startTime.split(':')[0]);
+            const endHour = parseInt(businessHours.endTime.split(':')[0]);
+            
+            return currentHour >= startHour && currentHour < endHour;
+        }
+
+        // Fallback: horário comercial padrão (8h às 22h)
+        return currentHour >= 8 && currentHour < 22;
+    }
+    async saveConversation(chatId, userId, userMessage, botResponse, storeId) {
+        try {
+            let conversation = await TelegramConversation.findOne({
+                chatId: chatId,
+                storeId: storeId
+            });
+
+            if (!conversation) {
+                conversation = new TelegramConversation({
+                    storeId: storeId,
+                    chatId: chatId,
+                    userId: userId,
+                    messages: []
+                });
+            }
+
+            conversation.messages.push({
+                type: 'user',
+                content: userMessage,
+                timestamp: new Date()
+            });
+
+            conversation.messages.push({
+                type: 'bot',
+                content: botResponse,
+                timestamp: new Date()
+            });
+
+            conversation.lastMessage = new Date();
+            await conversation.save();
+
+        } catch (error) {
+            console.error('Erro ao salvar conversa:', error);
         }
     }
 

@@ -9,11 +9,12 @@ import {
     testTelegramApi,
     getApiStatus 
 } from '../controllers/apiController.js';
-import { requireSuperAdmin } from '../middleware/multiTenancy.js';
+import { authMultiTenant, requireSuperAdmin } from '../middleware/multiTenancy.js';
 
 const router = express.Router();
 
 // Todas as rotas requerem autenticação de Super Admin
+router.use(authMultiTenant);
 router.use(requireSuperAdmin);
 
 // Rotas para configurações de APIs

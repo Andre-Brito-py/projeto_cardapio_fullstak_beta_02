@@ -127,27 +127,11 @@ class TelegramService {
             const chatId = message.chat.id;
             const userId = message.from.id;
             const userName = message.from.first_name || 'Cliente';
+            const username = message.from.username;
             const messageText = message.text;
             const messageId = message.message_id;
 
             console.log(`Mensagem recebida de ${userName} (${chatId}): ${messageText}`);
-
-            // Salvar ou atualizar cliente
-            await this.saveOrUpdateClient(message.from);
-
-            // Salvar mensagem na conversa
-            await this.saveConversation({
-                telegramId: userId.toString(),
-                messageType: 'user',
-                message: messageText,
-                telegramMessageId: messageId,
-                metadata: {
-                    from: message.from,
-                    chat: message.chat,
-                    telegramDate: new Date(message.date * 1000),
-                    contentType: 'text'
-                }
-            });
 
             // Verificar se é admin
             if (await this.isAdmin(userId)) {
@@ -155,8 +139,44 @@ class TelegramService {
                 return;
             }
 
-            // Processar mensagem do cliente com Liza
-            await this.processClientMessage(chatId, userId, userName, messageText);
+            // Verificar se é uma loja autorizada
+            const storeAuth = await this.isAuthorizedStore(userId);
+            if (storeAuth.isAuthorized) {
+                console.log(`Mensagem de loja autorizada: ${storeAuth.store.name}`);
+                await this.handleStoreMessage(chatId, userId, userName, messageText, storeAuth.store);
+                return;
+            }
+
+            // Verificar se está na lista de usuários permitidos
+            if (await this.isAllowedUser(userId, username)) {
+                console.log(`Usuário permitido: ${userName} (@${username || 'sem username'})`);
+                // Salvar ou atualizar cliente
+                await this.saveOrUpdateClient(message.from);
+
+                // Salvar mensagem na conversa
+                await this.saveConversation({
+                    telegramId: userId.toString(),
+                    messageType: 'user',
+                    message: messageText,
+                    telegramMessageId: messageId,
+                    metadata: {
+                        from: message.from,
+                        chat: message.chat,
+                        telegramDate: new Date(message.date * 1000),
+                        contentType: 'text'
+                    }
+                });
+
+                // Processar mensagem do cliente com Liza
+                await this.processClientMessage(chatId, userId, userName, messageText);
+                return;
+            }
+
+            // Usuário não autorizado
+            console.log(`Usuário não autorizado: ${userName} (${userId})`);
+            await this.sendMessage(chatId, 
+                '❌ Desculpe, você não tem permissão para usar este bot. Entre em contato com o administrador.'
+            );
 
         } catch (error) {
             console.error('Erro ao processar mensagem:', error);
@@ -173,6 +193,61 @@ class TelegramService {
                    this.settings.telegramAdminChatId === userId.toString();
         } catch (error) {
             console.error('Erro ao verificar admin:', error);
+            return false;
+        }
+    }
+
+    /**
+     * Verificar se usuário é uma loja autorizada
+     */
+    async isAuthorizedStore(userId) {
+        try {
+            const Store = (await import('../models/storeModel.js')).default;
+            
+            // Buscar loja com o chatId correspondente
+            const store = await Store.findOne({
+                'telegram.isActive': true,
+                'telegram.chatId': userId.toString()
+            });
+
+            return store ? { isAuthorized: true, store } : { isAuthorized: false, store: null };
+        } catch (error) {
+            console.error('Erro ao verificar loja autorizada:', error);
+            return { isAuthorized: false, store: null };
+        }
+    }
+
+    /**
+     * Verificar se usuário está na lista de usuários permitidos
+     */
+    async isAllowedUser(userId, username) {
+        try {
+            if (!this.settings.telegramAllowedUsers) {
+                return false;
+            }
+
+            const allowedUsers = this.settings.telegramAllowedUsers
+                .split(',')
+                .map(user => user.trim())
+                .filter(user => user.length > 0);
+
+            // Verificar por ID numérico
+            if (allowedUsers.includes(userId.toString())) {
+                return true;
+            }
+
+            // Verificar por username (com ou sem @)
+            if (username) {
+                const usernameWithAt = `@${username}`;
+                const usernameWithoutAt = username;
+                
+                return allowedUsers.includes(usernameWithAt) || 
+                       allowedUsers.includes(usernameWithoutAt);
+            }
+
+            return false;
+        } catch (error) {
+            console.error('Erro ao verificar usuário permitido:', error);
             return false;
         }
     }
@@ -312,6 +387,81 @@ Comandos disponíveis:
 
         } catch (error) {
             console.error('Erro ao processar mensagem de admin:', error);
+            await this.sendMessage(chatId, '❌ Erro interno. Tente novamente.');
+        }
+    }
+
+    /**
+     * Processar mensagem de loja autorizada
+     */
+    async handleStoreMessage(chatId, userId, userName, messageText, store) {
+        try {
+            const command = messageText.toLowerCase().trim();
+
+            if (command === '/start' || command === '/menu') {
+                const storeMenu = `
+🏪 <b>Painel da Loja - ${store.name}</b>
+
+Comandos disponíveis:
+
+📊 <b>Estatísticas:</b>
+/stats - Ver estatísticas da loja
+/orders - Pedidos recentes
+/clients - Clientes da loja
+
+📢 <b>Comunicação:</b>
+/broadcast [mensagem] - Enviar para clientes da loja
+/notify [mensagem] - Notificar sobre promoções
+
+⚙️ <b>Configurações:</b>
+/status - Status da loja
+/hours - Horário de funcionamento
+/help - Ajuda
+
+💬 <b>Atendimento:</b>
+Para atender clientes, apenas responda às mensagens que chegarem.
+                `;
+                await this.sendMessage(chatId, storeMenu);
+                return;
+            }
+
+            if (command.startsWith('/broadcast ')) {
+                const broadcastMessage = messageText.substring(11);
+                await this.sendStoreBroadcast(broadcastMessage, store._id, chatId);
+                return;
+            }
+
+            if (command === '/stats') {
+                await this.sendStoreStats(chatId, store._id);
+                return;
+            }
+
+            if (command === '/orders') {
+                await this.sendStoreOrders(chatId, store._id);
+                return;
+            }
+
+            if (command === '/clients') {
+                await this.sendStoreClients(chatId, store._id);
+                return;
+            }
+
+            if (command === '/status') {
+                await this.sendStoreStatus(chatId, store);
+                return;
+            }
+
+            if (command === '/hours') {
+                await this.sendStoreHours(chatId, store);
+                return;
+            }
+
+            // Se não é um comando, pode ser uma resposta para um cliente
+            // Aqui você pode implementar lógica para responder clientes específicos
+            await this.sendMessage(chatId, '💡 Use /menu para ver os comandos disponíveis ou responda diretamente às mensagens dos clientes.');
+
+        } catch (error) {
+            console.error('Erro ao processar mensagem da loja:', error);
             await this.sendMessage(chatId, '❌ Erro interno. Tente novamente.');
         }
     }
@@ -554,6 +704,168 @@ Regras importantes:
         } catch (error) {
             console.error('Erro ao criar campanha:', error);
             await this.sendMessage(adminChatId, '❌ Erro ao criar campanha.');
+        }
+    }
+
+    /**
+     * Enviar broadcast para clientes de uma loja específica
+     */
+    async sendStoreBroadcast(message, storeId, senderChatId) {
+        try {
+            // Buscar clientes da loja
+            const clients = await TelegramClient.find({ storeId: storeId });
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const client of clients) {
+                try {
+                    await this.sendMessage(client.telegramId, message);
+                    successCount++;
+                } catch (error) {
+                    console.error(`Erro ao enviar para cliente ${client.telegramId}:`, error);
+                    errorCount++;
+                }
+            }
+
+            const resultMessage = `
+📢 <b>Broadcast Enviado</b>
+
+✅ Enviados: ${successCount}
+❌ Erros: ${errorCount}
+📊 Total: ${clients.length}
+            `;
+
+            await this.sendMessage(senderChatId, resultMessage);
+        } catch (error) {
+            console.error('Erro ao enviar broadcast da loja:', error);
+            await this.sendMessage(senderChatId, '❌ Erro ao enviar broadcast.');
+        }
+    }
+
+    /**
+     * Enviar estatísticas da loja
+     */
+    async sendStoreStats(chatId, storeId) {
+        try {
+            const totalClients = await TelegramClient.countDocuments({ storeId: storeId });
+            const totalConversations = await TelegramConversation.countDocuments({ 
+                clientId: { $in: await TelegramClient.find({ storeId: storeId }).select('_id') }
+            });
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            const todayConversations = await TelegramConversation.countDocuments({
+                clientId: { $in: await TelegramClient.find({ storeId: storeId }).select('_id') },
+                createdAt: { $gte: today, $lt: tomorrow }
+            });
+
+            const statsMessage = `
+📊 <b>Estatísticas da Loja</b>
+
+👥 Total de clientes: ${totalClients}
+💬 Total de conversas: ${totalConversations}
+🟢 Conversas hoje: ${todayConversations}
+📅 Data: ${new Date().toLocaleDateString('pt-BR')}
+⏰ Hora: ${new Date().toLocaleTimeString('pt-BR')}
+            `;
+
+            await this.sendMessage(chatId, statsMessage);
+        } catch (error) {
+            console.error('Erro ao enviar estatísticas da loja:', error);
+            await this.sendMessage(chatId, '❌ Erro ao obter estatísticas.');
+        }
+    }
+
+    /**
+     * Enviar pedidos recentes da loja
+     */
+    async sendStoreOrders(chatId, storeId) {
+        try {
+            // Esta função precisará ser implementada baseada no modelo de pedidos
+            const ordersMessage = `
+📋 <b>Pedidos Recentes</b>
+
+🚧 Funcionalidade em desenvolvimento.
+Em breve você poderá ver os pedidos recentes da sua loja aqui.
+            `;
+
+            await this.sendMessage(chatId, ordersMessage);
+        } catch (error) {
+            console.error('Erro ao enviar pedidos da loja:', error);
+            await this.sendMessage(chatId, '❌ Erro ao obter pedidos.');
+        }
+    }
+
+    /**
+     * Enviar lista de clientes da loja
+     */
+    async sendStoreClients(chatId, storeId) {
+        try {
+            const clients = await TelegramClient.find({ storeId: storeId })
+                .sort({ createdAt: -1 })
+                .limit(10);
+
+            let clientsList = '👥 <b>Clientes Recentes</b>\n\n';
+            
+            if (clients.length === 0) {
+                clientsList += 'Nenhum cliente encontrado.';
+            } else {
+                clients.forEach((client, index) => {
+                    const date = new Date(client.createdAt).toLocaleDateString('pt-BR');
+                    clientsList += `${index + 1}. ${client.firstName || 'Sem nome'} (@${client.username || 'sem_username'})\n`;
+                    clientsList += `   📅 ${date}\n\n`;
+                });
+            }
+
+            await this.sendMessage(chatId, clientsList);
+        } catch (error) {
+            console.error('Erro ao enviar clientes da loja:', error);
+            await this.sendMessage(chatId, '❌ Erro ao obter clientes.');
+        }
+    }
+
+    /**
+     * Enviar status da loja
+     */
+    async sendStoreStatus(chatId, store) {
+        try {
+            const statusMessage = `
+🏪 <b>Status da Loja</b>
+
+📛 Nome: ${store.name}
+🟢 Status: ${store.isActive ? 'Ativa' : 'Inativa'}
+📱 Telegram ID: ${store.telegram?.chatId || 'Não configurado'}
+📧 Email: ${store.email || 'Não informado'}
+📞 Telefone: ${store.phone || 'Não informado'}
+📅 Criada em: ${new Date(store.createdAt).toLocaleDateString('pt-BR')}
+            `;
+
+            await this.sendMessage(chatId, statusMessage);
+        } catch (error) {
+            console.error('Erro ao enviar status da loja:', error);
+            await this.sendMessage(chatId, '❌ Erro ao obter status.');
+        }
+    }
+
+    /**
+     * Enviar horário de funcionamento da loja
+     */
+    async sendStoreHours(chatId, store) {
+        try {
+            const hoursMessage = `
+🕐 <b>Horário de Funcionamento</b>
+
+🚧 Funcionalidade em desenvolvimento.
+Em breve você poderá configurar e visualizar os horários de funcionamento aqui.
+            `;
+
+            await this.sendMessage(chatId, hoursMessage);
+        } catch (error) {
+            console.error('Erro ao enviar horários da loja:', error);
+            await this.sendMessage(chatId, '❌ Erro ao obter horários.');
         }
     }
 

@@ -39,6 +39,7 @@ import apiRouter from './routes/apiRoutes.js';
 import whatsappRouter from './routes/whatsappRoute.js';
 import whatsappWebhookRouter from './routes/whatsappWebhook.js';
 import telegramRouter from './routes/telegramRoutes.js';
+import telegramDirectRouter from './routes/telegramDirectRoutes.js';
 import lizaRouter from './routes/lizaRoutes.js';
 import lizaCustomerRouter from './routes/lizaCustomerRoutes.js';
 import lizaTelegramRouter from './routes/lizaTelegramRoutes.js';
@@ -54,13 +55,24 @@ const port = process.env.PORT || 4001;
 
 // Configuração de middlewares
 app.use(express.json()); // Parser para JSON
-app.use(cors()); // Habilita CORS para requisições cross-origin
 
-// Middleware de simulação desabilitado temporariamente para permitir APIs funcionarem
-// if (process.env.NODE_ENV === 'development') {
-//     app.use(simulateAuth);
-//     app.use(simulateDatabase);
-// }
+// Configuração específica de CORS para permitir requisições do admin
+app.use(cors({
+    origin: [
+        'http://localhost:5173', // Frontend
+        'http://localhost:5174', // Admin
+        'http://localhost:5176'  // Counter
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Middleware de simulação habilitado para desenvolvimento
+if (process.env.NODE_ENV === 'development') {
+    app.use(simulateAuth);
+    app.use(simulateDatabase);
+}
 
 // Middleware de contexto de loja removido da aplicação global
 // Será aplicado apenas nas rotas específicas que precisam
@@ -96,6 +108,7 @@ app.use('/api/liza/customers', validateStoreActive, lizaCustomerRouter); // Rota
 app.use('/api/liza/telegram', validateStoreActive, lizaTelegramRouter); // Rotas para Liza enviar mensagens via Telegram
 app.use('/api/liza', lizaRouter); // Rotas para chat com IA Liza
 app.use('/api/telegram', telegramRouter); // Rotas para integração com Telegram (Super Admin)
+app.use('/api/telegram-direct', telegramDirectRouter); // Rotas diretas para Telegram (sem middleware)
 app.use('/api/reports', reportRouter); // Rotas para relatórios diários
 
 // Rotas existentes (mantidas para compatibilidade)

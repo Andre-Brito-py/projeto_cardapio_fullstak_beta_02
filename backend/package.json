@@ -6,7 +6,9 @@
   "scripts": {
     "server": "nodemon server.js",
     "start": "node server.js",
-    "create-admin": "node createAdmin.js"
+    "create-admin": "node createAdmin.js",
+    "test:telegram": "node scripts/run-telegram-tests.js",
+    "test:telegram:manual": "node tests/telegram-manual-test.js"
   },
   "author": "",
   "license": "ISC",

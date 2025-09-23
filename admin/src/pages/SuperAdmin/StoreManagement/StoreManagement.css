@@ -272,6 +272,58 @@
   }
 }
 
+/* Seções do formulário */
+.form-section {
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: var(--background-secondary);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-light);
+}
+
+.form-section h4 {
+  margin: 0 0 var(--spacing-lg) 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.form-section .form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.form-section .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Checkbox labels específicos */
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  margin-bottom: 0 !important;
+  font-weight: var(--font-weight-medium);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto !important;
+  margin: 0 !important;
+  transform: scale(1.2);
+  accent-color: var(--primary-color);
+}
+
+.checkbox-label small {
+  margin-top: var(--spacing-xs);
+  margin-left: calc(1.2em + var(--spacing-sm));
+  display: block;
+}
+
 .store-form {
   background: var(--background-white);
   padding: var(--spacing-xl);

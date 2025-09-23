@@ -57,7 +57,7 @@ const App = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
+    const savedToken = localStorage.getItem('superAdminToken') || localStorage.getItem('token');
     const userRole = localStorage.getItem('userRole');
     if (savedToken) {
       setToken(savedToken);
@@ -67,6 +67,7 @@ const App = () => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('superAdminToken');
     localStorage.removeItem('userRole');
     setToken('');
     setIsSuperAdmin(false);

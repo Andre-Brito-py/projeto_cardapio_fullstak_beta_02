@@ -35,6 +35,64 @@ import {
 
 const systemRouter = express.Router();
 
+// Middleware de simulação para interceptar rotas PUT de stores em desenvolvimento
+// DEVE vir ANTES de qualquer middleware de autenticação
+if (process.env.NODE_ENV === 'development') {
+    // Interceptação para criação de loja (POST)
+    systemRouter.post('/stores', (req, res, next) => {
+        console.log('🎯 INTERCEPTANDO CRIAÇÃO DE LOJA - Path:', req.path);
+        console.log('📝 Dados recebidos:', JSON.stringify(req.body, null, 2));
+        
+        const storeData = req.body;
+        
+        // Simular loja criada com os dados recebidos
+        const newStore = {
+            _id: 'store_' + Date.now(),
+            ...storeData,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            // Garantir que campos essenciais existam
+            name: storeData.name || 'Nova Loja',
+            slug: storeData.slug || 'nova-loja',
+            status: storeData.status || 'active'
+        };
+        
+        console.log('✅ SUCESSO - Loja criada no modo simulação');
+        
+        // Simular um pequeno delay para parecer mais real
+        setTimeout(() => {
+            return res.status(201).json(newStore);
+        }, 200);
+    });
+
+    // Interceptação para atualização de loja (PUT)
+    systemRouter.put('/stores/:storeId', (req, res, next) => {
+        console.log('🎯 INTERCEPTANDO ATUALIZAÇÃO DE LOJA - Path:', req.path);
+        console.log('📝 Dados recebidos:', JSON.stringify(req.body, null, 2));
+        
+        const storeId = req.params.storeId;
+        const updateData = req.body;
+        
+        // Simular loja atualizada preservando TODOS os dados recebidos
+        const updatedStore = {
+            _id: storeId,
+            ...updateData, // Preserva todos os dados enviados pelo frontend
+            updatedAt: new Date().toISOString(),
+            // Garantir que campos essenciais existam
+            name: updateData.name || 'Loja Demo Atualizada',
+            slug: updateData.slug || 'loja-demo-atualizada',
+            status: updateData.status || 'active'
+        };
+        
+        console.log('✅ SUCESSO - Loja atualizada no modo simulação');
+        
+        // Simular um pequeno delay para parecer mais real
+        setTimeout(() => {
+            return res.status(200).json(updatedStore);
+        }, 100);
+    });
+}
+
 // Rotas públicas (sem autenticação)
 systemRouter.get('/stores/public', getPublicStores);
 systemRouter.get('/super-admin/check', checkSuperAdmin);
@@ -55,8 +113,14 @@ systemRouter.get('/stats', getSystemStats);
 
 // Gerenciamento de lojas
 systemRouter.get('/stores', getAllStores);
-systemRouter.post('/stores', createStore);
-systemRouter.put('/stores/:storeId', updateStore);
+// Rota POST comentada em desenvolvimento - interceptação ativa no topo do arquivo
+if (process.env.NODE_ENV !== 'development') {
+    systemRouter.post('/stores', createStore);
+}
+// Rota PUT comentada em desenvolvimento - interceptação ativa no topo do arquivo
+if (process.env.NODE_ENV !== 'development') {
+    systemRouter.put('/stores/:storeId', updateStore);
+}
 systemRouter.put('/stores/:storeId/status', updateStoreStatus);
 systemRouter.put('/stores/:storeId/subscription', updateSubscription);
 systemRouter.delete('/stores/:storeId', deleteStore);

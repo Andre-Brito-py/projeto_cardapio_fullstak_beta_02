@@ -236,6 +236,13 @@ const storeSchema = new mongoose.Schema({
       trim: true,
       default: ''
     },
+    // Chat ID da loja para autorização automática no bot
+    chatId: {
+      type: String,
+      trim: true,
+      default: '',
+      index: true // Índice para busca rápida
+    },
     welcomeMessage: {
       type: String,
       default: 'Olá! Bem-vindo ao nosso delivery. Como posso ajudá-lo hoje?'

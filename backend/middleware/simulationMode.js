@@ -52,9 +52,230 @@ const mockProducts = [
 
 // Middleware para simular autenticação
 export const simulateAuth = (req, res, next) => {
+    // Log de entrada para debug
+    console.log('🔍 Middleware simulação ativo - Path:', req.path, 'Method:', req.method, 'NODE_ENV:', process.env.NODE_ENV);
+    
+    // Debug específico para rotas de stores
+    if (req.path.includes('/api/system/stores')) {
+        console.log('🔍 ROTA DE STORE DETECTADA!');
+        console.log('🔍 req.path:', req.path);
+        console.log('🔍 req.method:', req.method);
+    }
+    
     // Verificar se estamos em modo simulação
     if (process.env.NODE_ENV !== 'development') {
         return next();
+    }
+
+    // Simular criação de loja do sistema (Super Admin) - DEVE VIR PRIMEIRO
+    if (req.path === '/api/system/stores' && req.method === 'POST') {
+        console.log('🎯 INTERCEPTANDO CRIAÇÃO DE LOJA - Path:', req.path);
+        console.log('📝 Dados recebidos:', JSON.stringify(req.body, null, 2));
+        
+        const storeData = req.body;
+        
+        // Simular nova loja criada com os dados recebidos
+        const newStore = {
+            _id: '507f1f77bcf86cd799439' + Math.floor(Math.random() * 1000),
+            name: storeData.name || 'Nova Loja',
+            slug: storeData.slug || 'nova-loja',
+            status: 'active',
+            description: storeData.description || 'Nova loja criada',
+            restaurantAddress: storeData.restaurantAddress || 'Endereço da nova loja',
+            settings: {
+                address: {
+                    street: storeData.street || 'Rua da nova loja',
+                    number: storeData.number || '123',
+                    complement: storeData.complement || '',
+                    neighborhood: storeData.neighborhood || 'Bairro',
+                    city: storeData.city || 'Cidade',
+                    state: storeData.state || 'Estado',
+                    zipCode: storeData.zipCode || '00000-000'
+                },
+                language: storeData.language || 'pt-BR',
+                currency: storeData.currency || 'BRL',
+                timezone: storeData.timezone || 'America/Sao_Paulo'
+            },
+            telegram: {
+                chatId: storeData.telegramChatId || '',
+                phoneNumber: storeData.telegramPhoneNumber || '',
+                isActive: storeData.telegramIsActive || false
+            },
+            owner: {
+                _id: 'owner' + Math.floor(Math.random() * 1000),
+                name: storeData.ownerName || 'Novo Proprietário',
+                email: storeData.ownerEmail || 'proprietario@novaLoja.com'
+            },
+            subscriptionPlan: storeData.subscriptionPlan || 'Básico',
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        
+        console.log('✅ SUCESSO - Nova loja criada no modo simulação');
+        
+        // Simular delay de 200ms
+        setTimeout(() => {
+            return res.status(201).json({
+                success: true,
+                message: 'Loja criada com sucesso!',
+                data: newStore
+            });
+        }, 200);
+        return;
+    }
+
+    // Simular atualização de loja do sistema (Super Admin)
+    if (req.path.startsWith('/api/system/stores/') && req.method === 'PUT') {
+        console.log('🎯 INTERCEPTANDO ATUALIZAÇÃO DE LOJA - Path:', req.path);
+        console.log('📝 Dados recebidos:', JSON.stringify(req.body, null, 2));
+        console.log('🔍 DEBUG - req.method:', req.method, 'req.path:', req.path);
+        console.log('🔍 DEBUG - Condição atendida:', req.path.startsWith('/api/system/stores/'), req.method === 'PUT');
+        
+        const storeId = req.path.split('/').pop();
+        const updateData = req.body;
+        
+        // Simular loja atualizada com os dados recebidos
+        const updatedStore = {
+            _id: storeId,
+            name: updateData.name || 'Loja Demo Atualizada',
+            slug: updateData.slug || 'loja-demo-atualizada',
+            status: updateData.status || 'active',
+            description: updateData.description || 'Descrição atualizada',
+            restaurantAddress: updateData.restaurantAddress || 'Endereço do restaurante atualizado',
+            settings: {
+                address: {
+                    street: updateData.street || 'Rua atualizada',
+                    number: updateData.number || '123',
+                    complement: updateData.complement || '',
+                    neighborhood: updateData.neighborhood || 'Bairro atualizado',
+                    city: updateData.city || 'Cidade atualizada',
+                    state: updateData.state || 'Estado atualizado',
+                    zipCode: updateData.zipCode || '00000-000'
+                },
+                language: updateData.language || 'pt-BR',
+                currency: updateData.currency || 'BRL',
+                timezone: updateData.timezone || 'America/Sao_Paulo'
+            },
+            telegram: {
+                chatId: updateData.telegramChatId || '',
+                phoneNumber: updateData.telegramPhoneNumber || '',
+                isActive: updateData.telegramIsActive || false
+            },
+            owner: {
+                _id: 'owner' + storeId,
+                name: updateData.ownerName || 'Proprietário Atualizado',
+                email: updateData.ownerEmail || 'proprietario@loja.com'
+            },
+            subscriptionPlan: updateData.subscriptionPlan || 'Básico',
+            updatedAt: new Date()
+        };
+        
+        console.log('✅ SUCESSO - Loja atualizada no modo simulação');
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Loja atualizada com sucesso!',
+            data: updatedStore
+        });
+    }
+
+    // Simular teste do Telegram PRIMEIRO (antes de qualquer autenticação)
+    if (req.path === '/api/system/api/test-telegram' && req.method === 'POST') {
+        console.log('🎯 Interceptando rota test-telegram no middleware de simulação');
+        console.log('📦 Body recebido:', req.body);
+        const { botToken, telegramBotToken } = req.body;
+        const token = botToken || telegramBotToken;
+        
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: 'Token do bot é obrigatório'
+            });
+        }
+
+        // Simular resposta de sucesso do teste do Telegram
+        return res.json({
+            success: true,
+            message: 'Bot Telegram testado com sucesso (modo simulação)',
+            data: {
+                bot: {
+                    id: 123456789,
+                    is_bot: true,
+                    first_name: 'Bot Demo',
+                    username: 'demo_bot',
+                    can_join_groups: true,
+                    can_read_all_group_messages: false,
+                    supports_inline_queries: false
+                },
+                testMessage: 'Mensagem de teste enviada com sucesso (simulação)'
+            }
+        });
+    }
+
+    // Para rotas de API do sistema, permitir que passem pela autenticação real
+    if (req.path.startsWith('/api/system/api/') && (req.method === 'POST' || req.method === 'GET' || req.method === 'PUT')) {
+        console.log('🔐 Permitindo autenticação real para rota do sistema:', req.path);
+        // Não interceptar - deixar que o middleware de autenticação real processe
+        return next();
+    }
+
+    // Simular resposta para configurações de API - mas buscar do banco real se disponível
+    if (req.path === '/api/system/api/settings' && req.method === 'GET') {
+        console.log('🔍 Tentando buscar configurações reais do banco de dados');
+        // Permitir que passe para o controller real primeiro
+        // Se falhar, então simular
+        // return res.json({
+        //     success: true,
+        //     settings: {
+        //         // Google Maps API
+        //         googleMapsApiKey: '',
+        //         googleMapsEnabled: false,
+        //         
+        //         // Asaas API
+        //         asaasApiKey: '',
+        //         asaasEnvironment: 'sandbox',
+        //         asaasEnabled: false,
+        //         
+        //         // Lisa AI Assistant API
+        //         lisaEnabled: false,
+        //         lisaOpenAiApiKey: '',
+        //         lisaGroqApiKey: '',
+        //         lisaChainlitSecret: '',
+        //         lisaLiteralApiKey: '',
+        //         lisaPort: '8000',
+        //         lisaMaxFileSize: 10,
+        //         
+        //         // Configurações de frete
+        //         shippingEnabled: true,
+        //         freeShippingMinValue: 50,
+        //         baseShippingCost: 5,
+        //         costPerKm: 2,
+        //         
+        //         // WhatsApp Business API
+        //         whatsappEnabled: false,
+        //         whatsappAccessToken: '',
+        //         whatsappPhoneNumberId: '',
+        //         whatsappWebhookVerifyToken: '',
+        //         whatsappBusinessAccountId: '',
+        //         
+        //         // Telegram Bot API
+        //         telegramEnabled: false,
+        //         telegramBotToken: '',
+        //         telegramWebhookUrl: '',
+        //         telegramAllowedUsers: '',
+        //         telegramAdminChatId: ''
+        //     }
+        // });
+    }
+
+    // Simular resposta para salvar configurações de API - mas permitir que passe para o controller real
+    if (req.path === '/api/system/api/settings' && req.method === 'PUT') {
+        console.log('🔍 Permitindo salvamento real de configurações de API');
+        // Não interceptar - deixar passar para o controller real
+        // return res.json({
+        //     success: true,
+        //     message: 'Configurações salvas com sucesso (simulação)'
+        // });
     }
 
     // Interceptar TODAS as rotas de login primeiro
@@ -398,6 +619,140 @@ export const simulateAuth = (req, res, next) => {
         });
     }
 
+    // Simular lista de lojas do sistema (Super Admin)
+    if (req.path === '/api/system/stores' && req.method === 'GET') {
+        const mockStores = [
+            {
+                _id: '1',
+                name: 'Loja Demo 1',
+                slug: 'loja-demo-1',
+                status: 'active',
+                owner: {
+                    _id: 'owner1',
+                    name: 'João Silva',
+                    email: 'joao@loja1.com'
+                },
+                createdAt: new Date('2024-01-15'),
+                subscription: {
+                    plan: 'premium',
+                    status: 'active',
+                    expiresAt: new Date('2024-12-31')
+                }
+            },
+            {
+                _id: '2',
+                name: 'Loja Demo 2',
+                slug: 'loja-demo-2',
+                status: 'pending',
+                owner: {
+                    _id: 'owner2',
+                    name: 'Maria Santos',
+                    email: 'maria@loja2.com'
+                },
+                createdAt: new Date('2024-02-10'),
+                subscription: {
+                    plan: 'basic',
+                    status: 'active',
+                    expiresAt: new Date('2024-11-30')
+                }
+            },
+            {
+                _id: '3',
+                name: 'Loja Demo 3',
+                slug: 'loja-demo-3',
+                status: 'active',
+                owner: {
+                    _id: 'owner3',
+                    name: 'Pedro Costa',
+                    email: 'pedro@loja3.com'
+                },
+                createdAt: new Date('2024-03-05'),
+                subscription: {
+                    plan: 'premium',
+                    status: 'active',
+                    expiresAt: new Date('2025-01-15')
+                },
+                telegram: {
+                    chatId: '',
+                    phoneNumber: '',
+                    isActive: false
+                }
+            }
+        ];
+        
+        return res.json({
+            success: true,
+            data: {
+                stores: mockStores,
+                pagination: {
+                    current: 1,
+                    pages: 1,
+                    total: mockStores.length
+                }
+            }
+        });
+    }
+
+    // Simular atualização de loja do sistema (Super Admin)
+    // REMOVIDO DAQUI - MOVIDO PARA O INÍCIO DA FUNÇÃO simulateAuth
+
+    // Simular configuração do bot do Telegram (Super Admin)
+    if (req.path === '/api/telegram/bot-config' && req.method === 'GET') {
+        return res.json({
+            success: true,
+            config: {
+                token: '8337588749:AAGxcGgyw3qpKEgvzwEUYeW0PWexJrFuMGI',
+                webhookUrl: 'https://seu-dominio.com/api/telegram/webhook',
+                enabled: true
+            }
+        });
+    }
+
+    // Simular salvamento da configuração do bot do Telegram (Super Admin)
+    if (req.path === '/api/telegram/bot-config' && req.method === 'POST') {
+        return res.json({
+            success: true,
+            message: 'Configuração salva com sucesso (modo simulação)'
+        });
+    }
+
+    // Simular teste do bot do Telegram com token real
+    if (req.path === '/api/system/api/test-telegram' && req.method === 'POST') {
+        console.log('🔍 Interceptando rota de teste do Telegram');
+        
+        const { token } = req.body;
+        
+        // Validar se o token foi fornecido
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: 'Token do bot é obrigatório'
+            });
+        }
+        
+        // Simular validação do token (usando o token real fornecido)
+        if (token === '8337588749:AAGxcGgyw3qpKEgvzwEUYeW0PWexJrFuMGI') {
+            return res.json({
+                success: true,
+                message: 'Bot Telegram testado com sucesso (modo simulação)',
+                data: {
+                    bot: {
+                        id: 8337588749,
+                        is_bot: true,
+                        first_name: 'Liza Delivery',
+                        username: 'LizaDelivetybot'
+                    },
+                    testMessage: 'Conexão com o bot estabelecida com sucesso (simulação)'
+                }
+            });
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: 'Token do bot inválido'
+            });
+        }
+    }
+
     // Simular pedidos
     if (req.path === '/api/order/list' && req.method === 'GET') {
         const mockOrders = [
@@ -447,13 +802,13 @@ export const simulateAuth = (req, res, next) => {
         });
     }
 
+
+
     next();
 };
 
 // Middleware para simular dados quando MongoDB não está disponível
 export const simulateDatabase = (req, res, next) => {
-    console.log('🔍 Middleware simulação ativo - Path:', req.path, 'Method:', req.method, 'NODE_ENV:', process.env.NODE_ENV);
-    
     // Forçar simulação temporariamente
     // if (process.env.NODE_ENV !== 'development') {
     //     return next();

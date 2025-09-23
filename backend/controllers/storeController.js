@@ -130,6 +130,26 @@ const createStore = async (req, res) => {
         store.owner = owner._id;
         await store.save();
 
+        // Adicionar automaticamente a loja aos usuários permitidos do Telegram
+        try {
+            const systemSettings = await SystemSettings.getInstance();
+            if (systemSettings.telegramEnabled && systemSettings.telegramAllowedUsers) {
+                // Adicionar o slug da loja aos usuários permitidos se não estiver já presente
+                const currentAllowedUsers = systemSettings.telegramAllowedUsers.split(',').map(user => user.trim()).filter(user => user);
+                const storeSlug = store.slug;
+                
+                if (!currentAllowedUsers.includes(storeSlug)) {
+                    currentAllowedUsers.push(storeSlug);
+                    systemSettings.telegramAllowedUsers = currentAllowedUsers.join(', ');
+                    await systemSettings.save();
+                    console.log(`Loja ${storeSlug} adicionada automaticamente aos usuários permitidos do Telegram`);
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao adicionar loja aos usuários permitidos do Telegram:', error);
+            // Não falhar a criação da loja por causa deste erro
+        }
+
         // Loja criada com sucesso - categorias podem ser adicionadas posteriormente via admin
         console.log('Loja criada com sucesso:', store.name);
 

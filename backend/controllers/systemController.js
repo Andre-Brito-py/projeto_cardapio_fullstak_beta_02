@@ -367,6 +367,10 @@ const updateStore = async (req, res) => {
                     'settings.language': updateData.language,
                     'settings.currency': updateData.currency,
                     'settings.timezone': updateData.timezone,
+                    // Campos do Telegram
+                    'telegram.chatId': updateData.telegramChatId,
+                    'telegram.phoneNumber': updateData.telegramPhoneNumber,
+                    'telegram.isActive': updateData.telegramIsActive,
                     updatedAt: new Date()
                 }
             },

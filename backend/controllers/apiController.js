@@ -6,7 +6,59 @@ import AsaasService from '../services/AsaasService.js';
  */
 export const getApiSettings = async (req, res) => {
     try {
-        const settings = await SystemSettings.getInstance();
+        let settings;
+        
+        try {
+            settings = await SystemSettings.getInstance();
+        } catch (dbError) {
+            console.log('🔍 Erro no banco de dados, usando configurações simuladas:', dbError.message);
+            
+            // Se falhar, usar configurações simuladas (modo desenvolvimento)
+            if (process.env.NODE_ENV === 'development') {
+                settings = {
+                    // Google Maps API
+                    googleMapsApiKey: '',
+                    googleMapsEnabled: false,
+                    
+                    // Asaas API
+                    asaasApiKey: '',
+                    asaasEnvironment: 'sandbox',
+                    asaasEnabled: false,
+                    
+                    // Lisa AI Assistant API
+                    lisaEnabled: false,
+                    lisaOpenAiApiKey: '',
+                    lisaGroqApiKey: '',
+                    lisaChainlitSecret: '',
+                    lisaLiteralApiKey: '',
+                    lisaPort: '8000',
+                    lisaMaxFileSize: 10,
+                    
+                    // Configurações de frete
+                    shippingEnabled: true,
+                    freeShippingMinValue: 50,
+                    baseShippingCost: 5,
+                    costPerKm: 2,
+                    
+                    // WhatsApp Business API
+                    whatsappEnabled: false,
+                    whatsappAccessToken: '',
+                    whatsappPhoneNumberId: '',
+                    whatsappWebhookVerifyToken: '',
+                    whatsappBusinessAccountId: '',
+                    
+                    // Telegram Bot API
+                    telegramEnabled: false,
+                    telegramBotToken: '',
+                    telegramWebhookUrl: '',
+                    telegramAllowedUsers: '',
+                    telegramAdminChatId: ''
+                };
+                console.log('🔍 Usando configurações simuladas para APIs');
+            } else {
+                throw dbError; // Re-throw se não estiver em desenvolvimento
+            }
+        }
         
         // Retornar configurações sem expor as chaves completas
         const apiSettings = {

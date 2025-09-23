@@ -30,7 +30,7 @@ const SuperAdminLogin = ({ url, setToken, setSuperAdmin }) => {
       if (response.data.success) {
         setToken(response.data.token);
         setSuperAdmin(true);
-        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('superAdminToken', response.data.token);
         localStorage.setItem('userRole', 'super_admin');
         toast.success(isRegister ? 'Super Admin criado com sucesso!' : 'Login realizado com sucesso!');
       } else {
