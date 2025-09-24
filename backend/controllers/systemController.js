@@ -796,6 +796,174 @@ const getLisaStatus = async (req, res) => {
     }
 };
 
+// Obter logs de auditoria para um usuário específico
+const getUserAuditLogs = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { page = 1, limit = 50, category, action, startDate, endDate } = req.query;
+        
+        // Importar modelo de auditoria
+        const AuditLog = (await import('../models/auditLogModel.js')).default;
+        
+        // Buscar logs do usuário
+        const options = {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            category,
+            action,
+            startDate,
+            endDate
+        };
+        
+        const logs = await AuditLog.find({ userId })
+            .populate('storeId', 'name slug')
+            .sort({ createdAt: -1 })
+            .limit(options.limit)
+            .skip((options.page - 1) * options.limit);
+        
+        const totalLogs = await AuditLog.countDocuments({ userId });
+        
+        res.json({
+            success: true,
+            logs,
+            pagination: {
+                currentPage: options.page,
+                totalPages: Math.ceil(totalLogs / options.limit),
+                totalLogs,
+                hasNext: options.page < Math.ceil(totalLogs / options.limit),
+                hasPrev: options.page > 1
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erro ao buscar logs de auditoria do usuário:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar logs de auditoria',
+            error: error.message
+        });
+    }
+};
+
+// Obter logs de auditoria por loja
+const getStoreAuditLogs = async (req, res) => {
+    try {
+        const { storeId } = req.params;
+        const { 
+            page = 1, 
+            limit = 50, 
+            category, 
+            action, 
+            userId, 
+            severity, 
+            startDate, 
+            endDate,
+            tags 
+        } = req.query;
+        
+        // Importar modelo de auditoria
+        const AuditLog = (await import('../models/auditLogModel.js')).default;
+        
+        const options = {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            category,
+            action,
+            userId,
+            severity,
+            startDate,
+            endDate,
+            tags: tags ? tags.split(',') : []
+        };
+        
+        const logs = await AuditLog.findByStore(storeId, options);
+        const totalLogs = await AuditLog.countDocuments({ storeId });
+        
+        res.json({
+            success: true,
+            logs,
+            pagination: {
+                currentPage: options.page,
+                totalPages: Math.ceil(totalLogs / options.limit),
+                totalLogs,
+                hasNext: options.page < Math.ceil(totalLogs / options.limit),
+                hasPrev: options.page > 1
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erro ao buscar logs de auditoria da loja:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar logs de auditoria',
+            error: error.message
+        });
+    }
+};
+
+// Obter estatísticas de auditoria
+const getAuditStats = async (req, res) => {
+    try {
+        const { storeId, days = 30 } = req.query;
+        
+        // Importar modelo de auditoria
+        const AuditLog = (await import('../models/auditLogModel.js')).default;
+        
+        let stats;
+        if (storeId) {
+            // Estatísticas por loja
+            stats = await AuditLog.getStats(storeId, parseInt(days));
+        } else {
+            // Estatísticas globais (apenas super admin)
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - parseInt(days));
+            
+            stats = await AuditLog.aggregate([
+                {
+                    $match: {
+                        createdAt: { $gte: startDate }
+                    }
+                },
+                {
+                    $group: {
+                        _id: {
+                            category: '$category',
+                            severity: '$severity'
+                        },
+                        count: { $sum: 1 }
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$_id.category',
+                        severityStats: {
+                            $push: {
+                                severity: '$_id.severity',
+                                count: '$count'
+                            }
+                        },
+                        totalCount: { $sum: '$count' }
+                    }
+                }
+            ]);
+        }
+        
+        res.json({
+            success: true,
+            stats,
+            period: `${days} dias`
+        });
+        
+    } catch (error) {
+        console.error('Erro ao buscar estatísticas de auditoria:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar estatísticas de auditoria',
+            error: error.message
+        });
+    }
+};
+
 // Obter atividades recentes do sistema
 const getRecentActivity = async (req, res) => {
     try {
@@ -879,5 +1047,8 @@ export {
     stopLisa,
     restartLisa,
     getLisaStatus,
-    getRecentActivity
+    getRecentActivity,
+    getUserAuditLogs,
+    getStoreAuditLogs,
+    getAuditStats
 };

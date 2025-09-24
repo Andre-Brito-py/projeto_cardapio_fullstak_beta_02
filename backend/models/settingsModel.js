@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
 const settingsSchema = new mongoose.Schema({
+    storeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Store',
+        required: true,
+        unique: true
+    },
     pixKey: {
         type: String,
         default: ""
@@ -65,6 +71,9 @@ const settingsSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
+// Índice para garantir performance nas consultas por loja
+settingsSchema.index({ storeId: 1 });
 
 const settingsModel = mongoose.model("settings", settingsSchema);
 

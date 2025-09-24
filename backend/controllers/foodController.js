@@ -129,7 +129,19 @@ const removeFood = async (req,res)=>{
         const query = req.store ? { _id: req.body.id, storeId: req.store._id } : { _id: req.body.id };
         const food = await foodModel.findOne(query);
         if (food) {
-            fs.unlink(`uploads/${food.image}`,()=>{})
+            // Remover arquivo de imagem com isolamento por loja
+            if (food.image) {
+                const storeId = food.storeId;
+                const imagePath = `uploads/stores/${storeId}/${food.image}`;
+                
+                fs.unlink(imagePath, (err) => {
+                    if (err) {
+                        // Tentar caminho antigo como fallback
+                        fs.unlink(`uploads/${food.image}`, () => {});
+                    }
+                });
+            }
+            
             await foodModel.findByIdAndDelete(req.body.id);
             res.json({success:true,message:'Food Removed'})
         } else {
@@ -205,9 +217,17 @@ const updateFood = async (req, res) => {
         
         // Update image if new file is uploaded
         if (req.file) {
-            // Remove old image
+            // Remove old image with store isolation
             if (food.image) {
-                fs.unlink(`uploads/${food.image}`, () => {});
+                const storeId = food.storeId;
+                const oldImagePath = `uploads/stores/${storeId}/${food.image}`;
+                
+                fs.unlink(oldImagePath, (err) => {
+                    if (err) {
+                        // Tentar caminho antigo como fallback
+                        fs.unlink(`uploads/${food.image}`, () => {});
+                    }
+                });
             }
             updateData.image = req.file.filename;
         } else {

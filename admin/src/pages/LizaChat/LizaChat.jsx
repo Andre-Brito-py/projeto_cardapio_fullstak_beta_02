@@ -18,11 +18,22 @@ const LizaChat = ({ url, token }) => {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "smooth",
+        block: "end",
+        inline: "nearest"
+      });
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Adicionar um pequeno delay para garantir que o DOM foi atualizado
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [messages]);
 
   // Função para buscar relatório diário

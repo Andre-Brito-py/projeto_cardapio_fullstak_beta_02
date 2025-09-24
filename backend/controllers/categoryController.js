@@ -4,28 +4,36 @@ import fs from 'fs';
 // Adicionar categoria
 const addCategory = async (req, res) => {
     try {
-        const { name, description } = req.body;
+        const { name, description, storeId } = req.body;
         const image_filename = req.file ? req.file.filename : null;
 
         if (!name) {
             return res.json({ success: false, message: "Nome da categoria é obrigatório" });
         }
 
+        if (!storeId) {
+            return res.json({ success: false, message: "storeId é obrigatório" });
+        }
+
         if (!image_filename) {
             return res.json({ success: false, message: "Imagem da categoria é obrigatória" });
         }
 
-        // Verificar se categoria já existe no MongoDB
-        const existingCategory = await categoryModel.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+        // Verificar se categoria já existe na loja específica
+        const existingCategory = await categoryModel.findOne({ 
+            name: { $regex: new RegExp(`^${name}$`, 'i') },
+            storeId 
+        });
         if (existingCategory) {
-            return res.json({ success: false, message: "Categoria já existe" });
+            return res.json({ success: false, message: "Categoria já existe nesta loja" });
         }
 
         const categoryData = {
             name: name,
             description: description || "",
             image: image_filename,
-            isActive: true
+            isActive: true,
+            storeId: storeId
         };
 
         const category = new categoryModel(categoryData);
@@ -40,7 +48,13 @@ const addCategory = async (req, res) => {
 // Listar todas as categorias
 const listCategory = async (req, res) => {
     try {
-        const categories = await categoryModel.find({});
+        const { storeId } = req.query;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "storeId é obrigatório" });
+        }
+        
+        const categories = await categoryModel.find({ storeId });
         res.json({ success: true, data: categories });
     } catch (error) {
         console.error('Erro ao listar categorias:', error);
@@ -51,7 +65,16 @@ const listCategory = async (req, res) => {
 // Listar apenas categorias ativas (para o frontend)
 const listActiveCategories = async (req, res) => {
     try {
-        const activeCategories = await categoryModel.find({ isActive: true });
+        const { storeId } = req.query;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "storeId é obrigatório" });
+        }
+        
+        const activeCategories = await categoryModel.find({ 
+            isActive: true, 
+            storeId 
+        });
         res.json({ success: true, data: activeCategories });
     } catch (error) {
         console.error('Erro ao listar categorias ativas:', error);
@@ -69,10 +92,23 @@ const removeCategory = async (req, res) => {
             return res.json({ success: false, message: "Categoria não encontrada" });
         }
         
-        // Remover arquivo de imagem
+        // Verificar se a categoria pertence à loja (se não for super admin)
+        if (req.storeId && req.user.role !== 'super_admin' && category.storeId.toString() !== req.storeId) {
+            return res.json({ success: false, message: "Acesso negado" });
+        }
+        
+        // Remover arquivo de imagem com isolamento por loja
         if (category.image) {
-            fs.unlink(`uploads/${category.image}`, (err) => {
-                if (err) console.error('Erro ao deletar imagem:', err);
+            const storeId = category.storeId;
+            const imagePath = `uploads/stores/${storeId}/${category.image}`;
+            
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    // Tentar caminho antigo como fallback
+                    fs.unlink(`uploads/${category.image}`, (fallbackErr) => {
+                        if (fallbackErr) console.error('Erro ao deletar imagem:', fallbackErr);
+                    });
+                }
             });
         }
 
@@ -97,14 +133,15 @@ const updateCategory = async (req, res) => {
             return res.json({ success: false, message: "Categoria não encontrada" });
         }
         
-        // Verificar se novo nome já existe em outra categoria
+        // Verificar se novo nome já existe em outra categoria da mesma loja
         if (name && name !== category.name) {
             const existingCategory = await categoryModel.findOne({ 
                 name: { $regex: new RegExp(`^${name}$`, 'i') },
+                storeId: category.storeId,
                 _id: { $ne: categoryId }
             });
             if (existingCategory) {
-                return res.json({ success: false, message: "Nome da categoria já existe" });
+                return res.json({ success: false, message: "Nome da categoria já existe nesta loja" });
             }
         }
 
@@ -116,10 +153,18 @@ const updateCategory = async (req, res) => {
         
         // Atualizar imagem se fornecida
         if (image_filename) {
-            // Remover imagem antiga
+            // Remover imagem antiga com isolamento por loja
             if (category.image) {
-                fs.unlink(`uploads/${category.image}`, (err) => {
-                    if (err) console.error('Erro ao deletar imagem antiga:', err);
+                const storeId = category.storeId;
+                const oldImagePath = `uploads/stores/${storeId}/${category.image}`;
+                
+                fs.unlink(oldImagePath, (err) => {
+                    if (err) {
+                        // Tentar caminho antigo como fallback
+                        fs.unlink(`uploads/${category.image}`, (fallbackErr) => {
+                            if (fallbackErr) console.error('Erro ao deletar imagem antiga:', fallbackErr);
+                        });
+                    }
                 });
             }
             updateData.image = image_filename;

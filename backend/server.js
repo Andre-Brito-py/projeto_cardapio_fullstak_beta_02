@@ -5,6 +5,7 @@ import 'dotenv/config';
 // Importações principais
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { connectDB } from './config/db.js';
 
 // Importações das rotas
@@ -48,6 +49,7 @@ import dailyReportScheduler from './services/dailyReportScheduler.js';
 import telegramCampaignScheduler from './services/telegramCampaignScheduler.js';
 import { identifyStore, validateStoreActive, logStoreContext } from './middleware/storeContext.js';
 import { simulateAuth, simulateDatabase } from './middleware/simulationMode.js';
+import { auditMiddleware } from './middleware/auditLogger.js';
 
 // Configuração da aplicação
 const app = express();
@@ -55,6 +57,9 @@ const port = process.env.PORT || 4001;
 
 // Configuração de middlewares
 app.use(express.json()); // Parser para JSON
+
+// Middleware de auditoria (aplicado globalmente)
+app.use(auditMiddleware);
 
 // Configuração específica de CORS para permitir requisições do admin
 app.use(cors({
@@ -65,14 +70,14 @@ app.use(cors({
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Store-ID']
 }));
 
-// Middleware de simulação habilitado para desenvolvimento
-if (process.env.NODE_ENV === 'development') {
-    app.use(simulateAuth);
-    app.use(simulateDatabase);
-}
+// Middleware de simulação (temporariamente desabilitado para debug)
+// if (process.env.NODE_ENV === 'development') {
+//     app.use(simulateAuth);
+//     app.use(simulateDatabase);
+// }
 
 // Middleware de contexto de loja removido da aplicação global
 // Será aplicado apenas nas rotas específicas que precisam
@@ -113,7 +118,20 @@ app.use('/api/reports', reportRouter); // Rotas para relatórios diários
 
 // Rotas existentes (mantidas para compatibilidade)
 app.use('/api/food', foodRouter); // Rotas para gerenciamento de comidas
-app.use('/images', express.static('uploads')); // Servir imagens estáticas
+
+// Servir imagens estáticas com isolamento por loja
+app.use('/images', (req, res, next) => {
+    // Extrair storeId da URL ou headers
+    const storeId = req.headers['x-store-id'] || req.query.storeId;
+    
+    if (storeId) {
+        // Servir arquivos do diretório específico da loja
+        express.static(path.join('uploads', 'stores', storeId))(req, res, next);
+    } else {
+        // Fallback para o diretório geral (compatibilidade)
+        express.static('uploads')(req, res, next);
+    }
+});
 app.use('/api/user', userRouter); // Rotas para autenticação e usuários
 app.use('/api/cart', cartRouter); // Rotas para carrinho de compras
 app.use('/api/order', orderRouter); // Rotas para pedidos

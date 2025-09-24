@@ -1,28 +1,31 @@
 import express from 'express';
-import {
-    getSystemSettings,
-    updateSystemSettings,
-    getSystemStats,
-    getAllStores,
-    updateStoreStatus,
-    updateStore,
-    createSuperAdmin,
-    loginSuperAdmin,
-    getPublicStores,
-    checkSuperAdmin,
-    resetSuperAdminPassword,
-    deleteStore,
-    getAllUsers,
-    createUser,
-    updateUser,
-    deleteUser,
-    updateUserStatus,
-    resetUserPassword,
-    startLisa,
-    stopLisa,
-    restartLisa,
-    getLisaStatus,
-    getRecentActivity
+import { 
+    getSystemSettings, 
+    updateSystemSettings, 
+    getSystemStats, 
+    getAllStores, 
+    updateStoreStatus, 
+    updateStore, 
+    createSuperAdmin, 
+    loginSuperAdmin, 
+    getPublicStores, 
+    checkSuperAdmin, 
+    resetSuperAdminPassword, 
+    deleteStore, 
+    getAllUsers, 
+    createUser, 
+    updateUser, 
+    deleteUser, 
+    updateUserStatus, 
+    resetUserPassword, 
+    startLisa, 
+    stopLisa, 
+    restartLisa, 
+    getLisaStatus, 
+    getRecentActivity,
+    getUserAuditLogs,
+    getStoreAuditLogs,
+    getAuditStats
 } from '../controllers/systemController.js';
 import {
     createStore,
@@ -141,5 +144,10 @@ systemRouter.get('/lisa/status', getLisaStatus);
 
 // Atividades recentes
 systemRouter.get('/recent-activity', getRecentActivity);
+
+// Rotas de auditoria
+systemRouter.get('/users/:userId/audit', getUserAuditLogs);
+systemRouter.get('/stores/:storeId/audit', getStoreAuditLogs);
+systemRouter.get('/audit/stats', getAuditStats);
 
 export default systemRouter;

@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 
 const couponSchema = new mongoose.Schema({
+    storeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Store',
+        required: true
+    },
     code: {
         type: String,
         required: true,
-        unique: true,
         uppercase: true,
         trim: true,
         minlength: 3,
@@ -67,11 +71,7 @@ const couponSchema = new mongoose.Schema({
     applicableCategories: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
-    }], // Se vazio, aplica a todas as categorias
-    applicableStores: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Store'
-    }], // Se vazio, aplica a todas as lojas
+    }], // Se vazio, aplica a todas as categorias da loja
     excludedItems: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Food'
@@ -102,8 +102,8 @@ couponSchema.pre('save', function(next) {
 });
 
 // Índices para melhor performance
-couponSchema.index({ code: 1 });
-couponSchema.index({ isActive: 1, validFrom: 1, validUntil: 1 });
+couponSchema.index({ storeId: 1, code: 1 }, { unique: true }); // Código único por loja
+couponSchema.index({ storeId: 1, isActive: 1, validFrom: 1, validUntil: 1 });
 couponSchema.index({ createdBy: 1 });
 
 // Método para verificar se o cupom está válido

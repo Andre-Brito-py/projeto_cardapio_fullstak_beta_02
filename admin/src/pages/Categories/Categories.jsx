@@ -16,7 +16,8 @@ const Categories = ({ url }) => {
 
     const fetchCategories = async () => {
         try {
-            const response = await axios.get(`${url}/api/category/list`);
+            const storeId = localStorage.getItem('storeId');
+            const response = await axios.get(`${url}/api/category/list?storeId=${storeId}`);
             if (response.data.success) {
                 setCategories(response.data.data);
             } else {

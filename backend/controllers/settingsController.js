@@ -1,13 +1,24 @@
 import settingsModel from '../models/settingsModel.js';
+import Store from '../models/storeModel.js';
 
 // Get PIX key
 const getPixKey = async (req, res) => {
     try {
-        let settings = await settingsModel.findOne();
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({
+                success: false,
+                message: 'ID da loja é obrigatório'
+            });
+        }
+
+        let settings = await settingsModel.findOne({ storeId });
         
         if (!settings) {
-            // Create default settings if none exist
+            // Create default settings if none exist for this store
             settings = new settingsModel({
+                storeId,
                 pixKey: ''
             });
             await settings.save();
@@ -30,12 +41,21 @@ const getPixKey = async (req, res) => {
 const updatePixKey = async (req, res) => {
     try {
         const { pixKey } = req.body;
+        const storeId = req.store?._id || req.user?.storeId;
         
-        let settings = await settingsModel.findOne();
+        if (!storeId) {
+            return res.json({
+                success: false,
+                message: 'ID da loja é obrigatório'
+            });
+        }
+        
+        let settings = await settingsModel.findOne({ storeId });
         
         if (!settings) {
-            // Create new settings if none exist
+            // Create new settings if none exist for this store
             settings = new settingsModel({
+                storeId,
                 pixKey: pixKey
             });
         } else {
@@ -63,11 +83,21 @@ const updatePixKey = async (req, res) => {
 // Get all settings
 const getSettings = async (req, res) => {
     try {
-        let settings = await settingsModel.findOne();
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({
+                success: false,
+                message: 'ID da loja é obrigatório'
+            });
+        }
+
+        let settings = await settingsModel.findOne({ storeId });
         
         if (!settings) {
-            // Create default settings if none exist
+            // Create default settings if none exist for this store
             settings = new settingsModel({
+                storeId,
                 pixKey: ''
             });
             await settings.save();
@@ -92,14 +122,22 @@ const getSettings = async (req, res) => {
 const updateBanner = async (req, res) => {
     try {
         const { title, description, image } = req.body;
+        const storeId = req.store?._id || req.user?.storeId;
         
-        let settings = await settingsModel.findOne();
+        if (!storeId) {
+            return res.json({
+                success: false,
+                message: 'ID da loja é obrigatório'
+            });
+        }
+        
+        let settings = await settingsModel.findOne({ storeId });
         
         if (!settings) {
-            // Create new settings if none exist
+            // Create new settings if none exist for this store
             settings = new settingsModel({
+                storeId,
                 pixKey: '',
-                deliveryFee: 2,
                 banner: {
                     title: title || "Peça sua comida favorita aqui",
                     description: description || "Nosso aplicativo de entrega de comida traz refeições deliciosas diretamente à sua porta.",
@@ -136,10 +174,19 @@ const updateBanner = async (req, res) => {
 // Get banner settings
 const getBanner = async (req, res) => {
     try {
-        let settings = await settingsModel.findOne();
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({
+                success: false,
+                message: 'ID da loja é obrigatório'
+            });
+        }
+
+        let settings = await settingsModel.findOne({ storeId });
         
         if (!settings || !settings.banner) {
-            // Return null if no banner is configured
+            // Return null if no banner is configured for this store
             res.json({
                 success: false,
                 message: "Nenhum banner principal configurado",

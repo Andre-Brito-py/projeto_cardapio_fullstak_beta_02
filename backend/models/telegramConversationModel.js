@@ -1,6 +1,13 @@
 import mongoose from 'mongoose';
 
 const telegramConversationSchema = new mongoose.Schema({
+    // Identificação da loja
+    storeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Store',
+        required: true
+    },
+    
     // Identificação da conversa
     telegramId: {
         type: String,
@@ -108,16 +115,16 @@ const telegramConversationSchema = new mongoose.Schema({
 });
 
 // Índices para otimização
-telegramConversationSchema.index({ telegramId: 1, createdAt: -1 });
-telegramConversationSchema.index({ clientId: 1, createdAt: -1 });
-telegramConversationSchema.index({ messageType: 1 });
-telegramConversationSchema.index({ createdAt: -1 });
-telegramConversationSchema.index({ isCommand: 1 });
-telegramConversationSchema.index({ isBroadcast: 1 });
+telegramConversationSchema.index({ storeId: 1, telegramId: 1, createdAt: -1 });
+telegramConversationSchema.index({ storeId: 1, clientId: 1, createdAt: -1 });
+telegramConversationSchema.index({ storeId: 1, messageType: 1 });
+telegramConversationSchema.index({ storeId: 1, createdAt: -1 });
+telegramConversationSchema.index({ storeId: 1, isCommand: 1 });
+telegramConversationSchema.index({ storeId: 1, isBroadcast: 1 });
 
 // Método estático para obter histórico de conversa
-telegramConversationSchema.statics.getConversationHistory = function(telegramId, limit = 50) {
-    return this.find({ telegramId })
+telegramConversationSchema.statics.getConversationHistory = function(storeId, telegramId, limit = 50) {
+    return this.find({ storeId, telegramId })
         .populate('clientId', 'firstName lastName username')
         .sort({ createdAt: -1 })
         .limit(limit)
@@ -125,8 +132,9 @@ telegramConversationSchema.statics.getConversationHistory = function(telegramId,
 };
 
 // Método estático para obter contexto da IA
-telegramConversationSchema.statics.getAIContext = function(telegramId, limit = 10) {
+telegramConversationSchema.statics.getAIContext = function(storeId, telegramId, limit = 10) {
     return this.find({ 
+        storeId,
         telegramId, 
         messageType: { $in: ['user', 'bot'] },
         context: { $ne: '' }
@@ -138,8 +146,8 @@ telegramConversationSchema.statics.getAIContext = function(telegramId, limit = 1
 };
 
 // Método estático para estatísticas
-telegramConversationSchema.statics.getStats = function(startDate, endDate) {
-    const matchStage = {};
+telegramConversationSchema.statics.getStats = function(storeId, startDate, endDate) {
+    const matchStage = { storeId };
     if (startDate && endDate) {
         matchStage.createdAt = { $gte: startDate, $lte: endDate };
     }

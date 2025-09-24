@@ -78,7 +78,15 @@ const removeBanner = async (req, res) => {
 
         // Remover arquivo de imagem (exceto se for o banner padrão principal)
         if (banner.image !== 'banner_principal.png') {
-            fs.unlink(`uploads/${banner.image}`, () => {});
+            const storeId = banner.storeId;
+            const imagePath = `uploads/stores/${storeId}/${banner.image}`;
+            
+            fs.unlink(imagePath, (err) => {
+                if (err) {
+                    // Tentar caminho antigo como fallback
+                    fs.unlink(`uploads/${banner.image}`, () => {});
+                }
+            });
         }
 
         await bannerModel.findByIdAndDelete(req.body.id);
