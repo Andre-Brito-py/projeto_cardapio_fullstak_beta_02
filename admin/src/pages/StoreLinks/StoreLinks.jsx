@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './StoreLinks.css';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { FRONTEND_URL } from '../../config/urls';
+import { FRONTEND_URL, BACKEND_URL } from '../../config/urls';
 
-const StoreLinks = ({ url }) => {
+const StoreLinks = () => {
   const [storeData, setStoreData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generatedLink, setGeneratedLink] = useState('');
@@ -20,6 +20,16 @@ const StoreLinks = ({ url }) => {
       setLoading(true);
       const token = localStorage.getItem('token');
       const storeId = localStorage.getItem('storeId');
+      const userRole = localStorage.getItem('userRole');
+      
+      // Se for super admin, não tentar buscar dados da loja
+      if (userRole === 'super_admin') {
+        toast.info('Super Admin não possui loja associada. Funcionalidade de links não disponível.');
+        setStoreData(null);
+        setGeneratedLink('');
+        setQrCodeUrl('');
+        return;
+      }
       
       const headers = {
         'Authorization': `Bearer ${token}`,
@@ -31,7 +41,7 @@ const StoreLinks = ({ url }) => {
         headers['X-Store-ID'] = storeId;
       }
       
-      const response = await fetch(`${url}/api/store/current`, {
+      const response = await fetch(`${BACKEND_URL}/api/store/current`, {
         headers: headers
       });
       const data = await response.json();
@@ -41,12 +51,29 @@ const StoreLinks = ({ url }) => {
         // Gerar o link automaticamente quando os dados da loja são carregados
         generateStoreLink(data.store);
       } else {
+        // Verificar se é resposta específica de super admin
+        if (data.userRole === 'super_admin') {
+          toast.info('Super Admin não possui loja associada. Funcionalidade de links não disponível.');
+          setStoreData(null);
+          setGeneratedLink('');
+          setQrCodeUrl('');
+          return;
+        }
+        
         console.error('Erro ao buscar dados da loja:', data.message);
         toast.error(data.message || 'Erro ao carregar dados da loja');
+        // Limpar dados em caso de erro
+        setStoreData(null);
+        setGeneratedLink('');
+        setQrCodeUrl('');
       }
     } catch (error) {
       console.error('Erro ao buscar dados da loja:', error);
       toast.error('Erro ao carregar dados da loja');
+      // Limpar dados em caso de erro
+      setStoreData(null);
+      setGeneratedLink('');
+      setQrCodeUrl('');
     } finally {
       setLoading(false);
     }
@@ -61,6 +88,12 @@ const StoreLinks = ({ url }) => {
       // Gerar QR Code usando uma API gratuita
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
       setQrCodeUrl(qrUrl);
+    } else {
+      // Caso o slug não esteja disponível, mostrar mensagem de erro
+      console.error('Erro: Slug da loja não encontrado', store);
+      toast.error('Não foi possível gerar o link da loja. Slug não encontrado.');
+      setGeneratedLink('');
+      setQrCodeUrl('');
     }
   };
 
@@ -98,10 +131,13 @@ const StoreLinks = ({ url }) => {
     );
   }
 
-  if (!storeData) {
+  if (!storeData || !generatedLink) {
     return (
       <div className="store-links-error">
-        <p>Erro ao carregar dados da loja</p>
+        <p>Erro ao carregar dados da loja ou gerar link</p>
+        <button onClick={fetchStoreData} className="retry-btn">
+          Tentar novamente
+        </button>
       </div>
     );
   }

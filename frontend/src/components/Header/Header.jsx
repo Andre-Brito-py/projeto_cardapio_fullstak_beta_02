@@ -13,18 +13,24 @@ const Header = () => {
 
   const fetchBanners = async () => {
     try {
-      const headers = {};
+      // Se há um storeId definido, busca banners específicos da loja
       if (storeId) {
-        headers['X-Store-ID'] = storeId;
+        console.log('Buscando banners para storeId:', storeId);
+        const headers = {
+          'X-Store-ID': storeId
+        };
+        
+        const response = await axios.get(`${url}/api/banner/list`, { headers });
+        if (response.data.success && response.data.data.length > 0) {
+          console.log('Banners encontrados:', response.data.data.length);
+          setBanners(response.data.data);
+          return;
+        }
       }
       
-      const response = await axios.get(`${url}/api/banner/list`, { headers });
-      if (response.data.success && response.data.data.length > 0) {
-        setBanners(response.data.data);
-      } else {
-        // Se não há banners cadastrados, busca o banner principal das configurações
-        await fetchMainBanner();
-      }
+      // Se não há storeId ou não há banners cadastrados, busca o banner principal das configurações
+      console.log('Buscando banner principal das configurações...');
+      await fetchMainBanner();
     } catch (error) {
       console.error('Erro ao buscar banners:', error);
       // Em caso de erro, tenta buscar banner principal

@@ -187,15 +187,30 @@ const Add = ({url}) => {
         // Include addon system data
         if (useOldSystem) {
             formData.append('extras', JSON.stringify(extras))
-            formData.append('useNewSystem', false)
+            formData.append('useOldSystem', 'true')
         } else {
-            // New inline system
-            const addonData = {
-                categories: addonCategories,
-                addons: categoryAddons
-            };
-            formData.append('addonData', JSON.stringify(addonData))
-            formData.append('useNewSystem', true)
+            // New inline system - convert to backend expected format
+            const inlineAddonCategories = addonCategories.map(cat => ({
+                name: cat.name,
+                description: cat.description,
+                maxSelection: cat.maxSelection,
+                isRequired: cat.isRequired
+            }));
+            
+            // Convert categoryAddons from ID-based to name-based
+            const categoryAddonsForBackend = {};
+            addonCategories.forEach(category => {
+                const addons = categoryAddons[category.id] || [];
+                categoryAddonsForBackend[category.name] = addons.map(addon => ({
+                    name: addon.name,
+                    price: addon.price,
+                    description: addon.description
+                }));
+            });
+            
+            formData.append('addonCategories', JSON.stringify(inlineAddonCategories))
+            formData.append('categoryAddons', JSON.stringify(categoryAddonsForBackend))
+            formData.append('useOldSystem', 'false')
         }
         
         try {

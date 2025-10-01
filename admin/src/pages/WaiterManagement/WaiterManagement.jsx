@@ -17,8 +17,16 @@ const WaiterManagement = ({ url }) => {
   const fetchStoreData = async () => {
     try {
       const token = localStorage.getItem('token');
+      const userRole = localStorage.getItem('userRole');
+      
       if (!token) {
         throw new Error('Token não encontrado');
+      }
+      
+      // Se for super admin, não tentar buscar dados da loja
+      if (userRole === 'super_admin') {
+        toast.info('Super Admin não possui loja associada. Funcionalidade de garçom não disponível.');
+        return;
       }
       
       const response = await axios.get(`${url}/api/store/current`, {
@@ -29,10 +37,22 @@ const WaiterManagement = ({ url }) => {
         setStoreData(response.data.store);
         await generateWaiterLink(response.data.store._id, response.data.store.slug);
       } else {
+        // Verificar se é resposta específica de super admin
+        if (response.data.userRole === 'super_admin') {
+          toast.info('Super Admin não possui loja associada. Funcionalidade de garçom não disponível.');
+          return;
+        }
         throw new Error(response.data.message || 'Erro ao buscar dados da loja');
       }
     } catch (error) {
       console.error('Erro ao buscar dados da loja:', error);
+      
+      // Verificar se é erro específico de super admin
+      if (error.response?.data?.userRole === 'super_admin') {
+        toast.info('Super Admin não possui loja associada. Funcionalidade de garçom não disponível.');
+        return;
+      }
+      
       // Não definir erro aqui para não bloquear a interface
       toast.error('Erro ao carregar dados da loja');
     }

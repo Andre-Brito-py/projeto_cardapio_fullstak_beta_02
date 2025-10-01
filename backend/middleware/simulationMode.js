@@ -124,60 +124,11 @@ export const simulateAuth = (req, res, next) => {
         return;
     }
 
-    // Simular atualização de loja do sistema (Super Admin)
-    if (req.path.startsWith('/api/system/stores/') && req.method === 'PUT') {
-        console.log('🎯 INTERCEPTANDO ATUALIZAÇÃO DE LOJA - Path:', req.path);
-        console.log('📝 Dados recebidos:', JSON.stringify(req.body, null, 2));
-        console.log('🔍 DEBUG - req.method:', req.method, 'req.path:', req.path);
-        console.log('🔍 DEBUG - Condição atendida:', req.path.startsWith('/api/system/stores/'), req.method === 'PUT');
-        
-        const storeId = req.path.split('/').pop();
-        const updateData = req.body;
-        
-        // Simular loja atualizada com os dados recebidos
-        const updatedStore = {
-            _id: storeId,
-            name: updateData.name || 'Loja Demo Atualizada',
-            slug: updateData.slug || 'loja-demo-atualizada',
-            status: updateData.status || 'active',
-            description: updateData.description || 'Descrição atualizada',
-            restaurantAddress: updateData.restaurantAddress || 'Endereço do restaurante atualizado',
-            settings: {
-                address: {
-                    street: updateData.street || 'Rua atualizada',
-                    number: updateData.number || '123',
-                    complement: updateData.complement || '',
-                    neighborhood: updateData.neighborhood || 'Bairro atualizado',
-                    city: updateData.city || 'Cidade atualizada',
-                    state: updateData.state || 'Estado atualizado',
-                    zipCode: updateData.zipCode || '00000-000'
-                },
-                language: updateData.language || 'pt-BR',
-                currency: updateData.currency || 'BRL',
-                timezone: updateData.timezone || 'America/Sao_Paulo'
-            },
-            telegram: {
-                chatId: updateData.telegramChatId || '',
-                phoneNumber: updateData.telegramPhoneNumber || '',
-                isActive: updateData.telegramIsActive || false
-            },
-            owner: {
-                _id: 'owner' + storeId,
-                name: updateData.ownerName || 'Proprietário Atualizado',
-                email: updateData.ownerEmail || 'proprietario@loja.com'
-            },
-            subscriptionPlan: updateData.subscriptionPlan || 'Básico',
-            updatedAt: new Date()
-        };
-        
-        console.log('✅ SUCESSO - Loja atualizada no modo simulação');
-        
-        return res.status(200).json({
-            success: true,
-            message: 'Loja atualizada com sucesso!',
-            data: updatedStore
-        });
-    }
+    // DESABILITADO: Interceptação genérica de PUT /api/system/stores
+    // Agora usamos bypasses específicos no systemRoute.js
+    // if (req.path.startsWith('/api/system/stores/') && req.method === 'PUT') {
+    //     // Código comentado para permitir que os bypasses específicos funcionem
+    // }
 
     // Simular teste do Telegram PRIMEIRO (antes de qualquer autenticação)
     if (req.path === '/api/system/api/test-telegram' && req.method === 'POST') {
@@ -594,9 +545,9 @@ export const simulateAuth = (req, res, next) => {
     // Simular categorias ativas
     if (req.path === '/api/category/active' && req.method === 'GET') {
         const mockCategories = [
-            { _id: '1', name: 'Categoria 1', active: true },
-            { _id: '2', name: 'Categoria 2', active: true },
-            { _id: '3', name: 'Categoria 3', active: true }
+            { _id: '1', name: 'Bolos', image: 'bolos.png', active: true },
+            { _id: '2', name: 'Massas', image: 'massas.png', active: true },
+            { _id: '3', name: 'Sobremesas', image: 'sobremesas.png', active: true }
         ];
         
         return res.json({
@@ -608,9 +559,9 @@ export const simulateAuth = (req, res, next) => {
     // Simular todas as categorias
     if (req.path === '/api/category/list' && req.method === 'GET') {
         const mockCategories = [
-            { _id: '1', name: 'Categoria 1', active: true },
-            { _id: '2', name: 'Categoria 2', active: true },
-            { _id: '3', name: 'Categoria 3', active: true }
+            { _id: '1', name: 'Bolos', image: 'bolos.png', active: true },
+            { _id: '2', name: 'Massas', image: 'massas.png', active: true },
+            { _id: '3', name: 'Sobremesas', image: 'sobremesas.png', active: true }
         ];
         
         return res.json({

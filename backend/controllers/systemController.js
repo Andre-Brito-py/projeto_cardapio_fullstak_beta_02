@@ -214,21 +214,37 @@ const createSuperAdmin = async (req, res) => {
 // Login do super admin
 const loginSuperAdmin = async (req, res) => {
     try {
+        console.log('🔍 Login Super Admin - Dados recebidos:', req.body);
         const { email, password } = req.body;
         
+        console.log('📧 Procurando usuário com email:', email);
         const user = await userModel.findOne({ email, role: 'super_admin' });
+        console.log('👤 Usuário encontrado:', user ? 'SIM' : 'NÃO');
+        
         if (!user) {
+            console.log('❌ Usuário não encontrado');
             return res.json({ success: false, message: "Credenciais inválidas" });
         }
+        
+        console.log('🔐 Comparando senha...');
+        console.log('Senha fornecida:', password);
+        console.log('Hash no banco:', user.password);
         
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log('🔍 Resultado da comparação:', isMatch);
+        
         if (!isMatch) {
+            console.log('❌ Senha não confere');
             return res.json({ success: false, message: "Credenciais inválidas" });
         }
         
+        console.log('✅ Verificando se usuário está ativo:', user.isActive);
         if (!user.isActive) {
+            console.log('❌ Usuário inativo');
             return res.json({ success: false, message: "Conta desativada" });
         }
+        
+        console.log('✅ Login bem-sucedido, gerando token...');
         
         // Atualizar último login
         user.lastLogin = new Date();
@@ -239,6 +255,8 @@ const loginSuperAdmin = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
+        
+        console.log('🎉 Token gerado com sucesso');
         
         res.json({
             success: true,
@@ -251,7 +269,7 @@ const loginSuperAdmin = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Erro no login do super admin:', error);
+        console.error('💥 Erro no login do super admin:', error);
         res.json({ success: false, message: "Erro no login" });
     }
 };

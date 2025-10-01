@@ -36,11 +36,13 @@ storeRouter.use(identifyStore);
 // Middleware de autenticação para todas as rotas abaixo
 storeRouter.use(authMultiTenant);
 storeRouter.use(requireStoreAdmin);
+
+// Rota especial para obter loja atual (sem requireActiveStore para super admins)
+storeRouter.get('/current', getStore); // Nova rota para obter loja atual
+
+// Aplicar middlewares restritivos para outras rotas
 storeRouter.use(requireActiveStore);
 storeRouter.use(addStoreContext);
-
-// Rotas da loja
-storeRouter.get('/current', getStore); // Nova rota para obter loja atual
 storeRouter.get('/:storeId', getStore);
 storeRouter.put('/:storeId/settings', updateStoreSettings);
 storeRouter.put('/status', updateStoreStatus); // Nova rota para atualizar status aberta/fechada

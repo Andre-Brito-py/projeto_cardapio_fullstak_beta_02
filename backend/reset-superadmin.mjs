@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import userModel from './models/userModel.js';
 import bcrypt from 'bcrypt';
 
-mongoose.connect('mongodb://admin:admin123@localhost:27017/food-delivery-multitenant?authSource=admin')
+mongoose.connect('mongodb://localhost:27017/mern-food-delivery-app')
   .then(async () => {
     console.log('Conectado ao MongoDB');
     

@@ -65,14 +65,14 @@ app.use(cors({
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Store-ID']
 }));
 
-// Middleware de simulação habilitado para desenvolvimento
-if (process.env.NODE_ENV === 'development') {
-    app.use(simulateAuth);
-    app.use(simulateDatabase);
-}
+// Middleware de simulação removido para permitir operações reais do super admin
+// if (process.env.NODE_ENV === 'development') {
+//     app.use(simulateAuth);
+//     app.use(simulateDatabase);
+// }
 
 // Middleware de contexto de loja removido da aplicação global
 // Será aplicado apenas nas rotas específicas que precisam

@@ -209,6 +209,22 @@
   color: #dc3545;
 }
 
+.retry-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.retry-btn:hover {
+  background: #0056b3;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .store-links {

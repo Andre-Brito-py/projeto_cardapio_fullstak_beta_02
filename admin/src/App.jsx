@@ -154,7 +154,7 @@ const App = () => {
           <Route path='/super-admin/users' element={<UserManagement url={url} token={token}/>} />
           <Route path='/super-admin/logs' element={<SystemLogs url={url} token={token}/>} />
           <Route path='/super-admin/asaas' element={<AsaasDashboard url={url} token={token}/>} />
-          <Route path='/store-links' element={<StoreLinks url={url} token={token}/>} />
+          <Route path='/store-links' element={<StoreLinks token={token}/>} />
           
           {/* Rotas normais do admin */}
           <Route path='/add' element={<Add url={url} />} />

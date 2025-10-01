@@ -6,7 +6,13 @@ import ProductSuggestion from '../models/productSuggestionModel.js'
 // Função para popular produtos iniciais se não existirem
 const populateInitialFoods = async () => {
     try {
-        const existingFoods = await foodModel.find({});
+        // Verificar apenas produtos sem storeId (produtos globais)
+        const existingFoods = await foodModel.find({
+            $or: [
+                { storeId: { $exists: false } },
+                { storeId: null }
+            ]
+        });
         
         if (existingFoods.length === 0) {
             const initialFoods = [
@@ -16,7 +22,8 @@ const populateInitialFoods = async () => {
                     price: 25.99,
                     image: 'pizza.jpg',
                     category: 'Pizza',
-                    extras: []
+                    extras: [],
+                    storeId: null
                 },
                 {
                     name: 'Hambúrguer Clássico',
@@ -24,7 +31,8 @@ const populateInitialFoods = async () => {
                     price: 18.50,
                     image: 'burger.jpg',
                     category: 'Burger',
-                    extras: []
+                    extras: [],
+                    storeId: null
                 },
                 {
                     name: 'Salada Caesar',
@@ -32,7 +40,8 @@ const populateInitialFoods = async () => {
                     price: 15.00,
                     image: 'salad.jpg',
                     category: 'Salad',
-                    extras: []
+                    extras: [],
+                    storeId: null
                 }
             ];
             
@@ -44,7 +53,7 @@ const populateInitialFoods = async () => {
 };
 
 // Chamar a função de população
-populateInitialFoods();
+// populateInitialFoods(); // Comentado para evitar execução automática
 
 //add food item
 
@@ -111,8 +120,16 @@ const addFood = async (req,res) =>{
 
 const listFood = async (req,res) =>{
     try {
-        // Se há contexto de loja, filtrar por loja, senão listar todos
-        const query = req.store ? { storeId: req.store._id, isActive: true } : { isActive: true };
+        // Se há contexto de loja, filtrar por loja, senão listar todos (incluindo produtos sem storeId)
+        const query = req.store 
+            ? { storeId: req.store._id, isActive: true } 
+            : { 
+                $or: [
+                    { storeId: { $exists: false } },
+                    { storeId: null }
+                ],
+                isActive: true 
+            };
         const foods = await foodModel.find(query).populate('storeId', 'name slug');
         res.json({success:true,data:foods})
     } catch (error) {
@@ -286,20 +303,32 @@ const getFoodWithAddonsAndSuggestions = async (req, res) => {
 // Listar produtos com informações básicas de adicionais (para listagem)
 const listFoodWithAddonInfo = async (req, res) => {
     try {
-        const query = req.store ? { storeId: req.store._id, isActive: true } : { isActive: true };
+        const query = req.store 
+            ? { storeId: req.store._id, isActive: true } 
+            : { 
+                $or: [
+                    { storeId: { $exists: false } },
+                    { storeId: null }
+                ],
+                isActive: true 
+            };
         const foods = await foodModel.find(query)
             .populate('storeId', 'name slug')
-            .populate('addonCategories', 'name')
             .sort({ createdAt: -1 });
 
         // Adicionar contagem de sugestões para cada produto
         const foodsWithSuggestionCount = await Promise.all(
             foods.map(async (food) => {
-                const suggestionCount = await ProductSuggestion.countDocuments({
-                    productId: food._id,
-                    storeId: food.storeId,
-                    isActive: true
-                });
+                let suggestionCount = 0;
+                
+                // Só buscar sugestões se o produto tiver storeId
+                if (food.storeId) {
+                    suggestionCount = await ProductSuggestion.countDocuments({
+                        productId: food._id,
+                        storeId: food.storeId,
+                        isActive: true
+                    });
+                }
 
                 return {
                     ...food.toObject(),
