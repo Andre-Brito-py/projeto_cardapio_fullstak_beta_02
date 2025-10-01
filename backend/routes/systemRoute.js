@@ -23,7 +23,10 @@ import {
     stopLisa,
     restartLisa,
     getLisaStatus,
-    getPublicStores
+    getPublicStores,
+    getUserAuditLogs,
+    getStoreAuditLogs,
+    getAuditStats
 } from '../controllers/systemController.js';
 
 import { createStore, updateSubscription } from '../controllers/storeController.js';
@@ -74,5 +77,10 @@ systemRouter.get('/lisa/status', getLisaStatus);
 
 // Atividades recentes
 systemRouter.get('/recent-activity', getRecentActivity);
+
+// Rotas de auditoria
+systemRouter.get('/users/:userId/audit', getUserAuditLogs);
+systemRouter.get('/stores/:storeId/audit', getStoreAuditLogs);
+systemRouter.get('/audit/stats', getAuditStats);
 
 export default systemRouter;

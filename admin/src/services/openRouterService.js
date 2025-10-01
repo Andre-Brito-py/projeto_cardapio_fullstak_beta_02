@@ -2,15 +2,18 @@
 class OpenRouterService {
   constructor() {
     this.baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
-    this.model = 'mistralai/mistral-7b-instruct'; // Modelo padrão
+    this.model = 'meta-llama/llama-3.2-3b-instruct:free'; // Modelo gratuito do OpenRouter
     this.apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
   }
 
   // Verificar se a API Key está configurada
   checkApiKey() {
-    if (!this.apiKey) {
-      console.error('OPENROUTER_API_KEY não está configurada');
-      return false;
+    console.log('Verificando API Key:', this.apiKey ? 'Configurada' : 'Não configurada');
+    console.log('API Key (primeiros 20 chars):', this.apiKey ? this.apiKey.substring(0, 20) + '...' : 'undefined');
+    
+    if (!this.apiKey || this.apiKey === 'sk-or-v1-your-api-key-here') {
+      console.error('OPENROUTER_API_KEY não está configurada ou está usando valor de exemplo');
+      throw new Error('OPENROUTER_API_KEY não está configurada. Configure uma API Key válida do OpenRouter.');
     }
     return true;
   }
@@ -49,35 +52,62 @@ class OpenRouterService {
   async sendMessage(message, context = {}) {
     try {
       if (!this.checkApiKey()) {
-        throw new Error('OPENROUTER_API_KEY não está configurada. Configure a variável de ambiente.');
+        throw new Error('OPENROUTER_API_KEY não está configurada. Configure uma API Key válida do OpenRouter.');
       }
+
+      console.log('Enviando requisição para OpenRouter...');
+      console.log('Modelo:', this.model);
+      console.log('URL:', this.baseUrl);
 
       // Construir prompt do sistema com contexto
       const systemPrompt = this.buildSystemPrompt(context);
+      
+      const requestBody = {
+        model: this.model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      };
+
+      console.log('Request body:', JSON.stringify(requestBody, null, 2));
       
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'HTTP-Referer': window.location.origin,
+          'X-Title': 'Liza Chat Assistant'
         },
-        body: JSON.stringify({
-          model: this.model,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: message }
-          ],
-          temperature: 0.7,
-          max_tokens: 500
-        })
+        body: JSON.stringify(requestBody)
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorText = await response.text();
+        console.error('Erro na resposta:', errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: { message: errorText } };
+        }
+        
+        if (response.status === 401) {
+          throw new Error(`API Key inválida ou expirada. Verifique sua chave do OpenRouter. Erro: ${errorData.error?.message || 'Unauthorized'}`);
+        }
+        
         throw new Error(`Erro na comunicação com OpenRouter: ${response.status} - ${errorData.error?.message || 'Erro desconhecido'}`);
       }
 
       const data = await response.json();
+      console.log('Resposta recebida:', data);
       const aiResponse = data.choices?.[0]?.message?.content?.trim();
       
       return {

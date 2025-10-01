@@ -15,6 +15,13 @@ const mockUsers = {
         email: 'admin@loja1.com',
         role: 'store_admin',
         storeId: '507f1f77bcf86cd799439012'
+    },
+    'admin@fooddelivery.com': {
+        _id: '68ac98c80ab28e621279eab3',
+        name: 'Admin da Loja',
+        email: 'admin@fooddelivery.com',
+        role: 'store_admin',
+        storeId: '68d2a1e3fc52f1e80b8457f2'
     }
 };
 
@@ -229,8 +236,8 @@ export const simulateAuth = (req, res, next) => {
         // });
     }
 
-    // Interceptar TODAS as rotas de login primeiro
-    if ((req.path === '/api/user/login' || req.path.includes('/login') || req.path === '/api/system/super-admin/login') && req.method === 'POST') {
+    // Interceptar TODAS as rotas de login primeiro - EXCETO store admin login
+    if ((req.path === '/api/user/login' || req.path === '/api/system/super-admin/login') && req.method === 'POST') {
         const { email, password } = req.body;
         const user = mockUsers[email];
         

@@ -11,14 +11,18 @@ import validator from 'validator';
  */
 const loginUser = async (req,res) =>{
     const {email, password} = req.body;
+    console.log('🔍 Debug loginUser - Dados recebidos:', { email, password: password ? '***' : 'undefined' });
+    
     try {
         const user = await userModel.findOne({email});
+        console.log('🔍 Debug loginUser - Usuário encontrado:', user ? { id: user._id, email: user.email, role: user.role } : 'null');
 
         if(!user){
            return res.json({success:false, message:'User does not exist'}) 
         }
 
         const isMatch = await bcrypt.compare(password,user.password)
+        console.log('🔍 Debug loginUser - Senha confere:', isMatch);
 
         if(!isMatch){
             return res.json({success:false, message:'Invalid credentials'})
@@ -37,6 +41,7 @@ const loginUser = async (req,res) =>{
             }
         })
     } catch (error) {
+        console.error('🔍 Debug loginUser - Erro:', error);
         res.json({success:false, message:'Error'})
     }
 }

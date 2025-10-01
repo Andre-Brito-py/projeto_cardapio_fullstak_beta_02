@@ -230,13 +230,18 @@ const StoreContextProvider = (props) => {
         async function loadData() {
             await fetchFoodList();
             
+            // Definir um storeId padrão para desenvolvimento
+            if (!storeId) {
+                setStoreId("68c2de4c7690c6c039b67494"); // ID da loja demo
+            }
+            
             const storedToken = localStorage.getItem("token");
             if (storedToken) {
                 setToken(storedToken);
             }
         }
         loadData();
-    }, [fetchFoodList]);
+    }, [fetchFoodList, storeId]);
 
     const contextValue = useMemo(() => ({
         food_list,

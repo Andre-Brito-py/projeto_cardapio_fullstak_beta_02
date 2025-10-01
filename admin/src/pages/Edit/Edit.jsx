@@ -24,7 +24,8 @@ const Edit = ({ url }) => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get(`${url}/api/category/active`);
+                const storeId = localStorage.getItem('storeId');
+                const response = await axios.get(`${url}/api/category/active?storeId=${storeId}`);
                 if (response.data.success) {
                     setCategories(response.data.data);
                 }

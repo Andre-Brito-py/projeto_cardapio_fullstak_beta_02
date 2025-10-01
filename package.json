@@ -4,7 +4,6 @@
   "description": "Full Stack Food Delivery Web Application",
   "type": "module",
   "scripts": {
-    "setup-project": "node setup-project.js",
     "validate-urls": "node scripts/validate-urls.js",
     "health-check": "node health-check.js",
     "dev:all": "concurrently \"npm run dev --prefix frontend\" \"npm run dev --prefix admin\" \"npm run dev --prefix counter\" \"npm start --prefix backend\"",
@@ -15,10 +14,9 @@
     "install:all": "npm install && npm install --prefix frontend && npm install --prefix admin && npm install --prefix backend && npm install --prefix counter",
     "build:all": "npm run build --prefix frontend && npm run build --prefix admin && npm run build --prefix counter",
     "test:urls": "npm run validate-urls",
-    "setup": "npm run setup-project && npm run install:all && node backend/createAdmin.js",
+    "setup": "npm run install:all && node backend/createAdmin.js",
     "create-test-data": "node backend/create-test-attendant.js",
-    "start": "npm run dev:all",
-    "postinstall": "npm run setup-project"
+    "start": "npm run dev:all"
   },
   "keywords": [
     "food-delivery",

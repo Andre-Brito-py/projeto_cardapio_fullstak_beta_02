@@ -21,7 +21,7 @@ const ExploreMenu = ({category, setCategory, categories: propCategories}) => {
         try {
             setLoading(true);
             setError(null);
-            const response = await axios.get(`${url}/api/category/active`);
+            const response = await axios.get(`${url}/api/category/active?storeId=${storeId}`);
             
             if (response.data.success) {
                 setCategories(response.data.data);

@@ -362,23 +362,30 @@ const updateSubscription = async (req, res) => {
 // Login do admin da loja
 const loginStoreAdmin = async (req, res) => {
     try {
+        console.log('🔍 LoginStoreAdmin - Dados recebidos:', req.body);
         const { email, password } = req.body;
         
+        console.log('🔍 Buscando usuário:', email, 'com role: store_admin');
         const user = await userModel.findOne({ email, role: 'store_admin' }).populate('storeId');
         if (!user) {
+            console.log('❌ Usuário não encontrado');
             return res.json({ success: false, message: "Credenciais inválidas" });
         }
         
+        console.log('✅ Usuário encontrado:', user.name, user.email);
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log('🔐 Verificação de senha:', isMatch ? 'CORRETA' : 'INCORRETA');
         if (!isMatch) {
             return res.json({ success: false, message: "Credenciais inválidas" });
         }
         
+        console.log('👤 Usuário ativo:', user.isActive);
         if (!user.isActive) {
             return res.json({ success: false, message: "Conta desativada" });
         }
         
         // Verificar se a loja está ativa
+        console.log('🏪 Store status:', user.storeId?.status);
         if (user.storeId && user.storeId.status !== 'active') {
             return res.json({ success: false, message: "Loja não está ativa" });
         }

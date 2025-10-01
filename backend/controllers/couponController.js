@@ -5,6 +5,13 @@ import userModel from '../models/userModel.js';
 // Criar novo cupom
 const createCoupon = async (req, res) => {
     try {
+        // Obter storeId do contexto da requisição
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Store ID é obrigatório" });
+        }
+
         const {
             code,
             name,
@@ -18,15 +25,17 @@ const createCoupon = async (req, res) => {
             validFrom,
             validUntil,
             applicableCategories,
-            applicableStores,
             excludedItems,
             firstTimeUserOnly
         } = req.body;
 
-        // Verificar se o código já existe
-        const existingCoupon = await couponModel.findOne({ code: code.toUpperCase() });
+        // Verificar se o código já existe na loja
+        const existingCoupon = await couponModel.findOne({ 
+            storeId: storeId,
+            code: code.toUpperCase() 
+        });
         if (existingCoupon) {
-            return res.json({ success: false, message: "Código de cupom já existe" });
+            return res.json({ success: false, message: "Código de cupom já existe nesta loja" });
         }
 
         // Validações básicas
@@ -39,6 +48,7 @@ const createCoupon = async (req, res) => {
         }
 
         const newCoupon = new couponModel({
+            storeId: storeId,
             code: code.toUpperCase(),
             name,
             description,
@@ -51,7 +61,6 @@ const createCoupon = async (req, res) => {
             validFrom: validFrom || new Date(),
             validUntil,
             applicableCategories: applicableCategories || [],
-            applicableStores: applicableStores || [],
             excludedItems: excludedItems || [],
             firstTimeUserOnly: firstTimeUserOnly || false,
             createdBy: req.user ? req.user._id : req.body.createdBy
@@ -68,23 +77,15 @@ const createCoupon = async (req, res) => {
 // Listar todos os cupons
 const listCoupons = async (req, res) => {
     try {
-        // Filter by store in multi-tenant context if needed
-        const storeId = req.store ? req.store._id : null;
-        let query = {};
+        // Obter storeId do contexto da requisição
+        const storeId = req.store?._id || req.user?.storeId;
         
-        // Se há contexto de loja, filtrar cupons aplicáveis
-        if (storeId) {
-            query = {
-                $or: [
-                    { applicableStores: { $size: 0 } }, // Cupons para todas as lojas
-                    { applicableStores: storeId } // Cupons específicos para esta loja
-                ]
-            };
+        if (!storeId) {
+            return res.json({ success: false, message: "Store ID é obrigatório" });
         }
 
-        const coupons = await couponModel.find(query)
+        const coupons = await couponModel.find({ storeId: storeId })
             .populate('applicableCategories', 'name')
-            .populate('applicableStores', 'name')
             .populate('excludedItems', 'name')
             .populate('createdBy', 'name email')
             .sort({ createdAt: -1 });
@@ -99,9 +100,18 @@ const listCoupons = async (req, res) => {
 // Obter cupom por ID
 const getCoupon = async (req, res) => {
     try {
-        const coupon = await couponModel.findById(req.params.id)
+        // Obter storeId do contexto da requisição
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Store ID é obrigatório" });
+        }
+
+        const coupon = await couponModel.findOne({ 
+            _id: req.params.id,
+            storeId: storeId 
+        })
             .populate('applicableCategories', 'name')
-            .populate('applicableStores', 'name')
             .populate('excludedItems', 'name')
             .populate('createdBy', 'name email');
 
@@ -122,15 +132,23 @@ const updateCoupon = async (req, res) => {
         const { id } = req.params;
         const updateData = { ...req.body };
 
-        // Se o código foi alterado, verificar se já existe
+        // Obter storeId do contexto da requisição
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Store ID é obrigatório" });
+        }
+
+        // Se o código foi alterado, verificar se já existe na loja
         if (updateData.code) {
             updateData.code = updateData.code.toUpperCase();
             const existingCoupon = await couponModel.findOne({ 
+                storeId: storeId,
                 code: updateData.code, 
                 _id: { $ne: id } 
             });
             if (existingCoupon) {
-                return res.json({ success: false, message: "Código de cupom já existe" });
+                return res.json({ success: false, message: "Código de cupom já existe nesta loja" });
             }
         }
 
@@ -144,12 +162,11 @@ const updateCoupon = async (req, res) => {
             return res.json({ success: false, message: "Data de início deve ser anterior à data de fim" });
         }
 
-        const updatedCoupon = await couponModel.findByIdAndUpdate(
-            id, 
+        const updatedCoupon = await couponModel.findOneAndUpdate(
+            { _id: id, storeId: storeId }, 
             updateData, 
             { new: true, runValidators: true }
         ).populate('applicableCategories', 'name')
-         .populate('applicableStores', 'name')
          .populate('excludedItems', 'name');
 
         if (!updatedCoupon) {
@@ -168,7 +185,17 @@ const deleteCoupon = async (req, res) => {
     try {
         const { id } = req.params;
         
-        const deletedCoupon = await couponModel.findByIdAndDelete(id);
+        // Obter storeId do contexto da requisição
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Store ID é obrigatório" });
+        }
+        
+        const deletedCoupon = await couponModel.findOneAndDelete({ 
+            _id: id, 
+            storeId: storeId 
+        });
         
         if (!deletedCoupon) {
             return res.json({ success: false, message: "Cupom não encontrado" });
@@ -190,11 +217,19 @@ const validateCoupon = async (req, res) => {
             return res.json({ success: false, message: "Código do cupom e valor do pedido são obrigatórios" });
         }
 
-        // Buscar cupom
+        // Obter storeId do contexto da requisição
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Store ID é obrigatório" });
+        }
+
+        // Buscar cupom da loja específica
         const coupon = await couponModel.findOne({ 
+            storeId: storeId,
             code: code.toUpperCase(),
             isActive: true 
-        }).populate('applicableCategories excludedItems applicableStores');
+        }).populate('applicableCategories excludedItems');
 
         if (!coupon) {
             return res.json({ success: false, message: "Cupom não encontrado ou inativo" });
@@ -286,8 +321,15 @@ const toggleCouponStatus = async (req, res) => {
         const { id } = req.params;
         const { isActive } = req.body;
         
-        const updatedCoupon = await couponModel.findByIdAndUpdate(
-            id,
+        // Obter storeId do contexto da requisição
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Store ID é obrigatório" });
+        }
+        
+        const updatedCoupon = await couponModel.findOneAndUpdate(
+            { _id: id, storeId: storeId },
             { isActive },
             { new: true }
         );
@@ -312,13 +354,24 @@ const getCouponStats = async (req, res) => {
     try {
         const { id } = req.params;
         
-        const coupon = await couponModel.findById(id);
+        // Obter storeId do contexto da requisição
+        const storeId = req.store?._id || req.user?.storeId;
+        
+        if (!storeId) {
+            return res.json({ success: false, message: "Store ID é obrigatório" });
+        }
+        
+        const coupon = await couponModel.findOne({ 
+            _id: id, 
+            storeId: storeId 
+        });
         if (!coupon) {
             return res.json({ success: false, message: "Cupom não encontrado" });
         }
         
-        // Buscar pedidos que usaram este cupom
+        // Buscar pedidos que usaram este cupom na loja específica
         const orders = await orderModel.find({ 
+            storeId: storeId,
             couponCode: coupon.code,
             payment: true 
         }).select('amount discountAmount date userId');
