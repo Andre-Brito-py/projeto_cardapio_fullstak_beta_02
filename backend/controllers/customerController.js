@@ -366,11 +366,447 @@ const deactivateCustomer = async (req, res) => {
     }
 };
 
+// POST /api/register - Cadastra ou retorna cliente existente (Sistema de cadastro automático)
+const registerCustomer = async (req, res) => {
+    try {
+        const { phone, storeId, clientId, lgpdConsent } = req.body;
+
+        // Validação dos dados obrigatórios
+        if (!phone || !storeId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Telefone e ID da loja são obrigatórios'
+            });
+        }
+
+        // Validar se storeId é um ObjectId válido
+        if (!mongoose.Types.ObjectId.isValid(storeId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID da loja inválido'
+            });
+        }
+
+        // Limpar e formatar telefone
+        const cleanPhone = phone.replace(/\D/g, '');
+        
+        // Verificar se cliente já existe
+        let customer = await customerModel.findByPhoneAndStore(cleanPhone, storeId);
+        
+        if (customer) {
+            // Cliente existe, retornar dados
+            return res.status(200).json({
+                success: true,
+                message: 'Cliente encontrado',
+                data: {
+                    clientId: customer.clientId,
+                    phone: customer.phone,
+                    name: customer.name,
+                    addresses: customer.addresses,
+                    orderHistory: customer.orderHistory.slice(-10), // Últimos 10 pedidos
+                    statistics: customer.statistics,
+                    isExisting: true
+                }
+            });
+        }
+
+        // Cliente não existe, criar novo
+        const newClientId = clientId || customerModel.generateClientId();
+        const phoneHash = customerModel.createPhoneHash(cleanPhone, storeId);
+
+        customer = new customerModel({
+            clientId: newClientId,
+            phone: cleanPhone,
+            storeId,
+            phoneHash,
+            lgpdConsent: {
+                consentGiven: lgpdConsent || false,
+                consentDate: lgpdConsent ? new Date() : null,
+                dataUsagePurpose: "Histórico de pedidos e facilitar próximas compras"
+            }
+        });
+
+        await customer.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Cliente cadastrado com sucesso',
+            data: {
+                clientId: customer.clientId,
+                phone: customer.phone,
+                name: customer.name,
+                addresses: customer.addresses,
+                orderHistory: customer.orderHistory,
+                statistics: customer.statistics,
+                isExisting: false
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao registrar cliente:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// POST /api/address - Adiciona um endereço ao cliente
+const addAddress = async (req, res) => {
+    try {
+        const { clientId, address } = req.body;
+
+        // Validação dos dados obrigatórios
+        if (!clientId || !address) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID do cliente e dados do endereço são obrigatórios'
+            });
+        }
+
+        // Validar campos obrigatórios do endereço
+        const requiredFields = ['label', 'street', 'number', 'neighborhood', 'city', 'state', 'zipCode'];
+        const missingFields = requiredFields.filter(field => !address[field]);
+        
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Campos obrigatórios faltando: ${missingFields.join(', ')}`
+            });
+        }
+
+        // Buscar cliente
+        const customer = await customerModel.findOne({ clientId });
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cliente não encontrado'
+            });
+        }
+
+        // Verificar se já existe endereço com o mesmo label
+        const existingAddress = customer.addresses.find(addr => 
+            addr.label.toLowerCase() === address.label.toLowerCase()
+        );
+
+        if (existingAddress) {
+            return res.status(400).json({
+                success: false,
+                message: `Já existe um endereço com o rótulo "${address.label}"`
+            });
+        }
+
+        // Adicionar endereço
+        const newAddress = customer.addAddress(address);
+        await customer.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Endereço adicionado com sucesso',
+            data: {
+                address: newAddress,
+                totalAddresses: customer.addresses.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao adicionar endereço:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// GET /api/addresses - Lista endereços do cliente
+const getAddresses = async (req, res) => {
+    try {
+        const { clientId } = req.query;
+
+        if (!clientId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID do cliente é obrigatório'
+            });
+        }
+
+        const customer = await customerModel.findOne({ clientId });
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cliente não encontrado'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                addresses: customer.addresses,
+                defaultAddress: customer.getDefaultAddress()
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar endereços:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// POST /api/order - Adiciona pedido ao histórico
+const addOrder = async (req, res) => {
+    try {
+        const { clientId, order } = req.body;
+
+        // Validação dos dados obrigatórios
+        if (!clientId || !order) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID do cliente e dados do pedido são obrigatórios'
+            });
+        }
+
+        // Validar campos obrigatórios do pedido
+        const requiredFields = ['orderId', 'items', 'totalAmount'];
+        const missingFields = requiredFields.filter(field => !order[field]);
+        
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `Campos obrigatórios faltando: ${missingFields.join(', ')}`
+            });
+        }
+
+        // Buscar cliente
+        const customer = await customerModel.findOne({ clientId });
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cliente não encontrado'
+            });
+        }
+
+        // Adicionar pedido ao histórico
+        const newOrder = customer.addOrderToHistory(order);
+        await customer.save();
+
+        res.status(201).json({
+            success: true,
+            message: 'Pedido adicionado ao histórico com sucesso',
+            data: {
+                order: newOrder,
+                statistics: customer.statistics
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao adicionar pedido:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// GET /api/orders - Lista histórico de pedidos do cliente
+const getOrders = async (req, res) => {
+    try {
+        const { clientId, limit = 10 } = req.query;
+
+        if (!clientId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID do cliente é obrigatório'
+            });
+        }
+
+        const customer = await customerModel.findOne({ clientId });
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cliente não encontrado'
+            });
+        }
+
+        // Ordenar por data mais recente e limitar resultados
+        const orders = customer.orderHistory
+            .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
+            .slice(0, parseInt(limit));
+
+        res.status(200).json({
+            success: true,
+            data: {
+                orders,
+                statistics: customer.statistics,
+                totalOrders: customer.orderHistory.length
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar pedidos:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// DELETE /api/customer/:clientId - Exclusão de dados (LGPD)
+const deleteCustomerData = async (req, res) => {
+    try {
+        const { clientId } = req.params;
+        const { confirmDelete } = req.body;
+
+        if (!clientId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID do cliente é obrigatório'
+            });
+        }
+
+        if (!confirmDelete) {
+            return res.status(400).json({
+                success: false,
+                message: 'Confirmação de exclusão é obrigatória'
+            });
+        }
+
+        const customer = await customerModel.findOne({ clientId });
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cliente não encontrado'
+            });
+        }
+
+        // Log da exclusão para auditoria
+        console.log(`LGPD: Exclusão de dados solicitada para cliente ${clientId} em ${new Date().toISOString()}`);
+
+        // Remover cliente do banco de dados
+        await customerModel.deleteOne({ clientId });
+
+        res.status(200).json({
+            success: true,
+            message: 'Dados do cliente excluídos com sucesso conforme LGPD'
+        });
+
+    } catch (error) {
+        console.error('Erro ao excluir dados do cliente:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+// GET /api/customers - Lista clientes para admin (com paginação)
+const getCustomersForAdmin = async (req, res) => {
+    try {
+        const { 
+            storeId, 
+            page = 1, 
+            limit = 20, 
+            segment, 
+            search,
+            sortBy = 'createdAt',
+            sortOrder = 'desc'
+        } = req.query;
+
+        if (!storeId) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID da loja é obrigatório'
+            });
+        }
+
+        // Validar se storeId é um ObjectId válido
+        if (!mongoose.Types.ObjectId.isValid(storeId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ID da loja inválido'
+            });
+        }
+
+        // Construir query de busca
+        const query = { storeId };
+        
+        if (segment && segment !== 'all') {
+            query.customerSegment = segment;
+        }
+
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { phone: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        // Configurar ordenação
+        const sort = {};
+        sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+        // Executar consulta com paginação
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+        
+        const [customers, totalCount] = await Promise.all([
+            customerModel.find(query)
+                .select('clientId name phone email customerSegment totalOrders statistics.totalSpent statistics.lastOrderDate createdAt isActive')
+                .sort(sort)
+                .skip(skip)
+                .limit(parseInt(limit)),
+            customerModel.countDocuments(query)
+        ]);
+
+        // Calcular estatísticas gerais
+        const analytics = await customerModel.getCustomerAnalytics(storeId);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                customers,
+                pagination: {
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(totalCount / parseInt(limit)),
+                    totalCount,
+                    hasNext: skip + customers.length < totalCount,
+                    hasPrev: parseInt(page) > 1
+                },
+                analytics
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar clientes para admin:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
 export {
     findCustomerByPhone,
     createCustomer,
     updateCustomer,
     getStoreCustomers,
     getCustomerById,
-    deactivateCustomer
+    deactivateCustomer,
+    // Novas funções para cadastro automático
+    registerCustomer,
+    addAddress,
+    getAddresses,
+    addOrder,
+    getOrders,
+    deleteCustomerData,
+    getCustomersForAdmin
 };

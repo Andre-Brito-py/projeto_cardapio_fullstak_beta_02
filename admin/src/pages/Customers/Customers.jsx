@@ -6,31 +6,29 @@ import { assets } from './../../../../frontend/src/assets/assets';
 
 const Customers = ({ url, token }) => {
   const [customers, setCustomers] = useState([]);
+  const [autoRegisterCustomers, setAutoRegisterCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('traditional'); // 'traditional' ou 'autoregister'
 
   const fetchCustomers = async (page = 1, search = '') => {
     setLoading(true);
     try {
-      const response = await axios.get(`${url}/api/customers/store`, {
-        params: {
-          page,
-          limit: 10,
-          search
-        },
-        headers: { token }
+      const response = await axios.get(`${url}/api/customer/list`, {
+        headers: { token },
+        params: { page, search, limit: 10 }
       });
-      
+
       if (response.data.success) {
         setCustomers(response.data.customers);
         setTotalPages(response.data.totalPages);
-        setCurrentPage(response.data.currentPage);
+        setCurrentPage(page);
       } else {
-        toast.error(response.data.message || 'Erro ao carregar clientes');
+        toast.error(response.data.message);
       }
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
@@ -40,16 +38,58 @@ const Customers = ({ url, token }) => {
     }
   };
 
+  const fetchAutoRegisterCustomers = async (page = 1, search = '') => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${url}/api/customer-auto/admin`, {
+        headers: { token },
+        params: { page, search, limit: 10 }
+      });
+
+      if (response.data.success) {
+        setAutoRegisterCustomers(response.data.customers);
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(page);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar clientes do cadastro automático:', error);
+      toast.error('Erro ao carregar clientes do cadastro automático');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
-    fetchCustomers(1, searchTerm);
+    if (activeTab === 'traditional') {
+      fetchCustomers(1, searchTerm);
+    } else {
+      fetchAutoRegisterCustomers(1, searchTerm);
+    }
   };
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
-      fetchCustomers(newPage, searchTerm);
+      if (activeTab === 'traditional') {
+        fetchCustomers(newPage, searchTerm);
+      } else {
+        fetchAutoRegisterCustomers(newPage, searchTerm);
+      }
+    }
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+    setSearchTerm('');
+    if (tab === 'traditional') {
+      fetchCustomers(1, '');
+    } else {
+      fetchAutoRegisterCustomers(1, '');
     }
   };
 
@@ -113,78 +153,115 @@ const Customers = ({ url, token }) => {
   };
 
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    if (activeTab === 'traditional') {
+      fetchCustomers();
+    } else {
+      fetchAutoRegisterCustomers();
+    }
+  }, [activeTab]);
 
   return (
-    <div className='customers'>
+    <div className="customers">
       <div className="customers-header">
-        <h2>Clientes da Loja</h2>
-        <div className="customers-search">
-          <form onSubmit={handleSearch}>
-            <input
-              type="text"
-              placeholder="Buscar por nome ou telefone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button type="submit">Buscar</button>
-          </form>
+        <h2>Gerenciamento de Clientes</h2>
+        
+        {/* Abas para alternar entre tipos de clientes */}
+        <div className="customer-tabs">
+          <button 
+            className={`tab-button ${activeTab === 'traditional' ? 'active' : ''}`}
+            onClick={() => handleTabChange('traditional')}
+          >
+            Clientes Tradicionais
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'autoregister' ? 'active' : ''}`}
+            onClick={() => handleTabChange('autoregister')}
+          >
+            Cadastro Automático
+          </button>
         </div>
+
+        <form onSubmit={handleSearch} className="search-form">
+          <input
+            type="text"
+            placeholder="Buscar por nome ou telefone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          <button type="submit" className="search-button">
+            Buscar
+          </button>
+        </form>
       </div>
 
       {loading ? (
-        <div className="loading">Carregando clientes...</div>
+        <div className="loading">Carregando...</div>
       ) : (
         <>
-          <div className='customers-list'>
-            <div className="customers-list-table">
-              <div className="customers-list-table-format title">
-                <b>Nome</b>
-                <b>Telefone</b>
-                <b>Endereço</b>
-                <b>Cidade</b>
-                <b>CEP</b>
-                <b>Total Pedidos</b>
-                <b>Último Pedido</b>
-                <b>Status</b>
-                <b>Ações</b>
-              </div>
-              {customers.map((customer, index) => {
-                return (
-                  <div key={index} className='customers-list-table-format'>
-                    <p>{customer.name}</p>
-                    <p>{formatPhone(customer.phone)}</p>
-                    <p title={`${customer.address?.street || ''}, ${customer.address?.number || ''}`}>
-                      {customer.address?.street ? `${customer.address.street}, ${customer.address.number}` : 'N/A'}
-                    </p>
-                    <p>{customer.address?.city || 'N/A'}</p>
-                    <p>{customer.address?.zipCode || 'N/A'}</p>
-                    <p>{customer.totalOrders || 0}</p>
-                    <p>{customer.lastOrderDate ? formatDate(customer.lastOrderDate) : 'Nunca'}</p>
-                    <p className={customer.isActive ? 'status-active' : 'status-inactive'}>
-                      {customer.isActive ? 'Ativo' : 'Inativo'}
-                    </p>
-                    <div className="customer-actions">
-                      <button 
-                        onClick={() => viewCustomerDetails(customer._id)}
-                        className="btn-view"
+          <div className="customers-list">
+            <table className="customers-table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Telefone</th>
+                  {activeTab === 'traditional' ? (
+                    <>
+                      <th>Endereço</th>
+                      <th>Pedidos</th>
+                      <th>Status</th>
+                    </>
+                  ) : (
+                    <>
+                      <th>Client ID</th>
+                      <th>Email</th>
+                      <th>Endereços</th>
+                      <th>Pedidos</th>
+                      <th>Cadastro</th>
+                    </>
+                  )}
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(activeTab === 'traditional' ? customers : autoRegisterCustomers).map((customer) => (
+                  <tr key={customer._id}>
+                    <td>{customer.name || 'N/A'}</td>
+                    <td>{customer.phone}</td>
+                    {activeTab === 'traditional' ? (
+                      <>
+                        <td>{customer.address || 'N/A'}</td>
+                        <td>{customer.orderCount || 0}</td>
+                        <td>
+                          <span className={`status ${customer.isActive ? 'active' : 'inactive'}`}>
+                            {customer.isActive ? 'Ativo' : 'Inativo'}
+                          </span>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td>{customer.clientId}</td>
+                        <td>{customer.email || 'N/A'}</td>
+                        <td>{customer.addresses?.length || 0}</td>
+                        <td>{customer.orderHistory?.length || 0}</td>
+                        <td>{new Date(customer.createdAt).toLocaleDateString('pt-BR')}</td>
+                      </>
+                    )}
+                    <td>
+                      <button
+                        onClick={() => {
+                          setSelectedCustomer(customer);
+                          setShowModal(true);
+                        }}
+                        className="view-button"
                       >
                         Ver Detalhes
                       </button>
-                      {customer.isActive && (
-                        <button 
-                          onClick={() => deactivateCustomer(customer._id)}
-                          className="btn-deactivate"
-                        >
-                          Desativar
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           {/* Paginação */}
@@ -218,60 +295,139 @@ const Customers = ({ url, token }) => {
             </div>
             <div className="modal-body">
               <div className="customer-details">
-                <div className="detail-group">
-                  <label>Nome:</label>
-                  <span>{selectedCustomer.name}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Telefone:</label>
-                  <span>{formatPhone(selectedCustomer.phone)}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Rua:</label>
-                  <span>{selectedCustomer.address?.street || 'N/A'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Número:</label>
-                  <span>{selectedCustomer.address?.number || 'N/A'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Complemento:</label>
-                  <span>{selectedCustomer.address?.complement || 'N/A'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Bairro:</label>
-                  <span>{selectedCustomer.address?.neighborhood || 'N/A'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Cidade:</label>
-                  <span>{selectedCustomer.address?.city || 'N/A'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Estado:</label>
-                  <span>{selectedCustomer.address?.state || 'N/A'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>CEP:</label>
-                  <span>{selectedCustomer.address?.zipCode || 'N/A'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Total de Pedidos:</label>
-                  <span>{selectedCustomer.totalOrders || 0}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Último Pedido:</label>
-                  <span>{selectedCustomer.lastOrderDate ? formatDate(selectedCustomer.lastOrderDate) : 'Nunca fez pedidos'}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Cadastrado em:</label>
-                  <span>{formatDate(selectedCustomer.createdAt)}</span>
-                </div>
-                <div className="detail-group">
-                  <label>Status:</label>
-                  <span className={selectedCustomer.isActive ? 'status-active' : 'status-inactive'}>
-                    {selectedCustomer.isActive ? 'Ativo' : 'Inativo'}
-                  </span>
-                </div>
+                {activeTab === 'traditional' ? (
+                  // Detalhes do cliente tradicional
+                  <>
+                    <div className="detail-group">
+                      <label>Nome:</label>
+                      <span>{selectedCustomer.name}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Telefone:</label>
+                      <span>{selectedCustomer.phone}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Endereço:</label>
+                      <span>{selectedCustomer.address || 'N/A'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Total de Pedidos:</label>
+                      <span>{selectedCustomer.orderCount || 0}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Cadastrado em:</label>
+                      <span>{new Date(selectedCustomer.createdAt).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Status:</label>
+                      <span className={selectedCustomer.isActive ? 'status-active' : 'status-inactive'}>
+                        {selectedCustomer.isActive ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  // Detalhes do cliente do cadastro automático
+                  <>
+                    <div className="detail-group">
+                      <label>Nome:</label>
+                      <span>{selectedCustomer.name || 'Não informado'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Telefone:</label>
+                      <span>{selectedCustomer.phone}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Client ID:</label>
+                      <span>{selectedCustomer.clientId}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Email:</label>
+                      <span>{selectedCustomer.email || 'Não informado'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Consentimento LGPD:</label>
+                      <span className={selectedCustomer.lgpdConsent ? 'status-active' : 'status-inactive'}>
+                        {selectedCustomer.lgpdConsent ? 'Aceito' : 'Não aceito'}
+                      </span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Total de Pedidos:</label>
+                      <span>{selectedCustomer.orderHistory?.length || 0}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Valor Total Gasto:</label>
+                      <span>R$ {selectedCustomer.statistics?.totalSpent?.toFixed(2) || '0,00'}</span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Último Pedido:</label>
+                      <span>
+                        {selectedCustomer.statistics?.lastOrderDate 
+                          ? new Date(selectedCustomer.statistics.lastOrderDate).toLocaleDateString('pt-BR')
+                          : 'Nunca fez pedidos'
+                        }
+                      </span>
+                    </div>
+                    <div className="detail-group">
+                      <label>Cadastrado em:</label>
+                      <span>{new Date(selectedCustomer.createdAt).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    
+                    {/* Endereços */}
+                    <div className="detail-section">
+                      <h4>Endereços ({selectedCustomer.addresses?.length || 0})</h4>
+                      {selectedCustomer.addresses?.length > 0 ? (
+                        <div className="addresses-list">
+                          {selectedCustomer.addresses.map((address, index) => (
+                            <div key={index} className="address-item">
+                              <strong>{address.label}:</strong>
+                              <span>{address.street}, {address.number}</span>
+                              {address.complement && <span>, {address.complement}</span>}
+                              <span>, {address.neighborhood}, {address.city} - {address.state}</span>
+                              <span>, CEP: {address.zipCode}</span>
+                              {address.isDefault && <span className="default-badge">Padrão</span>}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>Nenhum endereço cadastrado</p>
+                      )}
+                    </div>
+
+                    {/* Histórico de Pedidos */}
+                    <div className="detail-section">
+                      <h4>Últimos Pedidos ({selectedCustomer.orderHistory?.length || 0})</h4>
+                      {selectedCustomer.orderHistory?.length > 0 ? (
+                        <div className="orders-list">
+                          {selectedCustomer.orderHistory.slice(0, 5).map((order, index) => (
+                            <div key={index} className="order-item">
+                              <div className="order-header">
+                                <span className="order-date">
+                                  {new Date(order.date).toLocaleDateString('pt-BR')}
+                                </span>
+                                <span className="order-total">R$ {order.total.toFixed(2)}</span>
+                              </div>
+                              <div className="order-items">
+                                {order.items.slice(0, 3).map((item, itemIndex) => (
+                                  <span key={itemIndex} className="order-item-name">
+                                    {item.name} ({item.quantity}x)
+                                  </span>
+                                ))}
+                                {order.items.length > 3 && (
+                                  <span className="more-items">+{order.items.length - 3} itens</span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          {selectedCustomer.orderHistory.length > 5 && (
+                            <p className="more-orders">+{selectedCustomer.orderHistory.length - 5} pedidos anteriores</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p>Nenhum pedido realizado</p>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

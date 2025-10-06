@@ -1,9 +1,7 @@
 import mongoose from 'mongoose';
 import Store from './models/storeModel.js';
-import Category from './models/categoryModel.js';
 import User from './models/userModel.js';
 import Table from './models/tableModel.js';
-import Banner from './models/bannerModel.js';
 import bcrypt from 'bcrypt';
 
 // Conectar ao MongoDB
@@ -144,12 +142,11 @@ const createSuperAdminStore = async () => {
     // Criar mesas padrão
     console.log('\n🪑 Criando mesas padrão...');
     const defaultTables = [
-      { tableNumber: '1', displayName: 'Mesa 1', capacity: 2, qrCode: 'QR_MESA_1_' + store._id },
-      { tableNumber: '2', displayName: 'Mesa 2', capacity: 4, qrCode: 'QR_MESA_2_' + store._id },
-      { tableNumber: '3', displayName: 'Mesa 3', capacity: 4, qrCode: 'QR_MESA_3_' + store._id },
-      { tableNumber: '4', displayName: 'Mesa 4', capacity: 6, qrCode: 'QR_MESA_4_' + store._id },
-      { tableNumber: '5', displayName: 'Mesa 5', capacity: 2, qrCode: 'QR_MESA_5_' + store._id },
-      { tableNumber: '6', displayName: 'Mesa 6', capacity: 8, qrCode: 'QR_MESA_6_' + store._id }
+      { number: 1, displayName: 'Mesa 1', capacity: 4 },
+      { number: 2, displayName: 'Mesa 2', capacity: 4 },
+      { number: 3, displayName: 'Mesa 3', capacity: 6 },
+      { number: 4, displayName: 'Mesa 4', capacity: 2 },
+      { number: 5, displayName: 'Mesa 5', capacity: 8 }
     ];
 
     for (const tableData of defaultTables) {
@@ -172,33 +169,11 @@ const createSuperAdminStore = async () => {
       }
     }
 
-    // Criar banner padrão
-    console.log('\n🖼️  Criando banner padrão...');
-    const existingBanner = await Banner.findOne({ storeId: store._id });
-    
-    if (!existingBanner) {
-      const banner = new Banner({
-        title: 'Bem-vindo ao Food Delivery!',
-        description: 'Os melhores pratos da cidade, entregues na sua casa!',
-        image: '/images/banners/banner-default.jpg',
-        storeId: store._id,
-        isActive: true,
-        isDefault: true
-      });
-      
-      await banner.save();
-      console.log(`✅ Banner criado: ${banner.title}`);
-    } else {
-      console.log(`⚠️  Banner já existe para a loja`);
-    }
-
     console.log('\n🎉 Dados iniciais criados com sucesso!');
     console.log('\n📋 RESUMO:');
     console.log(`👤 Super Admin: ${superAdmin.email}`);
     console.log(`🏪 Loja: ${store.name}`);
-    console.log(`📂 Categorias: ${defaultCategories.length}`);
     console.log(`🪑 Mesas: ${defaultTables.length}`);
-    console.log(`🖼️  Banners: 1`);
 
   } catch (error) {
     console.error('❌ Erro durante a criação:', error);

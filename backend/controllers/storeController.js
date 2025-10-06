@@ -1,7 +1,6 @@
 import Store from '../models/storeModel.js';
 import userModel from '../models/userModel.js';
 import SystemSettings from '../models/systemSettingsModel.js';
-import { setupDefaultStoreContent } from '../utils/defaultStoreSetup.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
@@ -148,15 +147,6 @@ const createStore = async (req, res) => {
             }
         } catch (error) {
             console.error('Erro ao adicionar loja aos usuários permitidos do Telegram:', error);
-            // Não falhar a criação da loja por causa deste erro
-        }
-
-        // Criar categorias e banner padrão para a nova loja
-        try {
-            await setupDefaultStoreContent(store._id);
-            console.log('Conteúdo padrão criado para a loja:', store.name);
-        } catch (error) {
-            console.error('Erro ao criar conteúdo padrão para a loja:', error);
             // Não falhar a criação da loja por causa deste erro
         }
 

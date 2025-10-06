@@ -25,6 +25,7 @@ import tableRouter from './routes/tableRoute.js';
 import couponRouter from './routes/couponRoute.js';
 import waiterRouter from './routes/waiterRoute.js';
 import customerRouter from './routes/customerRoute.js';
+import customerAutoRegisterRouter from './routes/customerRoutes.js'; // Novas rotas para cadastro automático
 import shippingRouter from './routes/shippingRoute.js';
 import inPersonSaleRouter from './routes/inPersonSaleRoute.js';
 import orderStatsRouter from './routes/orderStatsRoutes.js';
@@ -94,6 +95,7 @@ app.use('/api/tables', tableRouter); // Rotas para gerenciamento de mesas
 app.use('/api/coupons', couponRouter); // Rotas para gerenciamento de cupons
 app.use('/api/waiter', waiterRouter); // Rotas para funcionalidades do garçom
 app.use('/api/customers', customerRouter); // Rotas para gerenciamento de clientes
+app.use('/api/customer-auto', customerAutoRegisterRouter); // Rotas para cadastro automático de clientes
 app.use('/api/shipping', shippingRouter); // Rotas para cálculo de frete
 app.use('/api/in-person-sales', inPersonSaleRouter); // Rotas para vendas presenciais
 app.use('/api/order-stats', orderStatsRouter); // Rotas para estatísticas de pedidos
