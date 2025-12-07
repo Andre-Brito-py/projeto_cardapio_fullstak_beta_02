@@ -18,7 +18,7 @@ const ContactableCustomers = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`${BACKEND_URL}/api/analytics/contactable-customers`, {
-        headers: { token },
+        headers: { Authorization: `Bearer ${token}` },
         params: filters
       });
       
@@ -43,7 +43,7 @@ const ContactableCustomers = () => {
         method,
         contactedAt: new Date().toISOString()
       }, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -65,12 +65,11 @@ const ContactableCustomers = () => {
     }
 
     const csvContent = [
-      ['Nome', 'Telefone', 'WhatsApp', 'Telegram', 'Segmento', 'Último Pedido', 'Total Pedidos'].join(','),
+      ['Nome', 'Telefone', 'WhatsApp', 'Segmento', 'Último Pedido', 'Total Pedidos'].join(','),
       ...customers.map(customer => [
         customer.name || 'N/A',
         customer.phone || 'N/A',
         customer.whatsappNumber || 'N/A',
-        customer.telegramUsername || 'N/A',
         customer.customerSegment || 'regular',
         customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString('pt-BR') : 'Nunca',
         customer.totalOrders || 0
@@ -118,7 +117,7 @@ const ContactableCustomers = () => {
     <div className="contactable-customers">
       <div className="section-header">
         <h2>📱 Clientes Contactáveis para Liza</h2>
-        <p>Lista de clientes disponíveis para campanhas via WhatsApp e Telegram</p>
+        <p>Lista de clientes disponíveis para campanhas via WhatsApp</p>
       </div>
 
       {/* Filtros */}
@@ -145,8 +144,6 @@ const ContactableCustomers = () => {
           >
             <option value="all">Todos os Métodos</option>
             <option value="whatsapp">Apenas WhatsApp</option>
-            <option value="telegram">Apenas Telegram</option>
-            <option value="both">WhatsApp + Telegram</option>
           </select>
         </div>
 
@@ -212,18 +209,7 @@ const ContactableCustomers = () => {
                     </div>
                   )}
                   
-                  {customer.telegramUsername && (
-                    <div className="info-row">
-                      <span className="label">💬 Telegram:</span>
-                      <span className="value">@{customer.telegramUsername}</span>
-                      <button 
-                        className="contact-btn telegram"
-                        onClick={() => markAsContacted(customer._id, 'telegram')}
-                      >
-                        Contatado
-                      </button>
-                    </div>
-                  )}
+                  
                   
                   <div className="info-row">
                     <span className="label">🛒 Total Pedidos:</span>

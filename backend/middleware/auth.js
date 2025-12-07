@@ -26,7 +26,7 @@ const authMiddleware = async (req, res, next) => {
             });
         }
 
-        const token_decode = jwt.verify(token, process.env.JWT_SECRET);
+        const token_decode = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
         // Token decodificado com sucesso
         
         req.user = { 

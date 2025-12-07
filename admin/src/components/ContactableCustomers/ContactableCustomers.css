@@ -226,14 +226,6 @@
   box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
 }
 
-.contact-btn.telegram {
-  background: #0088cc;
-  color: white;
-}
-
-.contact-btn.telegram:hover {
-  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
-}
 
 /* Empty State */
 .empty-state {

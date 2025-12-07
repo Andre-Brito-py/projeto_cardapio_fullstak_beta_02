@@ -18,7 +18,7 @@ const PaymentStats = ({ token }) => {
     try {
       setLoading(true);
       const response = await axios.get(`${url}/api/payment-stats/payment-stats`, {
-        headers: { token },
+        headers: { Authorization: `Bearer ${token}` },
         params: {
           startDate: startDate || undefined,
           endDate: endDate || undefined

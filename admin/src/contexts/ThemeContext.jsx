@@ -18,9 +18,8 @@ export const ThemeProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    // Aplicar o tema ao documento
-    document.documentElement.setAttribute('data-theme', theme);
-    // Salvar no localStorage
+    document.documentElement.setAttribute('data-bs-theme', theme === 'dark' ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
     localStorage.setItem('admin-theme', theme);
   }, [theme]);
 

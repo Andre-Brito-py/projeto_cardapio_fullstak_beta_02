@@ -9,9 +9,9 @@ const URLS = {
   
   // URLs de produção (para quando a aplicação for para produção)
   PRODUCTION: {
-    FRONTEND_URL: import.meta.env?.VITE_FRONTEND_URL || 'https://your-frontend-domain.com',
-    ADMIN_URL: import.meta.env?.VITE_ADMIN_URL || 'https://your-admin-domain.com',
-    BACKEND_URL: import.meta.env?.VITE_BACKEND_URL || 'https://your-backend-domain.com'
+    FRONTEND_URL: import.meta.env?.VITE_FRONTEND_URL || 'http://localhost:5173',
+    ADMIN_URL: import.meta.env?.VITE_ADMIN_URL || 'http://localhost:5174',
+    BACKEND_URL: import.meta.env?.VITE_BACKEND_URL || 'http://localhost:4001'
   }
 };
 

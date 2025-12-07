@@ -6,7 +6,6 @@ import {
     testAsaasApi, 
     testLisaApi,
     testWhatsAppApi,
-    testTelegramApi,
     getApiStatus 
 } from '../controllers/apiController.js';
 import { authMultiTenant, requireSuperAdmin } from '../middleware/multiTenancy.js';
@@ -27,6 +26,5 @@ router.post('/test-google-maps', testGoogleMapsApi);
 router.post('/test-asaas', testAsaasApi);
 router.post('/test-lisa', testLisaApi);
 router.post('/test-whatsapp', testWhatsAppApi);
-router.post('/test-telegram', testTelegramApi);
 
 export default router;

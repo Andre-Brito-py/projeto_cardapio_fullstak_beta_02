@@ -252,7 +252,7 @@ const loginSuperAdmin = async (req, res) => {
         
         const token = jwt.sign(
             { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || 'dev-secret',
             { expiresIn: '7d' }
         );
         
@@ -526,7 +526,7 @@ const createUser = async (req, res) => {
         }
         
         // Validar role
-        const validRoles = ['customer', 'admin', 'superadmin'];
+        const validRoles = ['customer', 'store_admin', 'super_admin'];
         if (!validRoles.includes(role)) {
             return res.json({
                 success: false,
@@ -534,8 +534,8 @@ const createUser = async (req, res) => {
             });
         }
         
-        // Se for admin, verificar se storeId foi fornecido
-        if (role === 'admin' && !storeId) {
+        // Se for admin de loja, verificar se storeId foi fornecido
+        if (role === 'store_admin' && !storeId) {
             return res.json({
                 success: false,
                 message: "StoreId é obrigatório para administradores"
@@ -555,7 +555,7 @@ const createUser = async (req, res) => {
             isActive: isActive !== undefined ? isActive : true
         };
         
-        if (role === 'admin' && storeId) {
+        if (role === 'store_admin' && storeId) {
             userData.storeId = storeId;
         }
         
@@ -609,7 +609,7 @@ const updateUser = async (req, res) => {
         if (name) user.name = name;
         if (email) user.email = email;
         if (role) {
-            const validRoles = ['customer', 'admin', 'superadmin'];
+            const validRoles = ['customer', 'store_admin', 'super_admin'];
             if (!validRoles.includes(role)) {
                 return res.json({
                     success: false,
@@ -620,10 +620,10 @@ const updateUser = async (req, res) => {
         }
         if (isActive !== undefined) user.isActive = isActive;
         
-        // Se for admin, definir storeId
-        if (role === 'admin' && storeId) {
+        // Se for admin de loja, definir storeId
+        if (role === 'store_admin' && storeId) {
             user.storeId = storeId;
-        } else if (role !== 'admin') {
+        } else if (role && role !== 'store_admin') {
             user.storeId = undefined;
         }
         
@@ -667,7 +667,7 @@ const deleteUser = async (req, res) => {
         }
         
         // Não permitir deletar super admin
-        if (user.role === 'superadmin') {
+        if (user.role === 'super_admin') {
             return res.json({
                 success: false,
                 message: "Não é possível deletar um Super Admin"

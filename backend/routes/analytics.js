@@ -159,15 +159,7 @@ analyticsRouter.get('/customers/:storeId/segments', authMiddleware, async (req, 
                             ]
                         }
                     },
-                    contactableTelegram: {
-                        $sum: {
-                            $cond: [
-                                { $and: ['$allowTelegramContact', { $ne: ['$telegramUsername', ''] }] },
-                                1,
-                                0
-                            ]
-                        }
-                    }
+                    
                 }
             },
             { $sort: { count: -1 } }

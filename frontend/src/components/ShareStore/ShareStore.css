@@ -213,9 +213,6 @@
     background: linear-gradient(135deg, #1da1f2 0%, #0d8bd9 100%);
 }
 
-.share-social-btn.telegram {
-    background: linear-gradient(135deg, #0088cc 0%, #006699 100%);
-}
 
 .share-social-btn.email {
     background: linear-gradient(135deg, #ea4335 0%, #d33b2c 100%);

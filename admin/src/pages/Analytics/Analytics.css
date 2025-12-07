@@ -160,8 +160,7 @@
     gap: 15px;
 }
 
-.whatsapp-count,
-.telegram-count {
+.whatsapp-count {
     font-size: 12px;
     color: #666;
     background: #f8f9fa;

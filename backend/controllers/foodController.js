@@ -2,6 +2,8 @@ import fs from 'fs'
 import foodModel from '../models/foodModel.js'
 import AddonCategory from '../models/addonCategoryModel.js'
 import ProductSuggestion from '../models/productSuggestionModel.js'
+import logger from '../config/logger.js'
+import { NotFoundError, ValidationError, InternalError } from '../utils/AppError.js'
 
 // Função para popular produtos iniciais se não existirem
 const populateInitialFoods = async () => {
@@ -13,7 +15,7 @@ const populateInitialFoods = async () => {
                 { storeId: null }
             ]
         });
-        
+
         if (existingFoods.length === 0) {
             const initialFoods = [
                 {
@@ -44,11 +46,11 @@ const populateInitialFoods = async () => {
                     storeId: null
                 }
             ];
-            
+
             await foodModel.insertMany(initialFoods);
         }
     } catch (error) {
-        console.error('Erro ao popular produtos iniciais:', error);
+        logger.error('Erro ao popular produtos iniciais:', error);
     }
 };
 
@@ -57,7 +59,7 @@ const populateInitialFoods = async () => {
 
 //add food item
 
-const addFood = async (req,res) =>{
+const addFood = async (req, res) => {
 
     let image_filename = req.file ? req.file.filename : req.body.image || 'default.jpg';
 
@@ -67,7 +69,7 @@ const addFood = async (req,res) =>{
         try {
             extras = typeof req.body.extras === 'string' ? JSON.parse(req.body.extras) : req.body.extras;
         } catch (error) {
-            // Error parsing extras, using empty array as fallback
+            logger.warn('Error parsing extras, using empty array as fallback', { error: error.message });
         }
     }
 
@@ -77,7 +79,7 @@ const addFood = async (req,res) =>{
         try {
             inlineAddonCategories = typeof req.body.addonCategories === 'string' ? JSON.parse(req.body.addonCategories) : req.body.addonCategories;
         } catch (error) {
-            console.error('Error parsing inline addon categories:', error);
+            logger.warn('Error parsing inline addon categories', { error: error.message });
         }
     }
 
@@ -87,7 +89,7 @@ const addFood = async (req,res) =>{
         try {
             categoryAddons = typeof req.body.categoryAddons === 'string' ? JSON.parse(req.body.categoryAddons) : req.body.categoryAddons;
         } catch (error) {
-            console.error('Error parsing category addons:', error);
+            logger.warn('Error parsing category addons', { error: error.message });
         }
     }
 
@@ -109,38 +111,38 @@ const addFood = async (req,res) =>{
 
     try {
         await food.save();
-        res.json({success:true,message:'Food Added'})
+        res.status(201).json({ success: true, message: 'Produto adicionado com sucesso', data: food })
     } catch (error) {
-        console.error('Erro ao adicionar produto:', error);
-        res.json({success:false, message:'Error'})
+        logger.error('Erro ao adicionar produto:', error);
+        res.status(500).json({ success: false, message: 'Erro ao adicionar produto' })
     }
 }
 
 // All food list
 
-const listFood = async (req,res) =>{
+const listFood = async (req, res) => {
     try {
         // Se há contexto de loja, filtrar por loja, senão listar todos (incluindo produtos sem storeId)
-        const query = req.store 
-            ? { storeId: req.store._id, isActive: true } 
-            : { 
+        const query = req.store
+            ? { storeId: req.store._id, isActive: true }
+            : {
                 $or: [
                     { storeId: { $exists: false } },
                     { storeId: null }
                 ],
-                isActive: true 
+                isActive: true
             };
         const foods = await foodModel.find(query).populate('storeId', 'name slug');
-        res.json({success:true,data:foods})
+        res.status(200).json({ success: true, data: foods })
     } catch (error) {
-        console.error('Erro ao listar produtos:', error)
-        res.json({success:false, message:'Error'})
+        logger.error('Erro ao listar produtos:', error)
+        res.status(500).json({ success: false, message: 'Erro ao listar produtos' })
     }
 }
 
 // remove food item
 
-const removeFood = async (req,res)=>{
+const removeFood = async (req, res) => {
     try {
         // Verificar se o produto pertence à loja
         const query = req.store ? { _id: req.body.id, storeId: req.store._id } : { _id: req.body.id };
@@ -150,23 +152,23 @@ const removeFood = async (req,res)=>{
             if (food.image) {
                 const storeId = food.storeId;
                 const imagePath = `uploads/stores/${storeId}/${food.image}`;
-                
+
                 fs.unlink(imagePath, (err) => {
                     if (err) {
                         // Tentar caminho antigo como fallback
-                        fs.unlink(`uploads/${food.image}`, () => {});
+                        fs.unlink(`uploads/${food.image}`, () => { });
                     }
                 });
             }
-            
+
             await foodModel.findByIdAndDelete(req.body.id);
-            res.json({success:true,message:'Food Removed'})
+            res.status(200).json({ success: true, message: 'Produto removido com sucesso' })
         } else {
-            res.json({success:false, message:'Food not found or access denied'})
+            res.status(404).json({ success: false, message: 'Produto não encontrado ou acesso negado' })
         }
     } catch (error) {
-        console.error('Erro ao remover produto:', error)
-        res.json({success:false, message:'Error'})
+        logger.error('Erro ao remover produto:', error)
+        res.status(500).json({ success: false, message: 'Erro ao remover produto' })
     }
 }
 
@@ -174,15 +176,15 @@ const removeFood = async (req,res)=>{
 const updateFood = async (req, res) => {
     try {
         const { id, name, description, price, category, extras, addonCategories, categoryAddons, useOldSystem } = req.body;
-        
+
         // Find food in database with store context
         const query = req.store ? { _id: id, storeId: req.store._id } : { _id: id };
         const food = await foodModel.findOne(query);
-        
+
         if (!food) {
-            return res.json({ success: false, message: 'Food item not found or access denied' });
+            return res.status(404).json({ success: false, message: 'Produto não encontrado ou acesso negado' });
         }
-        
+
         // Prepare update data
         const updateData = {
             name: name || food.name,
@@ -191,7 +193,7 @@ const updateFood = async (req, res) => {
             category: category || food.category,
             useOldSystem: useOldSystem !== undefined ? (useOldSystem === 'true' || useOldSystem === true) : food.useOldSystem
         };
-        
+
         // Update based on system type
         if (updateData.useOldSystem) {
             // Sistema antigo - atualizar extras
@@ -218,7 +220,7 @@ const updateFood = async (req, res) => {
             } else {
                 updateData.inlineAddonCategories = food.inlineAddonCategories || [];
             }
-            
+
             if (categoryAddons) {
                 try {
                     updateData.categoryAddons = typeof categoryAddons === 'string' ? JSON.parse(categoryAddons) : categoryAddons;
@@ -231,18 +233,18 @@ const updateFood = async (req, res) => {
             // Limpar extras do sistema antigo
             updateData.extras = [];
         }
-        
+
         // Update image if new file is uploaded
         if (req.file) {
             // Remove old image with store isolation
             if (food.image) {
                 const storeId = food.storeId;
                 const oldImagePath = `uploads/stores/${storeId}/${food.image}`;
-                
+
                 fs.unlink(oldImagePath, (err) => {
                     if (err) {
                         // Tentar caminho antigo como fallback
-                        fs.unlink(`uploads/${food.image}`, () => {});
+                        fs.unlink(`uploads/${food.image}`, () => { });
                     }
                 });
             }
@@ -250,14 +252,14 @@ const updateFood = async (req, res) => {
         } else {
             updateData.image = food.image;
         }
-        
+
         // Update in database
-        const updatedFood = await foodModel.findByIdAndUpdate(id, updateData, { new: true });
-        
-        res.json({ success: true, message: 'Food Updated', data: updatedFood });
+        const updatedFood = await foodModel.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+
+        res.status(200).json({ success: true, message: 'Produto atualizado com sucesso', data: updatedFood });
     } catch (error) {
-        console.error('Erro ao atualizar comida:', error);
-        res.json({ success: false, message: 'Error updating food' });
+        logger.error('Erro ao atualizar produto:', error);
+        res.status(500).json({ success: false, message: 'Erro ao atualizar produto' });
     }
 };
 
@@ -271,12 +273,12 @@ const getFoodWithAddonsAndSuggestions = async (req, res) => {
         const food = await foodModel.findOne({ _id: foodId, storeId, isActive: true });
 
         if (!food) {
-            return res.json({ success: false, message: 'Produto não encontrado' });
+            return res.status(404).json({ success: false, message: 'Produto não encontrado' });
         }
 
         // Preparar dados de adicionais baseado no sistema usado
         let addonData = {};
-        
+
         if (food.useOldSystem) {
             // Sistema antigo - usar extras
             addonData = {
@@ -293,21 +295,21 @@ const getFoodWithAddonsAndSuggestions = async (req, res) => {
         }
 
         // Buscar sugestões de produtos
-        const suggestions = await ProductSuggestion.find({ 
-            productId: foodId, 
-            storeId, 
-            isActive: true 
+        const suggestions = await ProductSuggestion.find({
+            productId: foodId,
+            storeId,
+            isActive: true
         })
-        .populate('suggestedProductId', 'name image price description category')
-        .sort({ order: 1, createdAt: -1 });
+            .populate('suggestedProductId', 'name image price description category')
+            .sort({ order: 1, createdAt: -1 });
 
         // Filtrar apenas produtos ativos nas sugestões
-        const activeSuggestions = suggestions.filter(suggestion => 
+        const activeSuggestions = suggestions.filter(suggestion =>
             suggestion.suggestedProductId && suggestion.suggestedProductId.name
         );
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             data: {
                 ...food.toObject(),
                 ...addonData,
@@ -315,22 +317,22 @@ const getFoodWithAddonsAndSuggestions = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Erro ao obter produto com adicionais e sugestões:', error);
-        res.json({ success: false, message: 'Erro interno do servidor' });
+        logger.error('Erro ao obter produto com adicionais:', error);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor' });
     }
 };
 
 // Listar produtos com informações básicas de adicionais (para listagem)
 const listFoodWithAddonInfo = async (req, res) => {
     try {
-        const query = req.store 
-            ? { storeId: req.store._id, isActive: true } 
-            : { 
+        const query = req.store
+            ? { storeId: req.store._id, isActive: true }
+            : {
                 $or: [
                     { storeId: { $exists: false } },
                     { storeId: null }
                 ],
-                isActive: true 
+                isActive: true
             };
         const foods = await foodModel.find(query)
             .populate('storeId', 'name slug')
@@ -340,7 +342,7 @@ const listFoodWithAddonInfo = async (req, res) => {
         const foodsWithSuggestionCount = await Promise.all(
             foods.map(async (food) => {
                 let suggestionCount = 0;
-                
+
                 // Só buscar sugestões se o produto tiver storeId
                 if (food.storeId) {
                     suggestionCount = await ProductSuggestion.countDocuments({
@@ -357,10 +359,10 @@ const listFoodWithAddonInfo = async (req, res) => {
             })
         );
 
-        res.json({ success: true, data: foodsWithSuggestionCount });
+        res.status(200).json({ success: true, data: foodsWithSuggestionCount });
     } catch (error) {
-        console.error('Erro ao listar produtos com informações de adicionais:', error);
-        res.json({ success: false, message: 'Erro interno do servidor' });
+        logger.error('Erro ao listar produtos:', error);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor' });
     }
 };
 
@@ -368,46 +370,46 @@ const listFoodWithAddonInfo = async (req, res) => {
 const updateStockStatus = async (req, res) => {
     try {
         const { id, isOutOfStock, outOfStockAddons, outOfStockAddonCategories } = req.body;
-        
+
         // Verificar se o produto pertence à loja
         const query = req.store ? { _id: id, storeId: req.store._id } : { _id: id };
         const food = await foodModel.findOne(query);
-        
+
         if (!food) {
-            return res.json({ success: false, message: 'Produto não encontrado ou acesso negado' });
+            return res.status(404).json({ success: false, message: 'Produto não encontrado ou acesso negado' });
         }
-        
+
         // Preparar dados de atualização
         const updateData = {};
-        
+
         if (isOutOfStock !== undefined) {
             updateData.isOutOfStock = isOutOfStock;
         }
-        
+
         if (outOfStockAddons !== undefined) {
             updateData.outOfStockAddons = Array.isArray(outOfStockAddons) ? outOfStockAddons : [];
         }
-        
+
         if (outOfStockAddonCategories !== undefined) {
             updateData.outOfStockAddonCategories = Array.isArray(outOfStockAddonCategories) ? outOfStockAddonCategories : [];
         }
-        
+
         // Atualizar produto
         const updatedFood = await foodModel.findByIdAndUpdate(
             id,
             updateData,
             { new: true }
         );
-        
+
         res.json({
             success: true,
             message: 'Status de estoque atualizado com sucesso',
             data: updatedFood
         });
-        
+
     } catch (error) {
-        console.error('Erro ao atualizar status de estoque:', error);
-        res.json({ success: false, message: 'Erro interno do servidor' });
+        logger.error('Erro ao atualizar status de estoque:', error);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor' });
     }
 };
 
@@ -415,20 +417,20 @@ const updateStockStatus = async (req, res) => {
 const getFoodDetails = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Verificar se o produto pertence à loja
         const query = req.store ? { _id: id, storeId: req.store._id } : { _id: id };
         const food = await foodModel.findOne(query);
-        
+
         if (!food) {
-            return res.json({ success: false, message: 'Produto não encontrado ou acesso negado' });
+            return res.status(404).json({ success: false, message: 'Produto não encontrado ou acesso negado' });
         }
-        
-        res.json({ success: true, data: food });
+
+        res.status(200).json({ success: true, data: food });
     } catch (error) {
-        console.error('Erro ao buscar detalhes do produto:', error);
-        res.json({ success: false, message: 'Erro interno do servidor' });
+        logger.error('Erro ao buscar detalhes do produto:', error);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor' });
     }
 };
 
-export {addFood, listFood, removeFood, updateFood, getFoodWithAddonsAndSuggestions, listFoodWithAddonInfo, updateStockStatus, getFoodDetails}
+export { addFood, listFood, removeFood, updateFood, getFoodWithAddonsAndSuggestions, listFoodWithAddonInfo, updateStockStatus, getFoodDetails }

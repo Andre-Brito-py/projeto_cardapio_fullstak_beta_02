@@ -84,25 +84,13 @@ lizaCustomerRouter.get('/contactable', authMiddleware, identifyStore, async (req
             filters.customerSegment = segment;
         }
 
-        // Filtrar por método de contato
-        if (contactMethod === 'whatsapp') {
-            filters.allowWhatsappContact = true;
-            filters.whatsappNumber = { $exists: true, $ne: '' };
-        } else if (contactMethod === 'telegram') {
-            filters.allowTelegramContact = true;
-            filters.telegramUsername = { $exists: true, $ne: '' };
-        } else if (contactMethod === 'both') {
-            filters.$and = [
-                { allowWhatsappContact: true },
-                { allowTelegramContact: true },
-                { whatsappNumber: { $exists: true, $ne: '' } },
-                { telegramUsername: { $exists: true, $ne: '' } }
-            ];
-        }
+        // Filtrar por método de contato (apenas WhatsApp)
+        filters.allowWhatsappContact = true;
+        filters.whatsappNumber = { $exists: true, $ne: '' };
 
         // Buscar clientes
         const customers = await Customer.find(filters)
-            .select('name phone whatsappNumber telegramUsername customerSegment totalOrders lastOrderDate')
+            .select('name phone whatsappNumber customerSegment totalOrders lastOrderDate')
             .limit(parseInt(limit))
             .sort({ lastOrderDate: -1 });
 
@@ -113,7 +101,7 @@ lizaCustomerRouter.get('/contactable', authMiddleware, identifyStore, async (req
             count: customers.length,
             filters: {
                 segment,
-                contactMethod,
+                contactMethod: 'whatsapp',
                 limit: parseInt(limit),
                 active
             }
@@ -154,7 +142,7 @@ lizaCustomerRouter.get('/search', authMiddleware, identifyStore, async (req, res
                 { whatsappNumber: { $regex: searchTerm } }
             ]
         })
-        .select('name phone whatsappNumber telegramUsername customerSegment totalOrders lastOrderDate')
+        .select('name phone whatsappNumber customerSegment totalOrders lastOrderDate')
         .limit(parseInt(limit))
         .sort({ name: 1 });
 
@@ -181,9 +169,7 @@ lizaCustomerRouter.patch('/contact-preferences/:customerId', authMiddleware, ide
         const { customerId } = req.params;
         const { storeId } = req;
         const { 
-            allowWhatsappContact, 
-            allowTelegramContact, 
-            telegramUsername,
+            allowWhatsappContact,
             campaignOptOut 
         } = req.body;
 
@@ -205,12 +191,7 @@ lizaCustomerRouter.patch('/contact-preferences/:customerId', authMiddleware, ide
         if (typeof allowWhatsappContact === 'boolean') {
             updateData.allowWhatsappContact = allowWhatsappContact;
         }
-        if (typeof allowTelegramContact === 'boolean') {
-            updateData.allowTelegramContact = allowTelegramContact;
-        }
-        if (telegramUsername !== undefined) {
-            updateData.telegramUsername = telegramUsername;
-        }
+        
         if (typeof campaignOptOut === 'boolean') {
             updateData.campaignOptOut = campaignOptOut;
         }
@@ -221,7 +202,7 @@ lizaCustomerRouter.patch('/contact-preferences/:customerId', authMiddleware, ide
             customerId,
             updateData,
             { new: true }
-        ).select('name phone allowWhatsappContact allowTelegramContact telegramUsername campaignOptOut');
+        ).select('name phone allowWhatsappContact campaignOptOut');
 
         res.json({
             success: true,

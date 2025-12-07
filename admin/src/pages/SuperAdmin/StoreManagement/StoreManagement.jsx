@@ -46,31 +46,18 @@ const StoreManagement = ({ url, token }) => {
     language: 'pt-BR',
     currency: 'BRL',
     timezone: 'America/Sao_Paulo',
-    // Campos do Telegram
-    telegramChatId: '',
-    telegramPhoneNumber: '',
-    telegramIsActive: false
+    
   });
-
-  
   useEffect(() => {
-    // Component mounted - checking for UI blocking elements
     const checkForBlockingElements = () => {
       const backdrop = document.querySelector('.sidebar-backdrop');
       const overlay = document.querySelector('.store-form-overlay');
-      
-      // Check if elements might be blocking interactions
       if (backdrop) {
         const backdropStyles = getComputedStyle(backdrop);
-        // Handle backdrop visibility if needed
       }
     };
-    
     checkForBlockingElements();
-    
-    // Check again after a small delay
     const timer = setTimeout(checkForBlockingElements, 1000);
-    
     return () => clearTimeout(timer);
   }, []);
 
@@ -93,8 +80,10 @@ const StoreManagement = ({ url, token }) => {
   };
 
   useEffect(() => {
-    fetchStores();
-  }, []);
+    if (token) {
+      fetchStores();
+    }
+  }, [token]);
 
   // Filtrar e ordenar lojas
   useEffect(() => {
@@ -187,11 +176,22 @@ const StoreManagement = ({ url, token }) => {
       if (response.data.success) {
         setStores(response.data.data.stores || []);
       } else {
-        toast.error('Erro ao carregar lojas');
+        toast.error(response.data.message || 'Erro ao carregar lojas');
       }
     } catch (error) {
-      console.error('Erro ao carregar lojas:', error);
-      toast.error('Erro ao conectar com o servidor');
+      console.error('Erro ao carregar lojas:', error.response?.data || error.message);
+      const message = error.response?.data?.message || error.message || 'Erro ao conectar com o servidor';
+      if (error.response?.status === 401 && (message.includes('Token inválido') || message.includes('Token não fornecido'))) {
+        try {
+          localStorage.removeItem('superAdminToken');
+          localStorage.removeItem('token');
+          localStorage.removeItem('userRole');
+        } catch {}
+        toast.error('Sessão expirada. Faça login novamente.');
+        window.location.href = '/';
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -251,12 +251,9 @@ const StoreManagement = ({ url, token }) => {
       subscriptionPlan: store.subscriptionPlan || 'Básico',
       language: store.language || 'pt-BR',
       currency: store.currency || 'BRL',
-      timezone: store.timezone || 'America/Sao_Paulo',
-      // Campos do Telegram
-      telegramChatId: store.telegram?.chatId || '',
-      telegramPhoneNumber: store.telegram?.phoneNumber || '',
-      telegramIsActive: store.telegram?.isActive || false
-    });
+    timezone: store.timezone || 'America/Sao_Paulo',
+    
+  });
     setShowForm(true);
   };
 
@@ -358,10 +355,7 @@ const StoreManagement = ({ url, token }) => {
       language: 'pt-BR',
       currency: 'BRL',
       timezone: 'America/Sao_Paulo',
-      // Campos do Telegram
-      telegramChatId: '',
-      telegramPhoneNumber: '',
-      telegramIsActive: false
+      
     });
     setEditingStore(null);
     setShowForm(false);
@@ -426,18 +420,18 @@ const StoreManagement = ({ url, token }) => {
           <h2>Gerenciamento de Lojas</h2>
           <div className='header-actions'>
             <button 
-              className='export-btn'
+              className='btn btn-secondary export-btn'
               onClick={exportToCSV}
               disabled={loading}
             >
-              📊 Exportar CSV
+              <i className='ti ti-download me-1'></i> Exportar CSV
             </button>
             <button 
-              className='add-store-btn'
+              className='btn btn-primary add-store-btn'
               onClick={() => setShowForm(true)}
               disabled={loading}
             >
-              + Nova Loja
+              <i className='ti ti-plus me-1'></i> Nova Loja
             </button>
           </div>
         </div>
@@ -445,52 +439,65 @@ const StoreManagement = ({ url, token }) => {
 
       {/* Estatísticas */}
       <div className='store-stats'>
-        <div className='stat-card'>
-          <div className='stat-icon'>🏪</div>
-          <div className='stat-content'>
-            <h3>{storeStats.total}</h3>
-            <p>Total de Lojas</p>
+        <div className='card stat-card'>
+          <div className='card-body d-flex align-items-center gap-3'>
+            <div className='stat-icon'><i className='ti ti-building-store'></i></div>
+            <div className='stat-content'>
+              <h3>{storeStats.total}</h3>
+              <p>Total de Lojas</p>
+            </div>
           </div>
         </div>
-        <div className='stat-card active'>
-          <div className='stat-icon'>✅</div>
-          <div className='stat-content'>
-            <h3>{storeStats.active}</h3>
-            <p>Lojas Ativas</p>
+        <div className='card stat-card active'>
+          <div className='card-body d-flex align-items-center gap-3'>
+            <div className='stat-icon'><i className='ti ti-circle-check'></i></div>
+            <div className='stat-content'>
+              <h3>{storeStats.active}</h3>
+              <p>Lojas Ativas</p>
+            </div>
           </div>
         </div>
-        <div className='stat-card suspended'>
-          <div className='stat-icon'>⏸️</div>
-          <div className='stat-content'>
-            <h3>{storeStats.suspended}</h3>
-            <p>Lojas Suspensas</p>
+        <div className='card stat-card suspended'>
+          <div className='card-body d-flex align-items-center gap-3'>
+            <div className='stat-icon'><i className='ti ti-player-pause'></i></div>
+            <div className='stat-content'>
+              <h3>{storeStats.suspended}</h3>
+              <p>Lojas Suspensas</p>
+            </div>
           </div>
         </div>
-        <div className='stat-card pending'>
-          <div className='stat-icon'>⏳</div>
-          <div className='stat-content'>
-            <h3>{storeStats.pending}</h3>
-            <p>Lojas Pendentes</p>
+        <div className='card stat-card pending'>
+          <div className='card-body d-flex align-items-center gap-3'>
+            <div className='stat-icon'><i className='ti ti-hourglass'></i></div>
+            <div className='stat-content'>
+              <h3>{storeStats.pending}</h3>
+              <p>Lojas Pendentes</p>
+            </div>
           </div>
         </div>
-        <div className='stat-card revenue'>
-          <div className='stat-icon'>💰</div>
-          <div className='stat-content'>
-            <h3>{formatCurrency(storeStats.totalRevenue)}</h3>
-            <p>Receita Total</p>
+        <div className='card stat-card revenue'>
+          <div className='card-body d-flex align-items-center gap-3'>
+            <div className='stat-icon'><i className='ti ti-coins'></i></div>
+            <div className='stat-content'>
+              <h3>{formatCurrency(storeStats.totalRevenue)}</h3>
+              <p>Receita Total</p>
+            </div>
           </div>
         </div>
-        <div className='stat-card avg-revenue'>
-          <div className='stat-icon'>📈</div>
-          <div className='stat-content'>
-            <h3>{formatCurrency(storeStats.avgRevenuePerStore)}</h3>
-            <p>Receita Média/Loja</p>
+        <div className='card stat-card avg-revenue'>
+          <div className='card-body d-flex align-items-center gap-3'>
+            <div className='stat-icon'><i className='ti ti-trending-up'></i></div>
+            <div className='stat-content'>
+              <h3>{formatCurrency(storeStats.avgRevenuePerStore)}</h3>
+              <p>Receita Média/Loja</p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Filtros e Busca */}
-      <div className='store-filters'>
+      <div className='store-filters card'>
+        <div className='card-body d-flex align-items-center gap-3 flex-wrap'>
         <div className='search-box'>
           <input
             type='text'
@@ -519,14 +526,15 @@ const StoreManagement = ({ url, token }) => {
             <option value='Enterprise'>Enterprise</option>
           </select>
         </div>
-        <div className='results-info'>
+        <div className='results-info ms-auto'>
           Mostrando {currentStores.length} de {filteredStores.length} lojas
+        </div>
         </div>
       </div>
 
       {showForm && (
         <div className='store-form-overlay'>
-          <div className='store-form'>
+          <div className='store-form card'>
             <h3>{editingStore ? 'Editar Loja' : 'Nova Loja'}</h3>
             <form onSubmit={handleSubmit}>
               <div className='form-group'>
@@ -721,54 +729,11 @@ const StoreManagement = ({ url, token }) => {
                 <small>A moeda será usada para preços e transações na loja</small>
               </div>
 
-              {/* Seção de Configurações do Telegram */}
-              <div className='form-section'>
-                <h4>📱 Configurações do Telegram</h4>
-                
-                <div className='form-group'>
-                  <label>Chat ID da Loja no Telegram</label>
-                  <input
-                    type='text'
-                    name='telegramChatId'
-                    value={formData.telegramChatId}
-                    onChange={handleInputChange}
-                    placeholder='123456789'
-                  />
-                  <small>ID do chat da loja para autorização automática no bot Telegram</small>
-                </div>
-
-                <div className='form-group'>
-                  <label>Número do Telegram</label>
-                  <input
-                    type='text'
-                    name='telegramPhoneNumber'
-                    value={formData.telegramPhoneNumber}
-                    onChange={handleInputChange}
-                    placeholder='(11) 99999-9999'
-                  />
-                  <small>Número de telefone associado ao Telegram da loja</small>
-                </div>
-
-                <div className='form-group'>
-                  <label className='checkbox-label'>
-                    <input
-                      type='checkbox'
-                      name='telegramIsActive'
-                      checked={formData.telegramIsActive}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        telegramIsActive: e.target.checked
-                      }))}
-                    />
-                    Ativar integração com Telegram
-                  </label>
-                  <small>Permite que a loja seja autorizada automaticamente no bot</small>
-                </div>
-              </div>
+              
               
               <div className='form-actions'>
-                <button type='button' onClick={resetForm}>Cancelar</button>
-                <button type='submit' disabled={loading}>
+                <button type='button' className='btn btn-outline' onClick={resetForm}>Cancelar</button>
+                <button type='submit' className='btn btn-primary' disabled={loading}>
                   {loading ? 'Salvando...' : (editingStore ? 'Atualizar' : 'Criar')}
                 </button>
               </div>
@@ -779,7 +744,7 @@ const StoreManagement = ({ url, token }) => {
 
       {showDeleteModal && (
         <div className='store-form-overlay'>
-          <div className='delete-modal'>
+          <div className='delete-modal card'>
             <h3>⚠️ Confirmar Exclusão</h3>
             <div className='delete-warning'>
               <p>Tem certeza que deseja excluir a loja <strong>"{storeToDelete?.name}"</strong>?</p>
@@ -799,14 +764,14 @@ const StoreManagement = ({ url, token }) => {
             <div className='modal-actions'>
               <button 
                 type='button' 
-                className='cancel-btn'
+                className='btn btn-outline cancel-btn'
                 onClick={cancelDelete}
               >
                 Cancelar
               </button>
               <button 
                 type='button' 
-                className='confirm-delete-btn'
+                className='btn btn-danger confirm-delete-btn'
                 onClick={confirmDelete}
               >
                 Excluir Permanentemente
@@ -827,97 +792,103 @@ const StoreManagement = ({ url, token }) => {
         
         {!loading && filteredStores.length > 0 && (
           <>
-            <table className='stores-table'>
-              <thead>
-                <tr>
-                  <th 
-                    className={`sortable ${sortBy === 'name' ? `sorted-${sortOrder}` : ''}`}
-                    onClick={() => handleSort('name')}
-                  >
-                    Nome {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th 
-                    className={`sortable ${sortBy === 'ownerName' ? `sorted-${sortOrder}` : ''}`}
-                    onClick={() => handleSort('ownerName')}
-                  >
-                    Proprietário {sortBy === 'ownerName' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th>Email</th>
-                  <th 
-                    className={`sortable ${sortBy === 'status' ? `sorted-${sortOrder}` : ''}`}
-                    onClick={() => handleSort('status')}
-                  >
-                    Status {sortBy === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th 
-                    className={`sortable ${sortBy === 'plan' ? `sorted-${sortOrder}` : ''}`}
-                    onClick={() => handleSort('plan')}
-                  >
-                    Plano {sortBy === 'plan' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th 
-                    className={`sortable ${sortBy === 'createdAt' ? `sorted-${sortOrder}` : ''}`}
-                    onClick={() => handleSort('createdAt')}
-                  >
-                    Criada em {sortBy === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}
-                  </th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentStores.map(store => (
-                  <tr key={store._id} className={store.status !== 'active' ? 'inactive' : ''}>
-                    <td>
-                      <div className='store-info'>
-                        <strong>{store.name}</strong>
-                        {store.description && <small>{store.description}</small>}
-                      </div>
-                    </td>
-                    <td>{store.ownerName}</td>
-                    <td>{store.ownerEmail}</td>
-                    <td>
-                      <span className={`status ${store.status}`}>
-                        {store.status === 'active' ? '✅ Ativa' : 
-                         store.status === 'suspended' ? '⏸️ Suspensa' :
-                         store.status === 'pending' ? '⏳ Pendente' : '❌ Inativa'}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`plan ${(store.subscription?.plan || store.subscriptionPlan).toLowerCase()}`}>
-                        {store.subscription?.plan || store.subscriptionPlan}
-                      </span>
-                    </td>
-                    <td>{new Date(store.createdAt).toLocaleDateString('pt-BR')}</td>
-                    <td className='actions'>
+            <div className='card'>
+              <div className='card-body'>
+                <div className='table-responsive'>
+                  <table className='stores-table table table-vcenter table-hover'>
+                <thead>
+                  <tr>
+                    <th 
+                      className={`sortable ${sortBy === 'name' ? `sorted-${sortOrder}` : ''}`}
+                      onClick={() => handleSort('name')}
+                    >
+                      Nome {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className={`sortable ${sortBy === 'ownerName' ? `sorted-${sortOrder}` : ''}`}
+                      onClick={() => handleSort('ownerName')}
+                    >
+                      Proprietário {sortBy === 'ownerName' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th>Email</th>
+                    <th 
+                      className={`sortable ${sortBy === 'status' ? `sorted-${sortOrder}` : ''}`}
+                      onClick={() => handleSort('status')}
+                    >
+                      Status {sortBy === 'status' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className={`sortable ${sortBy === 'plan' ? `sorted-${sortOrder}` : ''}`}
+                      onClick={() => handleSort('plan')}
+                    >
+                      Plano {sortBy === 'plan' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th 
+                      className={`sortable ${sortBy === 'createdAt' ? `sorted-${sortOrder}` : ''}`}
+                      onClick={() => handleSort('createdAt')}
+                    >
+                      Criada em {sortBy === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentStores.map(store => (
+                    <tr key={store._id} className={store.status !== 'active' ? 'inactive' : ''}>
+                      <td>
+                        <div className='store-info'>
+                          <strong>{store.name}</strong>
+                          {store.description && <small>{store.description}</small>}
+                        </div>
+                      </td>
+                      <td>{store.ownerName}</td>
+                      <td>{store.ownerEmail}</td>
+                      <td>
+                        <span className={`status ${store.status}`}>
+                          {store.status === 'active' ? '✅ Ativa' : 
+                           store.status === 'suspended' ? '⏸️ Suspensa' :
+                           store.status === 'pending' ? '⏳ Pendente' : '❌ Inativa'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`plan ${(store.subscription?.plan || store.subscriptionPlan).toLowerCase()}`}>
+                          {store.subscription?.plan || store.subscriptionPlan}
+                        </span>
+                      </td>
+                      <td>{new Date(store.createdAt).toLocaleDateString('pt-BR')}</td>
+                      <td className='actions'>
                       <button 
-                        className='edit-btn'
+                        className='btn edit-btn'
                         onClick={() => handleEdit(store)}
                         disabled={loading}
                         title='Editar loja'
                       >
-                        ✏️
+                        <i className='ti ti-pencil'></i>
                       </button>
                       <button 
-                        className={`toggle-btn ${store.status === 'active' ? 'active' : 'inactive'}`}
+                        className={`btn toggle-btn ${store.status === 'active' ? 'active' : 'inactive'}`}
                         onClick={() => toggleStoreStatus(store._id, store.status)}
                         disabled={loading}
                         title={store.status === 'active' ? 'Desativar loja' : 'Ativar loja'}
                       >
-                        {store.status === 'active' ? '⏸️' : '▶️'}
+                        {store.status === 'active' ? <i className='ti ti-player-pause'></i> : <i className='ti ti-player-play'></i>}
                       </button>
                       <button 
-                        className='delete-btn'
+                        className='btn delete-btn'
                         onClick={() => handleDelete(store._id)}
                         disabled={loading}
                         title='Excluir loja'
                       >
-                        🗑️
+                        <i className='ti ti-trash'></i>
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
 
             {/* Paginação */}
             {totalPages > 1 && (
@@ -925,7 +896,7 @@ const StoreManagement = ({ url, token }) => {
                 <button 
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className='pagination-btn'
+                  className='btn pagination-btn'
                 >
                   ← Anterior
                 </button>
@@ -947,7 +918,7 @@ const StoreManagement = ({ url, token }) => {
                       <button
                         key={pageNum}
                         onClick={() => goToPage(pageNum)}
-                        className={`pagination-btn ${currentPage === pageNum ? 'active' : ''}`}
+                        className={`btn pagination-btn ${currentPage === pageNum ? 'active' : ''}`}
                       >
                         {pageNum}
                       </button>
@@ -958,7 +929,7 @@ const StoreManagement = ({ url, token }) => {
                 <button 
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className='pagination-btn'
+                  className='btn pagination-btn'
                 >
                   Próxima →
                 </button>

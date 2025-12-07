@@ -3,6 +3,8 @@ import './SuperAdminDashboard.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { BACKEND_URL } from '../../../config/urls';
+import PremiumCard from '../../../components/Card/PremiumCard';
+import ReactApexChart from 'react-apexcharts';
 
 const SuperAdminDashboard = ({ token }) => {
   const [stats, setStats] = useState({
@@ -13,16 +15,17 @@ const SuperAdminDashboard = ({ token }) => {
     recentActivity: []
   });
   const [loading, setLoading] = useState(true);
-  const [quickActions, setQuickActions] = useState([
-    { id: 1, title: 'Nova Loja', icon: '🏪', action: 'create-store', color: 'primary' },
-    { id: 2, title: 'Novo Usuário', icon: '👤', action: 'create-user', color: 'success' },
-    { id: 3, title: 'Relatórios', icon: '📊', action: 'view-reports', color: 'info' },
-    { id: 4, title: 'Configurações', icon: '⚙️', action: 'system-settings', color: 'warning' }
-  ]);
+
+  const quickActions = [
+    { id: 1, title: 'Nova Loja', icon: <i className="ti ti-building-store"></i>, action: 'create-store' },
+    { id: 2, title: 'Novo Usuário', icon: <i className="ti ti-user-plus"></i>, action: 'create-user' },
+    { id: 3, title: 'Relatórios', icon: <i className="ti ti-chart-bar"></i>, action: 'view-reports' },
+    { id: 4, title: 'Configurações', icon: <i className="ti ti-settings"></i>, action: 'system-settings' }
+  ];
 
   useEffect(() => {
     fetchDashboardData();
-    const interval = setInterval(fetchDashboardData, 30000); // Atualiza a cada 30 segundos
+    const interval = setInterval(fetchDashboardData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -43,8 +46,8 @@ const SuperAdminDashboard = ({ token }) => {
         }));
       }
     } catch (error) {
-      console.error('Erro ao carregar dados do dashboard:', error);
-      toast.error('Erro ao carregar dados do dashboard');
+      console.error('Erro ao carregar dados:', error);
+      toast.error('Erro ao atualizar dashboard');
     } finally {
       setLoading(false);
     }
@@ -55,61 +58,91 @@ const SuperAdminDashboard = ({ token }) => {
       const response = await axios.get(`${BACKEND_URL}/api/system/recent-activity`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      if (response.data.success) {
-        return response.data.data;
-      } else {
-        console.error('Erro ao buscar atividades recentes:', response.data.message);
-        // Fallback para dados simulados em caso de erro
-        return [
-          { id: 1, type: 'system_backup', message: 'Backup automático realizado com sucesso', time: '1 hora atrás', icon: '💾' }
-        ];
-      }
+      return response.data.success ? response.data.data : [];
     } catch (error) {
-      console.error('Erro ao buscar atividades recentes:', error);
-      // Fallback para dados simulados em caso de erro
+      // Fallback em caso de erro (mock data)
       return [
-        { id: 1, type: 'system_backup', message: 'Backup automático realizado com sucesso', time: '1 hora atrás', icon: '💾' }
+        { id: 1, type: 'info', message: 'Sistema iniciado com sucesso', time: 'Agora', icon: '🚀' }
       ];
     }
   };
 
   const handleQuickAction = (action) => {
-    switch (action) {
-      case 'create-store':
-        window.location.href = '/super-admin/stores';
-        break;
-      case 'create-user':
-        window.location.href = '/super-admin/users';
-        break;
-      case 'view-reports':
-        window.location.href = '/super-admin/analytics';
-        break;
-      case 'system-settings':
-        window.location.href = '/super-admin/system-settings';
-        break;
-      default:
-        break;
-    }
+    const routes = {
+      'create-store': '/super-admin/stores',
+      'create-user': '/super-admin/users',
+      'view-reports': '/super-admin/analytics',
+      'system-settings': '/super-admin/system-settings'
+    };
+    if (routes[action]) window.location.href = routes[action];
   };
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
 
-  const getGrowthPercentage = (current, previous) => {
-    if (previous === 0) return 0;
-    return ((current - previous) / previous * 100).toFixed(1);
+  const [palette, setPalette] = useState({
+    primary: '#f76707',
+    green: '#2fb344',
+    blue: '#206bc4',
+    orange: '#f59f00',
+    gray: '#adb5bd'
+  });
+
+  useEffect(() => {
+    const styles = getComputedStyle(document.documentElement);
+    setPalette({
+      primary: styles.getPropertyValue('--primary')?.trim() || '#f76707',
+      green: styles.getPropertyValue('--tblr-green')?.trim() || '#2fb344',
+      blue: styles.getPropertyValue('--tblr-blue')?.trim() || '#206bc4',
+      orange: styles.getPropertyValue('--tblr-orange')?.trim() || '#f59f00',
+      gray: styles.getPropertyValue('--tblr-gray-600')?.trim() || '#adb5bd'
+    });
+  }, []);
+
+  const revenueSeries = [{
+    name: 'Receita',
+    data: [12, 14, 13, 16, 18, 21, 20, 24, 27, 25, 29, Math.max(30, Math.round((stats.revenue.monthly || 0) / 1000))]
+  }];
+
+  const revenueOptions = {
+    chart: { type: 'area', toolbar: { show: false }, sparkline: { enabled: false } },
+    stroke: { curve: 'smooth', width: 2 },
+    dataLabels: { enabled: false },
+    colors: [palette.primary],
+    grid: { strokeDashArray: 3 },
+    xaxis: { categories: ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'] },
+    yaxis: { labels: { formatter: (val) => `${val}k` } },
+    tooltip: { theme: 'light' }
+  };
+
+  const ordersSeries = [{
+    name: 'Pedidos',
+    data: [32, 28, 35, 40, 38, 44, 50]
+  }];
+
+  const ordersOptions = {
+    chart: { type: 'bar', toolbar: { show: false } },
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
+    dataLabels: { enabled: false },
+    colors: [palette.blue],
+    grid: { strokeDashArray: 3 },
+    xaxis: { categories: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'] }
+  };
+
+  const paymentsSeries = [44, 33, 23];
+  const paymentsOptions = {
+    chart: { type: 'donut' },
+    labels: ['Crédito', 'PIX', 'Dinheiro'],
+    colors: [palette.blue, palette.green, palette.orange],
+    legend: { position: 'bottom' }
   };
 
   if (loading) {
     return (
-      <div className="dashboard-loading">
-        <div className="loading-spinner"></div>
-        <p>Carregando dashboard...</p>
+      <div className="loading-wrapper">
+        <div className="spinner-border text-primary" role="status"></div>
+        <span className="ms-2">Carregando dashboard...</span>
       </div>
     );
   }
@@ -118,184 +151,163 @@ const SuperAdminDashboard = ({ token }) => {
     <div className="super-admin-dashboard">
       {/* Header */}
       <div className="dashboard-header">
-        <div className="header-content">
-          <h1>🚀 Dashboard Super Admin</h1>
-          <p>Bem-vindo ao centro de controle do seu ecossistema</p>
+        <div>
+          <h1 className="d-flex align-items-center">Dashboard Premium <span className="badge bg-orange-lt ms-2">Novo</span></h1>
+          <p>Visão geral do sistema e métricas principais</p>
         </div>
         <div className="header-actions">
-          <button className="refresh-btn" onClick={fetchDashboardData}>
-            🔄 Atualizar
+          <span className="last-update">Atualizado: {new Date().toLocaleTimeString()}</span>
+          <button className="btn btn-primary" onClick={fetchDashboardData}>
+            <i className="ti ti-refresh me-2"></i>Atualizar
           </button>
-          <div className="last-update">
-            Última atualização: {new Date().toLocaleTimeString('pt-BR')}
-          </div>
         </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        {/* Stores Card */}
+        <PremiumCard title="Lojas" statusTop>
+          <div className="stat-value-big">{stats.stores.total}</div>
+          <div className="stat-desc">
+            <span className="trend-indicator trend-positive">
+              {stats.stores.active} Ativas
+            </span>
+            <span className="ms-auto text-muted">Total Registrado</span>
+          </div>
+          <div className="store-progress">
+            <div className="progress">
+              <div
+                className="progress-bar"
+                style={{ width: `${(stats.stores.active / (stats.stores.total || 1)) * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        </PremiumCard>
+
+        {/* Users Card */}
+        <PremiumCard title="Usuários" statusTop statusColor="var(--tblr-blue)">
+          <div className="stat-value-big">{stats.users.total}</div>
+          <div className="users-list mt-3">
+            <div className="user-item">
+              <span>Administradores</span>
+              <span className="badge bg-blue-lt">{stats.users.storeAdmins}</span>
+            </div>
+            <div className="user-item">
+              <span>Clientes</span>
+              <span className="badge bg-green-lt">{stats.users.customers}</span>
+            </div>
+          </div>
+        </PremiumCard>
+
+        {/* Revenue Card */}
+        <PremiumCard title="Receita Mensal" statusTop statusColor="var(--tblr-green)">
+          <div className="stat-value-big">{formatCurrency(stats.revenue.monthly)}</div>
+          <div className="stat-desc mb-2">
+            <span className="text-muted">Total Acumulado:</span>
+            <span className="ms-auto font-weight-medium">{formatCurrency(stats.revenue.total)}</span>
+          </div>
+          <div className="text-muted text-sm">
+            📈 +12% em relação ao mês anterior
+          </div>
+        </PremiumCard>
+
+        {/* System Health */}
+        <PremiumCard title="Saúde do Sistema" statusTop statusColor="var(--tblr-purple)">
+          <div className="d-flex align-items-center justify-content-between mb-2">
+            <span>Status API</span>
+            <span className="badge bg-green-lt">Online</span>
+          </div>
+          <div className="d-flex align-items-center justify-content-between mb-2">
+            <span>Latência</span>
+            <span className="text-muted">45ms</span>
+          </div>
+          <div className="d-flex align-items-center justify-content-between">
+            <span>Uptime</span>
+            <span className="text-muted">99.9%</span>
+          </div>
+        </PremiumCard>
       </div>
 
       {/* Quick Actions */}
-      <div className="quick-actions">
-        <h3>⚡ Ações Rápidas</h3>
-        <div className="actions-grid">
-          {quickActions.map(action => (
-            <div 
-              key={action.id} 
-              className={`action-card ${action.color}`}
-              onClick={() => handleQuickAction(action.action)}
-            >
-              <div className="action-icon">{action.icon}</div>
-              <div className="action-title">{action.title}</div>
-            </div>
-          ))}
-        </div>
+      <h3 className="mb-3">Ferramentas Rápidas</h3>
+      <div className="actions-grid">
+        {quickActions.map(action => (
+          <div
+            key={action.id}
+            className="quick-action-btn"
+            onClick={() => handleQuickAction(action.action)}
+          >
+            <span className="quick-action-icon">{action.icon}</span>
+            <span className="quick-action-title">{action.title}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Main Stats Grid */}
-      <div className="stats-grid">
-        {/* Stores Overview */}
-        <div className="stat-card stores-overview">
-          <div className="card-header">
-            <h3>🏪 Lojas</h3>
-            <div className="total-count">{stats.stores.total}</div>
-          </div>
-          <div className="card-content">
-            <div className="stat-row">
-              <div className="stat-item active">
-                <span className="label">Ativas</span>
-                <span className="value">{stats.stores.active}</span>
-              </div>
-              <div className="stat-item pending">
-                <span className="label">Pendentes</span>
-                <span className="value">{stats.stores.pending}</span>
-              </div>
-              <div className="stat-item suspended">
-                <span className="label">Suspensas</span>
-                <span className="value">{stats.stores.suspended}</span>
-              </div>
-            </div>
-            <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ width: `${(stats.stores.active / stats.stores.total) * 100}%` }}
-              ></div>
-            </div>
-            <div className="progress-label">
-              {((stats.stores.active / stats.stores.total) * 100).toFixed(1)}% das lojas ativas
-            </div>
-          </div>
-        </div>
+      {/* Charts */}
+      <h3 className="mb-3">Métricas</h3>
+      <div className="charts-grid">
+        <PremiumCard title="Receita (12 meses)">
+          <ReactApexChart options={revenueOptions} series={revenueSeries} type="area" height={240} />
+        </PremiumCard>
+        <PremiumCard title="Pedidos por dia">
+          <ReactApexChart options={ordersOptions} series={ordersSeries} type="bar" height={240} />
+        </PremiumCard>
+        <PremiumCard title="Métodos de pagamento">
+          <ReactApexChart options={paymentsOptions} series={paymentsSeries} type="donut" height={240} />
+        </PremiumCard>
+      </div>
 
-        {/* Users Overview */}
-        <div className="stat-card users-overview">
-          <div className="card-header">
-            <h3>👥 Usuários</h3>
-            <div className="total-count">{stats.users.total}</div>
-          </div>
-          <div className="card-content">
-            <div className="user-breakdown">
-              <div className="user-type">
-                <div className="type-icon">👨‍💼</div>
-                <div className="type-info">
-                  <span className="type-label">Administradores</span>
-                  <span className="type-count">{stats.users.storeAdmins}</span>
+      {/* Recent Activity & Plans */}
+      <div className="row" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: '2', minWidth: '300px' }}>
+          <PremiumCard title="Atividade Recente" icon={<i className="ti ti-clipboard-text"></i>}>
+            <div className="activity-timeline">
+              {stats.recentActivity.map((activity, idx) => (
+                <div key={idx} className="timeline-item">
+                  <div className="timeline-marker"></div>
+                  <div className="timeline-content">
+                    <div className="font-weight-medium">{activity.message || 'Atividade do sistema'}</div>
+                    <span className="timeline-time">{activity.time}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="user-type">
-                <div className="type-icon">👤</div>
-                <div className="type-info">
-                  <span className="type-label">Clientes</span>
-                  <span className="type-count">{stats.users.customers}</span>
-                </div>
-              </div>
+              ))}
+              {stats.recentActivity.length === 0 && (
+                <div className="text-muted text-center py-3">Nenhuma atividade recente.</div>
+              )}
             </div>
-          </div>
+          </PremiumCard>
         </div>
 
-        {/* Revenue Overview */}
-        <div className="stat-card revenue-overview">
-          <div className="card-header">
-            <h3>💰 Receita</h3>
-            <div className="growth-indicator positive">+12.5%</div>
-          </div>
-          <div className="card-content">
-            <div className="revenue-stats">
-              <div className="revenue-item">
-                <span className="label">Total</span>
-                <span className="value">{formatCurrency(stats.revenue.total)}</span>
-              </div>
-              <div className="revenue-item">
-                <span className="label">Este Mês</span>
-                <span className="value">{formatCurrency(stats.revenue.monthly)}</span>
-              </div>
+        <div style={{ flex: '1', minWidth: '300px' }}>
+          <PremiumCard title="Planos de Assinatura" icon={<i className="ti ti-chart-pie"></i>}>
+            <div className="table-responsive">
+              <table className="table table-vcenter">
+                <thead>
+                  <tr>
+                    <th>Plano</th>
+                    <th className="text-end">Lojas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.subscriptions.map((sub, index) => (
+                    <tr key={index}>
+                      <td>
+                        <span className="badge bg-orange-lt">
+                          {sub._id || 'Padrão'}
+                        </span>
+                      </td>
+                      <td className="text-end font-weight-medium">
+                        {sub.count}
+                      </td>
+                    </tr>
+                  ))}
+                  {stats.subscriptions.length === 0 && (
+                    <tr><td colSpan="2" className="text-center text-muted">Sem dados</td></tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-            <div className="revenue-chart">
-              <div className="chart-placeholder">
-                📈 Gráfico de receita mensal
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* System Health */}
-        <div className="stat-card system-health">
-          <div className="card-header">
-            <h3>🔧 Saúde do Sistema</h3>
-            <div className="health-status online">Online</div>
-          </div>
-          <div className="card-content">
-            <div className="health-metrics">
-              <div className="metric">
-                <span className="metric-label">Uptime</span>
-                <span className="metric-value">99.9%</span>
-              </div>
-              <div className="metric">
-                <span className="metric-label">Resposta</span>
-                <span className="metric-value">45ms</span>
-              </div>
-              <div className="metric">
-                <span className="metric-label">CPU</span>
-                <span className="metric-value">23%</span>
-              </div>
-              <div className="metric">
-                <span className="metric-label">Memória</span>
-                <span className="metric-value">67%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="recent-activity">
-        <div className="activity-header">
-          <h3>📋 Atividade Recente</h3>
-          <button className="view-all-btn">Ver Todas</button>
-        </div>
-        <div className="activity-list">
-          {stats.recentActivity.map(activity => (
-            <div key={activity.id} className="activity-item">
-              <div className="activity-icon">{activity.icon}</div>
-              <div className="activity-content">
-                <div className="activity-message">{activity.message}</div>
-                <div className="activity-time">{activity.time}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Subscription Plans Overview */}
-      <div className="subscription-overview">
-        <h3>📊 Planos de Assinatura</h3>
-        <div className="plans-grid">
-          {stats.subscriptions.map((sub, index) => (
-            <div key={index} className="plan-card">
-              <div className="plan-name">{sub._id || 'Não definido'}</div>
-              <div className="plan-count">{sub.count} lojas</div>
-              <div className="plan-percentage">
-                {((sub.count / stats.stores.total) * 100).toFixed(1)}%
-              </div>
-            </div>
-          ))}
+          </PremiumCard>
         </div>
       </div>
     </div>

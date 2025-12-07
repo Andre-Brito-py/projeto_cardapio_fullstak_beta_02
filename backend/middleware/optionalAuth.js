@@ -25,7 +25,7 @@ const optionalAuthMiddleware = async (req, res, next) => {
 
         // Se há token, tentar validá-lo
         try {
-            const token_decode = jwt.verify(token, process.env.JWT_SECRET);
+            const token_decode = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
             // Token válido decodificado
             
             req.body.userId = token_decode.id;

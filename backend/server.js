@@ -20,7 +20,6 @@ import printRouter from './routes/printRoute.js';
 import deliveryRouter from './routes/deliveryRoute.js';
 import systemRouter from './routes/systemRoute.js';
 import storeRouter from './routes/storeRoute.js';
-import storeTelegramRouter from './routes/storeRoutes.js';
 import tableRouter from './routes/tableRoute.js';
 import couponRouter from './routes/couponRoute.js';
 import waiterRouter from './routes/waiterRoute.js';
@@ -40,17 +39,15 @@ import asaasRouter from './routes/asaasRoutes.js';
 import apiRouter from './routes/apiRoutes.js';
 import whatsappRouter from './routes/whatsappRoute.js';
 import whatsappWebhookRouter from './routes/whatsappWebhook.js';
-import telegramRouter from './routes/telegramRoutes.js';
-import telegramDirectRouter from './routes/telegramDirectRoutes.js';
 import lizaRouter from './routes/lizaRoutes.js';
 import lizaCustomerRouter from './routes/lizaCustomerRoutes.js';
-import lizaTelegramRouter from './routes/lizaTelegramRoutes.js';
 import reportRouter from './routes/reportRoutes.js';
 import dailyReportScheduler from './services/dailyReportScheduler.js';
-import telegramCampaignScheduler from './services/telegramCampaignScheduler.js';
 import { identifyStore, validateStoreActive, logStoreContext } from './middleware/storeContext.js';
 import { simulateAuth, simulateDatabase } from './middleware/simulationMode.js';
 import { auditMiddleware } from './middleware/auditLogger.js';
+import errorHandler from './middleware/errorHandler.js';
+import logger from './config/logger.js';
 
 // Configuração da aplicação
 const app = express();
@@ -66,7 +63,9 @@ app.use(auditMiddleware);
 app.use(cors({
     origin: [
         'http://localhost:5173', // Frontend
-        'http://localhost:5174', // Admin
+        'http://localhost:5174', // Admin (dev)
+        'http://localhost:4174', // Admin (preview build)
+        'http://localhost:4175', // Admin (preview hard reload)
         'http://localhost:5176'  // Counter
     ],
     credentials: true,
@@ -90,7 +89,6 @@ connectDB();
 // Rotas do sistema multi-tenant
 app.use('/api/system', systemRouter); // Rotas para Super Admin
 app.use('/api/store', storeRouter); // Rotas para gerenciamento de lojas
-app.use('/api/store', storeTelegramRouter); // Rotas para configurações do Telegram por loja
 app.use('/api/tables', tableRouter); // Rotas para gerenciamento de mesas
 app.use('/api/coupons', couponRouter); // Rotas para gerenciamento de cupons
 app.use('/api/waiter', waiterRouter); // Rotas para funcionalidades do garçom
@@ -112,10 +110,7 @@ app.use('/api/whatsapp', validateStoreActive, whatsappRouter); // Rotas para int
 app.use('/api/whatsapp-webhook', whatsappWebhookRouter); // Webhook não precisa validar loja ativa
 // Rotas mais específicas devem vir antes das genéricas
 app.use('/api/liza/customers', validateStoreActive, lizaCustomerRouter); // Rotas para Liza consultar clientes
-app.use('/api/liza/telegram', validateStoreActive, lizaTelegramRouter); // Rotas para Liza enviar mensagens via Telegram
 app.use('/api/liza', lizaRouter); // Rotas para chat com IA Liza
-app.use('/api/telegram', telegramRouter); // Rotas para integração com Telegram (Super Admin)
-app.use('/api/telegram-direct', telegramDirectRouter); // Rotas diretas para Telegram (sem middleware)
 app.use('/api/reports', reportRouter); // Rotas para relatórios diários
 
 // Rotas existentes (mantidas para compatibilidade)
@@ -125,7 +120,7 @@ app.use('/api/food', foodRouter); // Rotas para gerenciamento de comidas
 app.use('/images', (req, res, next) => {
     // Extrair storeId da URL ou headers
     const storeId = req.headers['x-store-id'] || req.query.storeId;
-    
+
     if (storeId) {
         // Servir arquivos do diretório específico da loja
         express.static(path.join('uploads', 'stores', storeId))(req, res, next);
@@ -148,13 +143,15 @@ app.get('/', (req, res) => {
     res.send('API working');
 });
 
+// Error Handler (DEVE ser o último middleware)
+app.use(errorHandler);
+
 // Inicializar agendadores
 dailyReportScheduler.init();
-telegramCampaignScheduler.init();
 
 // Inicialização do servidor
 app.listen(port, () => {
-    console.log(`Server started on http://localhost:${port}`);
-    console.log('📊 Agendador de relatórios diários inicializado');
-    console.log('📅 Agendador de campanhas do Telegram inicializado');
+    logger.info(`Server started on http://localhost:${port}`);
+    logger.info('📊 Agendador de relatórios diários inicializado');
+    
 });

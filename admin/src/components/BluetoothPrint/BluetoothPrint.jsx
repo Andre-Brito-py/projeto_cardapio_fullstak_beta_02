@@ -17,7 +17,7 @@ const BluetoothPrint = ({ url, token }) => {
             const response = await axios.post(
                 `${url}/api/print/scan`,
                 {},
-                { headers: { token } }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             if (response.data.success) {
@@ -41,7 +41,7 @@ const BluetoothPrint = ({ url, token }) => {
             const response = await axios.post(
                 `${url}/api/print/connect`,
                 { printerId },
-                { headers: { token } }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             if (response.data.success) {
@@ -65,7 +65,7 @@ const BluetoothPrint = ({ url, token }) => {
             const response = await axios.post(
                 `${url}/api/print/disconnect`,
                 {},
-                { headers: { token } }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             if (response.data.success) {
@@ -87,7 +87,7 @@ const BluetoothPrint = ({ url, token }) => {
             const response = await axios.post(
                 `${url}/api/print/test`,
                 {},
-                { headers: { token } }
+                { headers: { Authorization: `Bearer ${token}` } }
             );
 
             if (response.data.success) {

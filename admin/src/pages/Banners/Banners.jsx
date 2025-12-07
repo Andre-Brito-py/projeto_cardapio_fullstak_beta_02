@@ -20,7 +20,7 @@ const Banners = () => {
   const fetchBanners = async () => {
     try {
       const response = await axios.get(`${url}/api/banner/listall`, {
-        headers: { token: localStorage.getItem('token') }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       if (response.data.success) {
         setBanners(response.data.data);
@@ -67,11 +67,11 @@ const Banners = () => {
       if (editingBanner) {
         data.append('id', editingBanner._id);
         response = await axios.post(`${url}/api/banner/update`, data, {
-          headers: { token: localStorage.getItem('token') }
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
       } else {
         response = await axios.post(`${url}/api/banner/add`, data, {
-          headers: { token: localStorage.getItem('token') }
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
       }
 
@@ -101,7 +101,7 @@ const Banners = () => {
         
         const response = await axios.post(`${url}/api/banner/remove`, 
           requestData,
-          { headers: { token: localStorage.getItem('token') } }
+          { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
         );
         
         if (response.data.success) {
@@ -123,7 +123,7 @@ const Banners = () => {
     try {
       const response = await axios.post(`${url}/api/banner/toggle`, 
         { id: bannerId },
-        { headers: { token: localStorage.getItem('token') } }
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
       
       if (response.data.success) {

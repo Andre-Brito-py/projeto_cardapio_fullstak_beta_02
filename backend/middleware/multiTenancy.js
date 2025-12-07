@@ -36,7 +36,7 @@ const identifyStore = async (req, res, next) => {
         if (!store && req.headers.authorization) {
             try {
                 const token = req.headers.authorization.split(' ')[1];
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
                 if (decoded.storeId) {
                     store = await Store.findById(decoded.storeId);
                 }
@@ -129,7 +129,7 @@ const authMultiTenant = async (req, res, next) => {
         }
         
         // Verificando token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
         
         let user = null;
         

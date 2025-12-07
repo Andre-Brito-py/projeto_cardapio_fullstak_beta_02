@@ -9,8 +9,8 @@ const SystemSettings = ({ url, token }) => {
     systemName: '',
     systemEmail: '',
     systemPhone: '',
-    maintenanceMode: false,
-    allowRegistration: true,
+    maintenanceMode: 'false',
+    allowUserRegistration: 'true',
     maxStoresPerUser: 5,
     defaultCurrency: 'BRL',
     systemTimezone: 'America/Sao_Paulo',
@@ -24,7 +24,9 @@ const SystemSettings = ({ url, token }) => {
     paypalClientId: '',
     paypalClientSecret: '',
     mercadoPagoAccessToken: '',
+    mercadoPagoPublicKey: '',
     pixKey: '',
+    pixBeneficiaryName: '',
     enableStripe: true,
     enablePaypal: false,
     enableMercadoPago: true,
@@ -34,6 +36,7 @@ const SystemSettings = ({ url, token }) => {
     premiumPlanPrice: 59.90,
     enterprisePlanPrice: 149.90,
     trialPeriodDays: 14,
+    annualDiscount: 0,
     // System Limits
     maxProductsBasic: 100,
     maxProductsPremium: 500,
@@ -45,11 +48,16 @@ const SystemSettings = ({ url, token }) => {
     sessionTimeout: 24, // hours
     maxLoginAttempts: 5,
     passwordMinLength: 8,
-    requireTwoFactor: false,
+    minPasswordLength: 8,
+    requireUppercase: false,
+    requireNumbers: false,
+    requireSpecialChars: false,
+    twoFactorAuth: 'disabled',
     // Performance Settings
-    cacheEnabled: true,
-    cacheTtl: 3600, // seconds
-    compressionEnabled: true,
+    cacheEnabled: 'enabled',
+    cacheTimeout: 60,
+    imageCompression: 'medium',
+    compressionQuality: 80,
     // Analytics
     googleAnalyticsId: '',
     enableAnalytics: true
@@ -77,10 +85,21 @@ const SystemSettings = ({ url, token }) => {
   const fetchSystemStats = async () => {
     try {
       const response = await axios.get(`${url}/api/system/stats`, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
-        setSystemStats(response.data.stats);
+        const stats = response.data.stats || {};
+        setSystemStats(prev => ({
+          ...prev,
+          totalStores: Number.isFinite(stats.totalStores) ? stats.totalStores : prev.totalStores,
+          activeStores: Number.isFinite(stats.activeStores) ? stats.activeStores : prev.activeStores,
+          totalUsers: Number.isFinite(stats.totalUsers) ? stats.totalUsers : prev.totalUsers,
+          totalRevenue: Number.isFinite(stats.totalRevenue) ? stats.totalRevenue : prev.totalRevenue,
+          systemUptime: stats.systemUptime ?? prev.systemUptime,
+          lastBackup: stats.lastBackup ?? prev.lastBackup,
+          storageUsed: Number.isFinite(stats.storageUsed) ? stats.storageUsed : prev.storageUsed,
+          storageLimit: Number.isFinite(stats.storageLimit) ? stats.storageLimit : prev.storageLimit
+        }));
       }
     } catch (error) {
       console.error('Erro ao buscar estatísticas:', error);
@@ -91,10 +110,43 @@ const SystemSettings = ({ url, token }) => {
     setLoading(true);
     try {
       const response = await axios.get(`${url}/api/system/settings`, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       if (response.data.success) {
-        setSettings({ ...settings, ...response.data.settings });
+        const incoming = response.data.settings || {};
+        const toBoolString = (v, fallback) => {
+          if (v === true) return 'true';
+          if (v === false) return 'false';
+          return typeof v === 'string' ? (v === 'true' || v === 'false' ? v : fallback) : fallback;
+        };
+        const normalizeNumber = (v, fallback) => {
+          const n = typeof v === 'string' ? parseFloat(v) : v;
+          return Number.isFinite(n) ? n : fallback;
+        };
+        const normalizeSelect = (v, allowed, fallback) => {
+          return allowed.includes(v) ? v : fallback;
+        };
+        setSettings(prev => ({
+          ...prev,
+          ...incoming,
+          maintenanceMode: toBoolString(incoming.maintenanceMode, prev.maintenanceMode),
+          allowUserRegistration: toBoolString(incoming.allowUserRegistration, prev.allowUserRegistration),
+          twoFactorAuth: normalizeSelect(incoming.twoFactorAuth, ['disabled','optional','required'], prev.twoFactorAuth),
+          cacheEnabled: normalizeSelect(incoming.cacheEnabled, ['enabled','disabled'], prev.cacheEnabled),
+          imageCompression: normalizeSelect(incoming.imageCompression, ['high','medium','low','disabled'], prev.imageCompression),
+          basicPlanPrice: normalizeNumber(incoming.basicPlanPrice, prev.basicPlanPrice),
+          premiumPlanPrice: normalizeNumber(incoming.premiumPlanPrice, prev.premiumPlanPrice),
+          enterprisePlanPrice: normalizeNumber(incoming.enterprisePlanPrice, prev.enterprisePlanPrice),
+          trialPeriodDays: normalizeNumber(incoming.trialPeriodDays, prev.trialPeriodDays),
+          annualDiscount: normalizeNumber(incoming.annualDiscount, prev.annualDiscount),
+          sessionTimeout: normalizeNumber(incoming.sessionTimeout, prev.sessionTimeout),
+          maxLoginAttempts: normalizeNumber(incoming.maxLoginAttempts, prev.maxLoginAttempts),
+          minPasswordLength: normalizeNumber(incoming.minPasswordLength, prev.minPasswordLength),
+          cacheTimeout: normalizeNumber(incoming.cacheTimeout, prev.cacheTimeout),
+          compressionQuality: normalizeNumber(incoming.compressionQuality, prev.compressionQuality),
+          pixKey: incoming.pixKey ?? prev.pixKey,
+          pixBeneficiaryName: incoming.pixBeneficiaryName ?? prev.pixBeneficiaryName
+        }));
       }
     } catch (error) {
       console.error('Erro ao buscar configurações:', error);
@@ -118,7 +170,7 @@ const SystemSettings = ({ url, token }) => {
     
     try {
       const response = await axios.put(`${url}/api/system/settings`, settings, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -138,7 +190,7 @@ const SystemSettings = ({ url, token }) => {
     setSaving(true);
     try {
       const response = await axios.post(`${url}/api/system/backup`, {}, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -160,7 +212,7 @@ const SystemSettings = ({ url, token }) => {
     setSaving(true);
     try {
       const response = await axios.delete(`${url}/api/system/logs`, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -183,7 +235,7 @@ const SystemSettings = ({ url, token }) => {
         provider,
         settings
       }, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -208,7 +260,7 @@ const SystemSettings = ({ url, token }) => {
         enterprisePrice: settings.enterprisePlanPrice,
         trialDays: settings.trialPeriodDays
       }, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -228,7 +280,7 @@ const SystemSettings = ({ url, token }) => {
     setSaving(true);
     try {
       const response = await axios.post(`${url}/api/system/clear-cache`, {}, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -257,28 +309,28 @@ const SystemSettings = ({ url, token }) => {
         </div>
         <div className='header-stats'>
           <div className='stat-card'>
-            <div className='stat-icon'>🏪</div>
+            <div className='stat-icon'><i className='ti ti-building-store'></i></div>
             <div className='stat-info'>
               <h3>{systemStats.totalStores}</h3>
               <p>Total de Lojas</p>
             </div>
           </div>
           <div className='stat-card'>
-            <div className='stat-icon'>👥</div>
+            <div className='stat-icon'><i className='ti ti-users'></i></div>
             <div className='stat-info'>
               <h3>{systemStats.totalUsers}</h3>
               <p>Usuários Ativos</p>
             </div>
           </div>
           <div className='stat-card'>
-            <div className='stat-icon'>💰</div>
+            <div className='stat-icon'><i className='ti ti-currency-real'></i></div>
             <div className='stat-info'>
               <h3>R$ {systemStats.totalRevenue?.toLocaleString('pt-BR')}</h3>
               <p>Receita Total</p>
             </div>
           </div>
           <div className='stat-card'>
-            <div className='stat-icon'>💾</div>
+            <div className='stat-icon'><i className='ti ti-database'></i></div>
             <div className='stat-info'>
               <h3>{systemStats.storageUsed}GB</h3>
               <p>Armazenamento</p>
@@ -292,37 +344,37 @@ const SystemSettings = ({ url, token }) => {
           className={`tab-button ${activeTab === 'general' ? 'active' : ''}`}
           onClick={() => setActiveTab('general')}
         >
-          🔧 Geral
+          Geral
         </button>
         <button 
           className={`tab-button ${activeTab === 'payments' ? 'active' : ''}`}
           onClick={() => setActiveTab('payments')}
         >
-          💳 Pagamentos
+          Pagamentos
         </button>
         <button 
           className={`tab-button ${activeTab === 'plans' ? 'active' : ''}`}
           onClick={() => setActiveTab('plans')}
         >
-          📋 Planos
+          Planos
         </button>
         <button 
           className={`tab-button ${activeTab === 'security' ? 'active' : ''}`}
           onClick={() => setActiveTab('security')}
         >
-          🔒 Segurança
+          Segurança
         </button>
         <button 
           className={`tab-button ${activeTab === 'performance' ? 'active' : ''}`}
           onClick={() => setActiveTab('performance')}
         >
-          ⚡ Performance
+          Performance
         </button>
         <button 
           className={`tab-button ${activeTab === 'system' ? 'active' : ''}`}
           onClick={() => setActiveTab('system')}
         >
-          🛠️ Sistema
+          Sistema
         </button>
       </div>
 
@@ -331,7 +383,7 @@ const SystemSettings = ({ url, token }) => {
           {activeTab === 'general' && (
           <form onSubmit={handleSubmit} className='settings-form'>
             <div className='settings-section'>
-              <h3>🗺️ Configurações de API</h3>
+              <h3>Configurações de API</h3>
               <div className='form-group'>
                 <label>Chave da API do Google Maps</label>
                 <input
@@ -358,7 +410,7 @@ const SystemSettings = ({ url, token }) => {
             </div>
 
             <div className='settings-section'>
-              <h3>ℹ️ Informações Gerais</h3>
+              <h3>Informações Gerais</h3>
               <div className='form-row'>
                 <div className='form-group'>
                   <label>Nome do Sistema</label>
@@ -426,7 +478,7 @@ const SystemSettings = ({ url, token }) => {
 
         {activeTab === 'payments' && (
           <div className='settings-section'>
-            <h3>💳 Configurações de Pagamento</h3>
+            <h3>Configurações de Pagamento</h3>
             
             <div className='payment-providers'>
                 <div className='provider-card'>
@@ -558,7 +610,7 @@ const SystemSettings = ({ url, token }) => {
         )}
         {activeTab === 'plans' && (
           <div className='settings-section'>
-            <h3>📋 Planos de Assinatura</h3>
+            <h3>Planos de Assinatura</h3>
             
             <div className='plans-grid'>
               <div className='plan-card'>
@@ -586,8 +638,8 @@ const SystemSettings = ({ url, token }) => {
                   <label>Preço Mensal (R$)</label>
                   <input
                     type='number'
-                    name='proPlanPrice'
-                    value={settings.proPlanPrice}
+                    name='premiumPlanPrice'
+                    value={settings.premiumPlanPrice}
                     onChange={handleInputChange}
                     placeholder='59.90'
                   />
@@ -645,14 +697,14 @@ const SystemSettings = ({ url, token }) => {
             </div>
 
             <button className='update-prices-btn' onClick={updatePlanPrices}>
-              💰 Atualizar Preços dos Planos
+              Atualizar Preços dos Planos
             </button>
           </div>
         )}
 
         {activeTab === 'security' && (
           <div className='settings-section'>
-            <h3>🔒 Configurações de Segurança</h3>
+            <h3>Configurações de Segurança</h3>
             
             <div className='form-row'>
               <div className='form-group'>
@@ -722,8 +774,8 @@ const SystemSettings = ({ url, token }) => {
                 />
               </div>
               <div className='form-group'>
-                <label>Autenticação de Dois Fatores</label>
-                <select
+                  <label>Autenticação de Dois Fatores</label>
+                  <select
                   name='twoFactorAuth'
                   value={settings.twoFactorAuth}
                   onChange={handleInputChange}
@@ -739,7 +791,7 @@ const SystemSettings = ({ url, token }) => {
 
         {activeTab === 'performance' && (
           <div className='settings-section'>
-            <h3>⚡ Configurações de Performance</h3>
+            <h3>Configurações de Performance</h3>
             
             <div className='form-row'>
               <div className='form-group'>
@@ -801,7 +853,7 @@ const SystemSettings = ({ url, token }) => {
 
         {activeTab === 'system' && (
           <div className='settings-section'>
-            <h3>⚙️ Configurações de Acesso</h3>
+            <h3>Configurações de Acesso</h3>
             
             <div className='form-row'>
               <div className='form-group'>
@@ -840,7 +892,7 @@ const SystemSettings = ({ url, token }) => {
             </div>
 
             <div className='settings-section'>
-              <h3>🗂️ Sistema e Logs</h3>
+              <h3>Sistema e Logs</h3>
               
               <div className='form-row'>
                 <div className='form-group'>
@@ -872,10 +924,10 @@ const SystemSettings = ({ url, token }) => {
 
               <div className='system-actions'>
                 <button className='backup-btn' onClick={handleBackup}>
-                  📦 Criar Backup Manual
+                  Criar Backup Manual
                 </button>
                 <button className='clear-logs-btn' onClick={handleClearLogs}>
-                  🗑️ Limpar Logs do Sistema
+                  Limpar Logs do Sistema
                 </button>
               </div>
             </div>
@@ -886,7 +938,7 @@ const SystemSettings = ({ url, token }) => {
 
       <div className='settings-actions'>
         <button className='save-btn' onClick={handleSubmit}>
-          💾 Salvar Configurações
+          Salvar Configurações
         </button>
       </div>
     </div>

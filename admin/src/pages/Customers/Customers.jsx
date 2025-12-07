@@ -19,7 +19,7 @@ const Customers = ({ url, token }) => {
     setLoading(true);
     try {
       const response = await axios.get(`${url}/api/customer/list`, {
-        headers: { token },
+        headers: { Authorization: `Bearer ${token}` },
         params: { page, search, limit: 10 }
       });
 
@@ -42,7 +42,7 @@ const Customers = ({ url, token }) => {
     setLoading(true);
     try {
       const response = await axios.get(`${url}/api/customer-auto/admin`, {
-        headers: { token },
+        headers: { Authorization: `Bearer ${token}` },
         params: { page, search, limit: 10 }
       });
 
@@ -96,7 +96,7 @@ const Customers = ({ url, token }) => {
   const viewCustomerDetails = async (customerId) => {
     try {
       const response = await axios.get(`${url}/api/customers/${customerId}`, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -115,7 +115,7 @@ const Customers = ({ url, token }) => {
     if (window.confirm('Tem certeza que deseja desativar este cliente?')) {
       try {
         const response = await axios.patch(`${url}/api/customers/${customerId}/deactivate`, {}, {
-          headers: { token }
+          headers: { Authorization: `Bearer ${token}` }
         });
         
         if (response.data.success) {
@@ -189,7 +189,7 @@ const Customers = ({ url, token }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
-          <button type="submit" className="search-button">
+          <button type="submit" className="btn btn-primary">
             Buscar
           </button>
         </form>
@@ -199,8 +199,10 @@ const Customers = ({ url, token }) => {
         <div className="loading">Carregando...</div>
       ) : (
         <>
-          <div className="customers-list">
-            <table className="customers-table">
+          <div className="card customers-list">
+            <div className="card-header"><h3 className="card-title">Lista de Clientes</h3></div>
+            <div className="card-body">
+            <table className="customers-table table">
               <thead>
                 <tr>
                   <th>Nome</th>
@@ -253,7 +255,7 @@ const Customers = ({ url, token }) => {
                           setSelectedCustomer(customer);
                           setShowModal(true);
                         }}
-                        className="view-button"
+                        className="btn btn-outline"
                       >
                         Ver Detalhes
                       </button>
@@ -262,12 +264,14 @@ const Customers = ({ url, token }) => {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Paginação */}
           {totalPages > 1 && (
             <div className="pagination">
               <button 
+                className="btn btn-outline"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
@@ -275,6 +279,7 @@ const Customers = ({ url, token }) => {
               </button>
               <span>Página {currentPage} de {totalPages}</span>
               <button 
+                className="btn btn-outline"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >

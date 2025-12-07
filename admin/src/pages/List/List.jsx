@@ -84,58 +84,75 @@ const List = ({url}) => {
     fetchList();
   },[])
   return (
-    <div className='list add flex-col'>
-      <p>All Foods List</p>
-      <div className="list-table">
-        <div className="list-table-format title">
-            <b>Image</b>
-            <b>Name</b>
-            <b>Category</b>
-            <b>Price</b>
-            <b>Status</b>
-            <b>Actions</b>
+    <div className='list'>
+      <div className="card">
+        <div className="card-header d-flex align-items-center justify-content-between">
+          <h2 className="m-0">Produtos</h2>
+          <div className="d-flex gap-2">
+            <button className="btn btn-primary" onClick={() => navigate('/add')}>Adicionar Produto</button>
+          </div>
         </div>
-        {list.map((item,index)=>{
-          return(
-            <div key={index} className={`list-table-format ${item.isOutOfStock ? 'out-of-stock' : ''}`}>
-              <img src={`${url}/images/`+item.image} alt="" />
-              <p>{item.name}</p>
-              <p>{item.category}</p>
-              <p>₹{item.price}</p>
-              <div className="status-column">
-                <span className={`status-badge ${item.isOutOfStock ? 'out-of-stock' : 'in-stock'}`}>
-                  {item.isOutOfStock ? 'Esgotado' : 'Disponível'}
-                </span>
-              </div>
-              <div className="action-buttons">
-                <button 
-                  onClick={() => navigate(`/edit/${item._id}`)} 
-                  className="edit-btn"
-                >
-                  Editar
-                </button>
-                <button 
-                  onClick={() => toggleStockStatus(item._id, item.isOutOfStock)} 
-                  className={`stock-btn ${item.isOutOfStock ? 'restock-btn' : 'outstock-btn'}`}
-                >
-                  {item.isOutOfStock ? 'Repor' : 'Esgotar'}
-                </button>
-                <button 
-                  onClick={() => openStockManagement(item)} 
-                  className="manage-btn"
-                >
-                  Gerenciar
-                </button>
-                <button 
-                  onClick={() => removeFood(item._id)} 
-                  className="delete-btn"
-                >
-                  Excluir
-                </button>
-              </div>
-            </div>
-          )
-        })}
+        <div className="card-body">
+          <div className="table-responsive">
+            <table className="table table-vcenter">
+              <thead>
+                <tr>
+                  <th>Imagem</th>
+                  <th>Nome</th>
+                  <th>Categoria</th>
+                  <th>Preço</th>
+                  <th>Status</th>
+                  <th className="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((item, index) => (
+                  <tr key={index}>
+                    <td>
+                      <img src={`${url}/images/` + item.image} alt={item.name} style={{ width: 40, height: 40, borderRadius: 4, border: '1px solid var(--tblr-border-color)' }} />
+                    </td>
+                    <td className="font-weight-medium">{item.name}</td>
+                    <td>{item.category}</td>
+                    <td>₹{item.price}</td>
+                    <td>
+                      <span className={`badge ${item.isOutOfStock ? 'bg-red-lt' : 'bg-green-lt'}`}>
+                        {item.isOutOfStock ? 'Esgotado' : 'Disponível'}
+                      </span>
+                    </td>
+                    <td className="text-end">
+                      <div className="d-inline-flex gap-2">
+                        <button
+                          onClick={() => navigate(`/edit/${item._id}`)}
+                          className="btn btn-outline btn-sm"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => toggleStockStatus(item._id, item.isOutOfStock)}
+                          className={`btn btn-sm ${item.isOutOfStock ? 'btn-success' : 'btn-warning'}`}
+                        >
+                          {item.isOutOfStock ? 'Repor' : 'Esgotar'}
+                        </button>
+                        <button
+                          onClick={() => openStockManagement(item)}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          Gerenciar
+                        </button>
+                        <button
+                          onClick={() => removeFood(item._id)}
+                          className="btn btn-danger btn-sm"
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   )

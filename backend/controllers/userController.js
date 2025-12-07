@@ -62,7 +62,7 @@ const createToken = (id, user = null) => {
         }
     }
     
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
+    return jwt.sign(payload, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '7d' });
 };
 
 /**

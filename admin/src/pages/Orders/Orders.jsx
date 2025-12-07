@@ -4,7 +4,7 @@ import { useState } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify';
 import { useEffect } from 'react';
-import { assets } from './../../../../frontend/src/assets/assets';
+ 
 
 const Orders = ({url, token}) => {
 
@@ -15,12 +15,14 @@ const Orders = ({url, token}) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentMethodFilter, setPaymentMethodFilter] = useState('all');
   const [filteredTotals, setFilteredTotals] = useState({ count: 0, revenue: 0 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkStatus, setBulkStatus] = useState('Food Processing');
 
   const fetchAllOrders = async () =>{
     const response = await axios.get(url+"/api/order/list", {
       headers: { 
-        'Authorization': `Bearer ${token}`,
-        'store-slug': 'loja-de-teste-gar-om'
+        'Authorization': `Bearer ${token}`
       }
     });
     if(response.data.success){
@@ -31,26 +33,29 @@ const Orders = ({url, token}) => {
     }
   }
 
-  // Filter orders based on delivery type and status
   const filterOrders = () => {
     let filtered = [...allOrders];
-    
     if (deliveryTypeFilter !== 'all') {
       filtered = filtered.filter(order => order.deliveryType === deliveryTypeFilter);
     }
-    
     if (statusFilter !== 'all') {
       filtered = filtered.filter(order => order.status === statusFilter);
     }
-    
     if (paymentMethodFilter !== 'all') {
       filtered = filtered.filter(order => order.paymentMethod === paymentMethodFilter);
     }
-    
+    if (searchQuery && searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      filtered = filtered.filter(order => {
+        const name = `${order.address?.firstName || ''} ${order.address?.lastName || ''}`.toLowerCase();
+        const items = (order.items || []).map(i => i.name).join(' ').toLowerCase();
+        const notes = (order.notes || '').toLowerCase();
+        const mesa = String(order.tableId?.tableNumber || order.tableNumber || '').toLowerCase();
+        return name.includes(q) || items.includes(q) || notes.includes(q) || mesa.includes(q);
+      });
+    }
     setOrders(filtered);
-    
-    // Calculate filtered totals
-    const totalRevenue = filtered.reduce((sum, order) => sum + order.amount, 0);
+    const totalRevenue = filtered.reduce((sum, order) => sum + Number(order.amount || 0), 0);
     setFilteredTotals({ count: filtered.length, revenue: totalRevenue });
   };
 
@@ -104,8 +109,7 @@ const Orders = ({url, token}) => {
       status:event.target.value
     }, {
       headers: { 
-        'Authorization': `Bearer ${token}`,
-        'store-slug': 'loja-de-teste-gar-om'
+        'Authorization': `Bearer ${token}`
       }
     })
     if(response.data.success){
@@ -119,7 +123,7 @@ const Orders = ({url, token}) => {
       const response = await axios.post(
         url + "/api/print/print",
         { orderId },
-        { headers: { token } }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       
       if (response.data.success) {
@@ -141,156 +145,167 @@ const Orders = ({url, token}) => {
 
   useEffect(() => {
     filterOrders();
-  }, [deliveryTypeFilter, statusFilter, paymentMethodFilter, allOrders]);
+  }, [deliveryTypeFilter, statusFilter, paymentMethodFilter, searchQuery, allOrders]);
   return (
-    <div className='order add'>
-      <h3>Order Page</h3>
-      
-      {/* Filters Section */}
-      <div className="order-filters">
-        <div className="filter-group">
-          <label>Filtrar por Tipo de Saída:</label>
-          <select 
-            value={deliveryTypeFilter} 
-            onChange={(e) => setDeliveryTypeFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">Todos os Tipos</option>
-            <option value="delivery">🚚 Entrega</option>
-            <option value="waiter">👨‍💼 Garçom</option>
-            <option value="in_person">🏪 Presencial</option>
-          </select>
-        </div>
-        
-        <div className="filter-group">
-          <label>Filtrar por Status:</label>
-          <select 
-            value={statusFilter} 
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">Todos os Status</option>
-            <option value="Food Processing">Processando</option>
-            <option value="Out for delivery">Saiu para Entrega</option>
-            <option value="Delivered">Entregue</option>
-          </select>
-        </div>
-        
-        <div className="filter-group">
-          <label>Filtrar por Método de Pagamento:</label>
-          <select 
-            value={paymentMethodFilter} 
-            onChange={(e) => setPaymentMethodFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">Todos os Métodos</option>
-            <option value="pix">PIX</option>
-            <option value="dinheiro">Dinheiro</option>
-            <option value="cartao_credito">Cartão de Crédito</option>
-            <option value="cartao_debito">Cartão de Débito</option>
-            <option value="vale_refeicao">Vale Refeição</option>
-            <option value="vale_alimentacao">Vale Alimentação</option>
-          </select>
-        </div>
-        
-        <div className="filter-summary">
-          <div className="summary-item">
-            <span className="summary-label">Pedidos:</span>
-            <span className="summary-value">{orders.length} de {allOrders.length}</span>
-          </div>
-          <div className="summary-item">
-            <span className="summary-label">Faturamento:</span>
-            <span className="summary-value">R$ {filteredTotals.revenue.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-      
-      <div className="order-list">
-        {orders.map((order, index)=>(
-          <div key={index} className="order-item">
-            <img src={assets.parcel_icon} alt="" />
-            <div>
-              <p className="order-item-food">
-                {order.items.map((item,index)=>{
-                  if(index===order.items.length-1){
-                    return item.name + " x " + item.quantity
-                  }else{
-                    return item.name + " x " + item.quantity + " , "
-                  }
-                })}
-              </p>
-              <p className="order-item-name">{order.address.firstName + " "+order.address.lastName}</p>
-              
-              {/* Informações sobre quem fez o pedido */}
-              {order.isWaiterOrder && (
-                <div className="order-waiter-info">
-                  <p className="waiter-indicator">👨‍💼 Pedido feito pelo Garçom</p>
-                </div>
-              )}
-              
-              {/* Delivery Type Badge */}
-              <div className={`delivery-type-badge ${order.deliveryType || 'delivery'}`}>
-                {getDeliveryTypeIcon(order.deliveryType || 'delivery')} 
-                {getDeliveryTypeLabel(order.deliveryType || 'delivery')}
-              </div>
-              
-              {/* Payment Method Badge */}
-              <div className="payment-method-badge">
-                {getPaymentMethodIcon(order.paymentMethod)} {getPaymentMethodLabel(order.paymentMethod)}
-              </div>
-              
-              {/* Informações da Mesa */}
-              {(order.tableId || order.tableNumber || order.orderType === 'dine_in') && (
-                <div className="order-table-info">
-                  <p className="table-indicator">🍽️ Mesa {order.tableId?.tableNumber || order.tableNumber || 'N/A'}</p>
-                  {order.tableId?.displayName && order.tableId.displayName !== `Mesa ${order.tableId.tableNumber}` && (
-                    <p className="table-name">({order.tableId.displayName})</p>
-                  )}
-                  <span className="order-type-badge dine-in">Consumo no Local</span>
-                </div>
-              )}
-              
-              {/* Endereço de Entrega (apenas para delivery) */}
-              {!order.tableId && !order.tableNumber && order.orderType !== 'dine_in' && order.address && (
-                <div className="order-item-address">
-                  <p>{order.address.state + ","}</p>
-                  <p>{order.address.city+" ,"+ order.address.state+" ,"+order.address.country+" ,"+order.address.zipcode}</p>
-                  <p className='order-item-phone'>{order.address.phone}</p>
-                  <span className="order-type-badge delivery">Entrega</span>
-                </div>
-              )}
-              
-              {/* Telefone para pedidos de mesa */}
-              {(order.tableId || order.tableNumber || order.orderType === 'dine_in') && order.address?.phone && (
-                <p className='order-item-phone'>📞 {order.address.phone}</p>
-              )}
-              
-              {/* Observações do Pedido */}
-              {order.notes && (
-                <div className="order-notes-display">
-                  <p className="order-notes-text">📝 <strong>Obs:</strong> {order.notes}</p>
-                </div>
-              )}
-            </div>
-            <p>Itmes: {order.items.length}</p>
-            <p>₹{order.amount}</p>
-            <div className="order-actions">
-              <select onChange={(event)=> statusHandler(event,order._id)} value={order.status} >
-                <option value="Food Processing">Food Processing</option>
-                <option value="Out for delivery">Out for delivery</option>
-                <option value="Delivered">Delivered</option>
-              </select>
-              <button 
-                className={`print-btn ${printingOrder === order._id ? 'printing' : ''}`}
-                onClick={() => printOrder(order._id)}
-                disabled={printingOrder === order._id}
-                title="Imprimir Pedido"
+    <div className='orders'>
+      <div className="card">
+        <div className="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 className="m-0">Pedidos</h2>
+          <div className="d-flex align-items-center flex-wrap gap-2">
+            <div className="d-flex flex-column">
+              <label className="form-label m-0">Tipo</label>
+              <select 
+                value={deliveryTypeFilter}
+                onChange={(e) => setDeliveryTypeFilter(e.target.value)}
+                className="form-select form-select-sm"
               >
-                {printingOrder === order._id ? '🖨️ Imprimindo...' : '🖨️ Imprimir'}
-              </button>
+                <option value="all">Todos</option>
+                <option value="delivery">Entrega</option>
+                <option value="waiter">Garçom</option>
+                <option value="in_person">Presencial</option>
+              </select>
+            </div>
+            <div className="d-flex flex-column">
+              <label className="form-label m-0">Status</label>
+              <select 
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="form-select form-select-sm"
+              >
+                <option value="all">Todos</option>
+                <option value="Food Processing">Processando</option>
+                <option value="Out for delivery">Saiu para Entrega</option>
+                <option value="Delivered">Entregue</option>
+              </select>
+            </div>
+            <div className="d-flex flex-column">
+              <label className="form-label m-0">Pagamento</label>
+              <select 
+                value={paymentMethodFilter}
+                onChange={(e) => setPaymentMethodFilter(e.target.value)}
+                className="form-select form-select-sm"
+              >
+                <option value="all">Todos</option>
+                <option value="pix">PIX</option>
+                <option value="dinheiro">Dinheiro</option>
+                <option value="cartao_credito">Crédito</option>
+                <option value="cartao_debito">Débito</option>
+                <option value="vale_refeicao">Vale Refeição</option>
+                <option value="vale_alimentacao">Vale Alimentação</option>
+              </select>
+            </div>
+            <div className="d-flex align-items-center gap-2">
+              <span className="badge bg-blue-lt">{orders.length} pedidos</span>
+              <span className="badge bg-green-lt">R$ {filteredTotals.revenue.toFixed(2)}</span>
+            </div>
+            <div className="d-flex flex-column">
+              <label className="form-label m-0">Busca</label>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="form-control form-control-sm"
+                placeholder="Cliente, item, mesa, obs"
+              />
             </div>
           </div>
-        ))}
+        </div>
+        <div className="card-body">
+          {selectedIds.length > 0 && (
+            <div className="bulk-actions d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+              <div className="d-flex align-items-center gap-2">
+                <span className="badge bg-orange-lt">{selectedIds.length} selecionados</span>
+                <select 
+                  value={bulkStatus}
+                  onChange={(e) => setBulkStatus(e.target.value)}
+                  className="form-select form-select-sm"
+                >
+                  <option value="Food Processing">Processando</option>
+                  <option value="Out for delivery">Saiu para Entrega</option>
+                  <option value="Delivered">Entregue</option>
+                </select>
+                <button className="btn btn-outline btn-sm" onClick={async () => { for (const id of selectedIds) { await axios.post(url+"/api/order/status",{ orderId:id, status:bulkStatus }, { headers: { 'Authorization': `Bearer ${token}`, 'store-slug': 'loja-de-teste-gar-om' } }) } await fetchAllOrders(); toast.success('Status atualizado em massa'); }}>Atualizar status</button>
+                <button className="btn btn-outline btn-sm" onClick={async () => { for (const id of selectedIds) { await printOrder(id) } }} disabled={printingOrder !== null}>Imprimir selecionados</button>
+              </div>
+              <button className="btn btn-link btn-sm" onClick={() => setSelectedIds([])}>Limpar seleção</button>
+            </div>
+          )}
+          <div className="table-responsive">
+            <table className="table table-vcenter">
+              <thead>
+                <tr>
+                  <th style={{width:'32px'}}>
+                    <input type="checkbox" className="form-check-input" onChange={() => { const ids = orders.map(o => o._id); const allSelected = ids.every(id => selectedIds.includes(id)); setSelectedIds(allSelected ? [] : ids); }} checked={orders.length > 0 && orders.every(o => selectedIds.includes(o._id))} />
+                  </th>
+                  <th>ID</th>
+                  <th>Cliente</th>
+                  <th>Itens</th>
+                  <th>Tipo</th>
+                  <th>Método</th>
+                  <th>Mesa</th>
+                  <th>Valor</th>
+                  <th>Status</th>
+                  <th className="text-end">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((order, index) => (
+                  <tr key={index}>
+                    <td>
+                      <input 
+                        type="checkbox" 
+                        className="form-check-input" 
+                        onChange={() => setSelectedIds(prev => prev.includes(order._id) ? prev.filter(x => x !== order._id) : [...prev, order._id])} 
+                        checked={selectedIds.includes(order._id)}
+                      />
+                    </td>
+                    <td>#{String(order._id).slice(-6)}</td>
+                    <td>
+                      <div className="font-weight-medium">{order.address?.firstName} {order.address?.lastName}</div>
+                      {order.notes && (
+                        <div className="text-muted">Obs: {order.notes}</div>
+                      )}
+                    </td>
+                    <td>{order.items?.length || 0}</td>
+                    <td>
+                      <span className="badge bg-orange-lt">
+                        {getDeliveryTypeLabel(order.deliveryType || 'delivery')}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-blue-lt">
+                        {getPaymentMethodLabel(order.paymentMethod)}
+                      </span>
+                    </td>
+                    <td>{order.tableId?.tableNumber || order.tableNumber || '—'}</td>
+                    <td>R$ {Number(order.amount).toFixed(2)}</td>
+                    <td>
+                      <select 
+                        onChange={(event) => statusHandler(event, order._id)} 
+                        value={order.status}
+                        className="form-select form-select-sm"
+                      >
+                        <option value="Food Processing">Processando</option>
+                        <option value="Out for delivery">Saiu para Entrega</option>
+                        <option value="Delivered">Entregue</option>
+                      </select>
+                    </td>
+                    <td className="text-end">
+                      <button 
+                        className={`btn btn-outline btn-sm ${printingOrder === order._id ? 'disabled' : ''}`}
+                        onClick={() => printOrder(order._id)}
+                        disabled={printingOrder === order._id}
+                        title="Imprimir Pedido"
+                      >
+                        {printingOrder === order._id ? 'Imprimindo…' : 'Imprimir'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   )

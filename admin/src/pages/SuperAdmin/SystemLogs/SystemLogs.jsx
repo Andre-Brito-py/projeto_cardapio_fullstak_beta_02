@@ -148,7 +148,10 @@ const SystemLogs = ({ url, token }) => {
   return (
     <div className="system-logs">
       <div className="logs-header">
-        <h1>📋 Logs do Sistema</h1>
+        <h1>
+          <i className="ti ti-notebook"></i>
+          Logs do Sistema
+        </h1>
         <p>Monitore todas as atividades e eventos do sistema</p>
       </div>
 
@@ -201,7 +204,8 @@ const SystemLogs = ({ url, token }) => {
           className="refresh-btn"
           onClick={() => fetchLogs()}
         >
-          🔄 Atualizar
+          <i className="ti ti-refresh"></i>
+          Atualizar
         </button>
       </div>
 

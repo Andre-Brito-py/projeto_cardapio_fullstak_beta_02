@@ -308,30 +308,30 @@ const Tables = ({ url }) => {
         <h2>Gerenciamento de Mesas</h2>
         <div className="header-actions">
           <button 
-            className="action-btn generate-btn"
+            className="btn btn-primary"
             onClick={generateAllQRCodes}
             disabled={loading}
           >
             {loading ? 'Gerando...' : 'Gerar QR Codes'}
           </button>
           <button 
-            className="action-btn print-btn"
+            className="btn btn-indigo"
             onClick={printQRCodes}
             disabled={tables.filter(t => t.isActive && t.qrCodeUrl).length === 0}
             title="Baixar PDF com todos os QR codes"
           >
-            📄 Baixar PDF
+            <i className="ti ti-file-text"></i> Baixar PDF
           </button>
           <button 
-            className="action-btn thermal-print-btn"
+            className="btn btn-orange"
             onClick={printQRCodesDirect}
             disabled={tables.filter(t => t.isActive && t.qrCodeUrl).length === 0}
             title="Imprimir diretamente na impressora térmica"
           >
-            🖨️ Imprimir Direto
+            <i className="ti ti-printer"></i> Imprimir Direto
           </button>
           <button 
-            className="action-btn add-btn"
+            className="btn btn-success"
             onClick={() => setShowAddForm(!showAddForm)}
           >
             {showAddForm ? 'Cancelar' : 'Adicionar Mesa'}
@@ -340,8 +340,11 @@ const Tables = ({ url }) => {
       </div>
 
       {showAddForm && (
-        <div className="add-form-section">
-          <h3>{editingTable ? 'Editar Mesa' : 'Adicionar Nova Mesa'}</h3>
+        <div className="card add-form-section">
+          <div className="card-header">
+            <h3 className="card-title">{editingTable ? 'Editar Mesa' : 'Adicionar Nova Mesa'}</h3>
+          </div>
+          <div className="card-body">
           <form onSubmit={handleSubmit} className="table-form">
             <div className="form-row">
               <div className="form-group">
@@ -352,7 +355,7 @@ const Tables = ({ url }) => {
                   value={tableNumber}
                   onChange={(e) => setTableNumber(e.target.value)}
                   placeholder="Ex: 1, 2, 3..."
-                  className="form-input"
+                  className="form-control"
                   required
                   min="1"
                 />
@@ -366,7 +369,7 @@ const Tables = ({ url }) => {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Ex: Mesa 1, Mesa VIP..."
-                  className="form-input"
+                  className="form-control"
                 />
               </div>
             </div>
@@ -380,7 +383,7 @@ const Tables = ({ url }) => {
                   value={capacity}
                   onChange={(e) => setCapacity(e.target.value)}
                   placeholder="Ex: 2, 4, 6..."
-                  className="form-input"
+                  className="form-control"
                   min="1"
                 />
               </div>
@@ -393,7 +396,7 @@ const Tables = ({ url }) => {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="Ex: Área externa, Salão principal..."
-                  className="form-input"
+                  className="form-control"
                 />
               </div>
             </div>
@@ -405,36 +408,42 @@ const Tables = ({ url }) => {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Observações sobre a mesa..."
-                className="form-textarea"
+                className="form-control"
                 rows="3"
               />
             </div>
             
             <div className="form-group">
-              <label className="checkbox-label">
+              <div className="form-check form-switch">
                 <input
+                  className="form-check-input"
                   type="checkbox"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
+                  id="isActiveSwitch"
                 />
-                Mesa ativa
-              </label>
+                <label className="form-check-label" htmlFor="isActiveSwitch">Mesa ativa</label>
+              </div>
             </div>
             
             <div className="form-actions">
-              <button type="button" onClick={resetForm} className="cancel-btn">
+              <button type="button" onClick={resetForm} className="btn btn-secondary">
                 Cancelar
               </button>
-              <button type="submit" disabled={loading} className="submit-btn">
+              <button type="submit" disabled={loading} className="btn btn-primary">
                 {loading ? 'Salvando...' : (editingTable ? 'Atualizar' : 'Criar Mesa')}
               </button>
             </div>
           </form>
+          </div>
         </div>
       )}
 
-      <div className="tables-list">
-        <h3>Mesas Cadastradas ({tables.length})</h3>
+      <div className="card tables-list">
+        <div className="card-header">
+          <h3 className="card-title">Mesas Cadastradas ({tables.length})</h3>
+        </div>
+        <div className="card-body">
         
         {tables.length === 0 ? (
           <div className="empty-state">
@@ -449,18 +458,20 @@ const Tables = ({ url }) => {
         ) : (
           <div className="tables-grid">
             {tables.map((table) => (
-              <div key={table._id} className={`table-card ${!table.isActive ? 'inactive' : ''}`}>
+              <div key={table._id} className={`card table-card ${!table.isActive ? 'inactive' : ''}`}>
                 <div className="table-header">
                   <div className="table-number">Mesa {table.tableNumber}</div>
                   <div className="table-status">
-                    <label className="toggle-switch">
+                    <div className="form-check form-switch">
                       <input
+                        className="form-check-input"
                         type="checkbox"
                         checked={table.isActive}
                         onChange={() => toggleTableStatus(table._id, table.isActive)}
+                        id={`active-${table._id}`}
                       />
-                      <span className="slider"></span>
-                    </label>
+                      <label className="form-check-label" htmlFor={`active-${table._id}`}></label>
+                    </div>
                   </div>
                 </div>
                 
@@ -472,41 +483,41 @@ const Tables = ({ url }) => {
                   
                   <div className="qr-info">
                     {table.qrCodeUrl ? (
-                      <div className="qr-preview">
+                      <div className="qr-preview d-flex align-items-center gap-2">
                         <img src={table.qrCodeUrl} alt={`QR Code Mesa ${table.tableNumber}`} />
-                        <span className="qr-status success">QR Code gerado</span>
+                        <span className="badge bg-green-lt">QR Code gerado</span>
                       </div>
                     ) : (
-                      <span className="qr-status pending">QR Code não gerado</span>
+                      <span className="badge bg-yellow-lt">QR Code não gerado</span>
                     )}
                   </div>
                 </div>
                 
                 <div className="table-actions">
                       <button 
-                        className="edit-btn"
+                        className="btn btn-warning"
                         onClick={() => handleEdit(table)}
                       >
                         Editar
                       </button>
                       <button 
-                        className="print-btn"
+                        className="btn btn-indigo"
                         onClick={() => printIndividualQR(table._id, table.tableNumber)}
                         disabled={!table.qrCodeUrl}
                         title={table.qrCodeUrl ? 'Baixar PDF do QR Code' : 'QR Code não disponível'}
                       >
-                        📄 PDF
+                        <i className="ti ti-file-text"></i> PDF
                       </button>
                       <button 
-                        className="thermal-print-btn"
+                        className="btn btn-orange"
                         onClick={() => printIndividualQRDirect(table._id, table.tableNumber)}
                         disabled={!table.qrCodeUrl}
                         title={table.qrCodeUrl ? 'Imprimir QR Code diretamente na impressora térmica' : 'QR Code não disponível'}
                       >
-                        🖨️ Direto
+                        <i className="ti ti-printer"></i> Direto
                       </button>
                       <button 
-                        className="delete-btn"
+                        className="btn btn-danger"
                         onClick={() => handleDelete(table._id)}
                       >
                         Excluir
@@ -516,6 +527,7 @@ const Tables = ({ url }) => {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

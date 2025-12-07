@@ -92,7 +92,7 @@ class LizaCustomerService:
             headers = {'X-Store-ID': store_id}
             params = {
                 'segment': segment,
-                'contactMethod': contact_method,
+                'contactMethod': 'whatsapp',
                 'limit': limit,
                 'active': 'true'
             }
@@ -202,7 +202,7 @@ class LizaCustomerService:
             name = customer.get('name', 'Nome não informado')
             phone = customer.get('phone', 'Telefone não informado')
             whatsapp = customer.get('whatsappNumber', phone)
-            telegram = customer.get('telegramUsername', 'Não informado')
+            
             segment = customer.get('customerSegment', 'new')
             total_orders = customer.get('totalOrders', 0)
             
@@ -229,7 +229,7 @@ class LizaCustomerService:
             info = f"""👤 **{name}**
 📱 Telefone: {phone}
 💬 WhatsApp: {whatsapp}
-📧 Telegram: @{telegram}
+
 🏷️ Segmento: {segment_display}
 📦 Total de Pedidos: {total_orders}
 🗓️ Último Pedido: {last_order_str}"""
@@ -255,8 +255,7 @@ class LizaCustomerService:
         if customer.get('allowWhatsappContact') and customer.get('whatsappNumber'):
             methods.append('whatsapp')
         
-        if customer.get('allowTelegramContact') and customer.get('telegramUsername'):
-            methods.append('telegram')
+        
         
         return methods
     
@@ -276,16 +275,14 @@ class LizaCustomerService:
             stats = {
                 'total_customers': 0,
                 'by_segment': {},
-                'contactable_whatsapp': 0,
-                'contactable_telegram': 0,
-                'contactable_both': 0
+                'contactable_whatsapp': 0
             }
             
             for segment in segments:
                 customers = await self.get_contactable_customers(
                     store_id=store_id,
                     segment=segment,
-                    contact_method='all',
+                    contact_method='whatsapp',
                     limit=1000
                 )
                 stats['by_segment'][segment] = len(customers)
@@ -299,19 +296,7 @@ class LizaCustomerService:
             )
             stats['contactable_whatsapp'] = len(whatsapp_customers)
             
-            telegram_customers = await self.get_contactable_customers(
-                store_id=store_id,
-                contact_method='telegram',
-                limit=1000
-            )
-            stats['contactable_telegram'] = len(telegram_customers)
             
-            both_customers = await self.get_contactable_customers(
-                store_id=store_id,
-                contact_method='both',
-                limit=1000
-            )
-            stats['contactable_both'] = len(both_customers)
             
             return stats
             

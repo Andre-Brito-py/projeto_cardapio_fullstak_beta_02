@@ -35,7 +35,7 @@ const CustomerSegmentation = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`${BACKEND_URL}/api/analytics/segmentation-summary`, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -54,7 +54,7 @@ const CustomerSegmentation = () => {
         rules: segmentationRules,
         autoSegmentEnabled
       }, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {
@@ -76,7 +76,7 @@ const CustomerSegmentation = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(`${BACKEND_URL}/api/analytics/run-segmentation`, {}, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       if (response.data.success) {

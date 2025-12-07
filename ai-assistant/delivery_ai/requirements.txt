@@ -17,9 +17,6 @@ torch==2.1.0
 transformers==4.35.2
 tokenizers==0.15.0
 
-# Telegram Bot
-python-telegram-bot==20.7
-telebot==0.0.5
 
 # Banco de dados
 sqlalchemy==2.0.23

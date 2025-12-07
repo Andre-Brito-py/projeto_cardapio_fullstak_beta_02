@@ -263,264 +263,183 @@ const Add = ({url}) => {
 
   return (
     <div className='add'>
-        <form  className="flex-col" onSubmit={onSubmitHandler}>
+      <div className="card">
+        <div className="card-header d-flex align-items-center justify-content-between">
+          <h2 className="m-0 d-flex align-items-center gap-2"><i className="ti ti-plus"></i>Novo Produto</h2>
+          <div className="d-flex gap-2">
+            <button type="button" className="btn btn-outline-primary" onClick={testConnection}><i className="ti ti-plug"></i> Testar Conexão</button>
+          </div>
+        </div>
+        <div className="card-body">
+          <form className="flex-col" onSubmit={onSubmitHandler}>
             <div className="add-img-upload flex-col">
-                <p>Upload Image</p>
-                <label htmlFor="image">
-                    <img src={image? URL.createObjectURL(image):assets.upload_area} alt="" />
-                </label>
-                <input onChange={(e)=>setImage(e.target.files[0])} type="file" id='image' hidden required />
+              <label className="form-label">Imagem</label>
+              <label htmlFor="image">
+                <img src={image ? URL.createObjectURL(image) : assets.upload_area} alt="upload" />
+              </label>
+              <input onChange={(e) => setImage(e.target.files[0])} type="file" id='image' hidden required accept="image/*" />
             </div>
             <div className="add-product-name flex-col">
-                <p>Product name</p>
-                <input onChange={onChangeHandler} value={data.name} type="text" name='name' placeholder='Type Here' required />
+              <label className="form-label">Nome</label>
+              <div className="input-with-icon">
+                <i className="ti ti-text-size"></i>
+                <input className="form-control" onChange={onChangeHandler} value={data.name} type="text" name='name' placeholder='Digite o nome' required />
+              </div>
             </div>
             <div className="add-product-description flex-col">
-                <p>Product description</p>
-                <textarea onChange={onChangeHandler} value={data.description} name="description" rows='6' placeholder='Write content here' required></textarea>
+              <label className="form-label">Descrição</label>
+              <div className="input-with-icon">
+                <i className="ti ti-align-left"></i>
+                <textarea className="form-control" onChange={onChangeHandler} value={data.description} name="description" rows='6' placeholder='Descreva o produto' required></textarea>
+              </div>
             </div>
             <div className="add-category-price">
-                <div className="add-category flex-col">
-                    <p>Product category</p>
-                    <select onChange={onChangeHandler} name="category" value={data.category}>
-                        {categories.length === 0 ? (
-                            <option value="">Carregando categorias...</option>
-                        ) : (
-                            categories.map((category) => (
-                                <option key={category._id} value={category.name}>
-                                    {category.name}
-                                </option>
-                            ))
-                        )}
-                    </select>
+              <div className="add-category flex-col">
+                <label className="form-label">Categoria</label>
+                <div className="input-with-icon">
+                <i className="ti ti-category"></i>
+                <select className="form-select" onChange={onChangeHandler} name="category" value={data.category}>
+                  {categories.length === 0 ? (
+                    <option value="">Carregando categorias...</option>
+                  ) : (
+                    categories.map((category) => (
+                      <option key={category._id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))
+                  )}
+                </select>
                 </div>
-                <div className="add-price flex-col">
-                    <p>Product price</p>
-                    <input onChange={onChangeHandler} value={data.price} type="number" name='price' placeholder='₹20' required />
+              </div>
+              <div className="add-price flex-col">
+                <label className="form-label">Preço</label>
+                <div className="input-with-icon">
+                  <i className="ti ti-currency-dollar"></i>
+                  <input className="form-control" onChange={onChangeHandler} value={data.price} type="number" name='price' placeholder='R$ 0,00' required />
                 </div>
+              </div>
             </div>
-            
-            {/* Addon System Toggle */}
-            <div className="addon-system-toggle flex-col">
-                <div className="system-choice">
-                    <label>
-                        <input 
-                            type="radio" 
-                            name="addonSystem"
-                            checked={!useOldSystem}
-                            onChange={() => setUseOldSystem(false)}
-                        />
-                        Usar sistema de categorias de adicionais (Recomendado)
-                    </label>
-                    <label>
-                        <input 
-                            type="radio" 
-                            name="addonSystem"
-                            checked={useOldSystem}
-                            onChange={() => setUseOldSystem(true)}
-                        />
-                        Usar sistema antigo de extras
-                    </label>
-                </div>
-            </div>
-            
-            {/* New Inline Addon Categories System */}
-            {!useOldSystem && (
-                <div className="addon-categories-system flex-col">
+            <div className="card card-tabs mt-2">
+              <div className="card-header">
+                <ul className="nav nav-tabs card-header-tabs">
+                  <li className="nav-item">
+                    <button type="button" className={`nav-link ${!useOldSystem ? 'active' : ''}`} onClick={() => setUseOldSystem(false)}>
+                      <i className="ti ti-layers-union"></i> Adicionais
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button type="button" className={`nav-link ${useOldSystem ? 'active' : ''}`} onClick={() => setUseOldSystem(true)}>
+                      <i className="ti ti-archive"></i> Extras (Legado)
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              <div className="card-body">
+                {!useOldSystem && (
+                  <div className="addon-categories-system flex-col">
                     <h3>Categorias de Adicionais</h3>
-                    
-                    {/* Add New Category Form */}
                     <div className="add-category-form">
-                        <h4>Adicionar Nova Categoria</h4>
-                        <div className="category-form-inputs">
-                            <input 
-                                type="text" 
-                                name="name" 
-                                placeholder="Nome da categoria (ex: Coberturas, Saladas)" 
-                                value={currentAddonCategory.name}
-                                onChange={onAddonCategoryChangeHandler}
-                            />
-                            <input 
-                                type="text" 
-                                name="description" 
-                                placeholder="Descrição (opcional)" 
-                                value={currentAddonCategory.description}
-                                onChange={onAddonCategoryChangeHandler}
-                            />
-                            <div className="category-settings">
-                                <div className="setting-group">
-                                    <label>Máximo de seleções:</label>
-                                    <input 
-                                        type="number" 
-                                        name="maxSelection"
-                                        min="1" 
-                                        max="10"
-                                        value={currentAddonCategory.maxSelection}
-                                        onChange={onAddonCategoryChangeHandler}
-                                    />
-                                </div>
-                                <div className="setting-group">
-                                    <label>
-                                        <input 
-                                            type="checkbox" 
-                                            name="isRequired"
-                                            checked={currentAddonCategory.isRequired}
-                                            onChange={onAddonCategoryChangeHandler}
-                                        />
-                                        Categoria obrigatória
-                                    </label>
-                                </div>
-                            </div>
-                            <button type="button" onClick={addAddonCategory} className="add-category-btn">
-                                Adicionar Categoria
-                            </button>
+                      <h4>Adicionar Nova Categoria</h4>
+                      <div className="category-form-inputs">
+                        <input className="form-control" type="text" name="name" placeholder="Nome da categoria" value={currentAddonCategory.name} onChange={onAddonCategoryChangeHandler} />
+                        <input className="form-control" type="text" name="description" placeholder="Descrição (opcional)" value={currentAddonCategory.description} onChange={onAddonCategoryChangeHandler} />
+                        <div className="category-settings d-flex gap-3">
+                          <div className="setting-group">
+                            <label className="form-label">Máximo de seleções</label>
+                            <input className="form-control" type="number" name="maxSelection" min="1" max="10" value={currentAddonCategory.maxSelection} onChange={onAddonCategoryChangeHandler} />
+                          </div>
+                          <div className="setting-group d-flex align-items-center gap-2">
+                            <input className="form-check-input" type="checkbox" name="isRequired" checked={currentAddonCategory.isRequired} onChange={onAddonCategoryChangeHandler} />
+                            <span>Obrigatória</span>
+                          </div>
                         </div>
+                        <button type="button" onClick={addAddonCategory} className="btn btn-primary">Adicionar Categoria</button>
+                      </div>
                     </div>
-                    
-                    {/* Display Created Categories */}
                     {addonCategories.length > 0 && (
-                        <div className="created-categories">
-                            <h4>Categorias Criadas</h4>
+                      <div className="created-categories">
+                        <h4>Categorias Criadas</h4>
+                        <ul className="list-group list-group-flush">
+                          {addonCategories.map(category => (
+                            <li key={category.id} className="list-group-item">
+                              <div className="d-flex justify-content-between align-items-center">
+                                <div className="category-info">
+                                  <strong>{category.name}</strong>
+                                  {category.description && <span> - {category.description}</span>}
+                                  <small> (Máx: {category.maxSelection}, {category.isRequired ? 'Obrigatória' : 'Opcional'})</small>
+                                </div>
+                                <button type="button" onClick={() => removeAddonCategory(category.id)} className="btn btn-danger btn-sm">Remover</button>
+                              </div>
+                              {categoryAddons[category.id] && categoryAddons[category.id].length > 0 && (
+                                <ul className="list-group list-group-flush mt-2">
+                                  {categoryAddons[category.id].map(addon => (
+                                    <li key={addon.id} className="list-group-item d-flex justify-content-between align-items-center">
+                                      <span>{addon.name} - R$ {addon.price.toFixed(2)}</span>
+                                      {addon.description && <small> ({addon.description})</small>}
+                                      <button type="button" onClick={() => removeAddon(category.id, addon.id)} className="btn btn-danger btn-sm">×</button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {addonCategories.length > 0 && (
+                      <div className="add-addon-form">
+                        <h4>Adicionar Adicionais às Categorias</h4>
+                        <div className="addon-form-inputs">
+                          <select className="form-select" value={selectedCategoryForAddon} onChange={(e) => setSelectedCategoryForAddon(e.target.value)}>
+                            <option value="">Selecione uma categoria</option>
                             {addonCategories.map(category => (
-                                <div key={category.id} className="category-item">
-                                    <div className="category-header">
-                                        <div className="category-info">
-                                            <strong>{category.name}</strong>
-                                            {category.description && <span> - {category.description}</span>}
-                                            <small> (Máx: {category.maxSelection}, {category.isRequired ? 'Obrigatória' : 'Opcional'})</small>
-                                        </div>
-                                        <button 
-                                            type="button" 
-                                            onClick={() => removeAddonCategory(category.id)}
-                                            className="remove-category-btn"
-                                        >
-                                            Remover
-                                        </button>
-                                    </div>
-                                    
-                                    {/* Display addons for this category */}
-                                    {categoryAddons[category.id] && categoryAddons[category.id].length > 0 && (
-                                        <div className="category-addons">
-                                            <strong>Adicionais:</strong>
-                                            {categoryAddons[category.id].map(addon => (
-                                                <div key={addon.id} className="addon-item">
-                                                    <span>{addon.name} - R$ {addon.price.toFixed(2)}</span>
-                                                    {addon.description && <small> ({addon.description})</small>}
-                                                    <button 
-                                                        type="button" 
-                                                        onClick={() => removeAddon(category.id, addon.id)}
-                                                        className="remove-addon-btn"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
+                              <option key={category.id} value={category.id}>{category.name}</option>
                             ))}
+                          </select>
+                          <input className="form-control" type="text" name="name" placeholder="Nome do adicional" value={currentAddon.name} onChange={onAddonChangeHandler} />
+                          <input className="form-control" type="number" name="price" placeholder="Preço (R$)" step="0.01" value={currentAddon.price} onChange={onAddonChangeHandler} />
+                          <input className="form-control" type="text" name="description" placeholder="Descrição (opcional)" value={currentAddon.description} onChange={onAddonChangeHandler} />
+                          <button type="button" onClick={addAddon} className="btn btn-primary">Adicionar</button>
                         </div>
+                      </div>
                     )}
-                    
-                    {/* Add Addons to Categories */}
-                    {addonCategories.length > 0 && (
-                        <div className="add-addon-form">
-                            <h4>Adicionar Adicionais às Categorias</h4>
-                            <div className="addon-form-inputs">
-                                <select 
-                                    value={selectedCategoryForAddon}
-                                    onChange={(e) => setSelectedCategoryForAddon(e.target.value)}
-                                >
-                                    <option value="">Selecione uma categoria</option>
-                                    {addonCategories.map(category => (
-                                        <option key={category.id} value={category.id}>
-                                            {category.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <input 
-                                    type="text" 
-                                    name="name" 
-                                    placeholder="Nome do adicional (ex: Tomate, Calda de Morango)" 
-                                    value={currentAddon.name}
-                                    onChange={onAddonChangeHandler}
-                                />
-                                <input 
-                                    type="number" 
-                                    name="price" 
-                                    placeholder="Preço (R$)" 
-                                    step="0.01"
-                                    value={currentAddon.price}
-                                    onChange={onAddonChangeHandler}
-                                />
-                                <input 
-                                    type="text" 
-                                    name="description" 
-                                    placeholder="Descrição (opcional)" 
-                                    value={currentAddon.description}
-                                    onChange={onAddonChangeHandler}
-                                />
-                                <button type="button" onClick={addAddon} className="add-addon-btn">
-                                    Adicionar
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
-            
-            {/* Legacy Extras Section */}
-            {useOldSystem && (
-                <div className="add-extras-section flex-col">
+                  </div>
+                )}
+                {useOldSystem && (
+                  <div className="add-extras-section flex-col">
                     <h3>Extras do Produto (Sistema Antigo)</h3>
-                    
-                    {/* Current extras list */}
                     {extras.length > 0 && (
-                        <div className="extras-list">
-                            <h4>Extras Adicionados:</h4>
-                            {extras.map((extra, index) => (
-                                <div key={index} className="extra-item">
-                                    <span><strong>{extra.name}</strong> - R$ {extra.price}</span>
-                                    {extra.description && <span> ({extra.description})</span>}
-                                    <button type="button" onClick={() => removeExtra(index)} className="remove-extra-btn">Remover</button>
-                                </div>
-                            ))}
-                        </div>
+                      <div className="extras-list">
+                        <h4>Extras Adicionados:</h4>
+                        <ul className="list-group list-group-flush">
+                          {extras.map((extra, index) => (
+                            <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                              <span><strong>{extra.name}</strong> - R$ {extra.price}</span>
+                              {extra.description && <span> ({extra.description})</span>}
+                              <button type="button" onClick={() => removeExtra(index)} className="btn btn-danger btn-sm">Remover</button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     )}
-                    
-                    {/* Add new extra form */}
                     <div className="add-extra-form">
-                        <div className="extra-inputs">
-                            <input 
-                                type="text" 
-                                name="name" 
-                                placeholder="Nome do extra (ex: Queijo Extra)" 
-                                value={currentExtra.name}
-                                onChange={onExtraChangeHandler}
-                            />
-                            <input 
-                                type="number" 
-                                name="price" 
-                                placeholder="Preço (R$)" 
-                                step="0.01"
-                                value={currentExtra.price}
-                                onChange={onExtraChangeHandler}
-                            />
-                            <input 
-                                type="text" 
-                                name="description" 
-                                placeholder="Descrição (opcional)" 
-                                value={currentExtra.description}
-                                onChange={onExtraChangeHandler}
-                            />
-                            <button type="button" onClick={addExtra} className="add-extra-btn">Adicionar Extra</button>
-                        </div>
+                      <div className="extra-inputs">
+                        <input className="form-control" type="text" name="name" placeholder="Nome do extra" value={currentExtra.name} onChange={onExtraChangeHandler} />
+                        <input className="form-control" type="number" name="price" placeholder="Preço (R$)" step="0.01" value={currentExtra.price} onChange={onExtraChangeHandler} />
+                        <input className="form-control" type="text" name="description" placeholder="Descrição (opcional)" value={currentExtra.description} onChange={onExtraChangeHandler} />
+                        <button type="button" onClick={addExtra} className="btn btn-primary">Adicionar Extra</button>
+                      </div>
                     </div>
-                </div>
-            )}
-            
-            <button type='submit' className='add-btn'>ADD</button>
-        </form>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="card-footer d-flex justify-content-end gap-2">
+              <button type='submit' className='btn btn-primary'>Salvar</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   )
 }

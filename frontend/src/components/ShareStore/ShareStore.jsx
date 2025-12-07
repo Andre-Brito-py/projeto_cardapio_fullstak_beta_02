@@ -49,11 +49,7 @@ const ShareStore = ({ storeData = null }) => {
         window.open(twitterUrl, '_blank');
     };
 
-    // Compartilhar no Telegram
-    const shareTelegram = () => {
-        const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(storeUrl)}&text=${encodeURIComponent(shareText)}`;
-        window.open(telegramUrl, '_blank');
-    };
+    
 
     // Compartilhar por email
     const shareEmail = () => {
@@ -167,14 +163,7 @@ const ShareStore = ({ storeData = null }) => {
                                         Twitter
                                     </button>
 
-                                    <button 
-                                        className="share-social-btn telegram"
-                                        onClick={shareTelegram}
-                                        title="Compartilhar no Telegram"
-                                    >
-                                        <i className="fab fa-telegram-plane"></i>
-                                        Telegram
-                                    </button>
+                                    
 
                                     <button 
                                         className="share-social-btn email"

@@ -37,12 +37,6 @@ const ApiManagement = ({ url, token }) => {
     whatsappWebhookVerifyToken: '',
     whatsappBusinessAccountId: '',
     
-    // Telegram Bot API
-    telegramEnabled: false,
-    telegramBotToken: '',
-    telegramWebhookUrl: '',
-    telegramAllowedUsers: '',
-    telegramAdminChatId: ''
   });
   
   const [loading, setLoading] = useState(false);
@@ -51,12 +45,11 @@ const ApiManagement = ({ url, token }) => {
   const [activeTab, setActiveTab] = useState('openai');
   const [testingLisa, setTestingLisa] = useState(false);
   const [testingWhatsApp, setTestingWhatsApp] = useState(false);
-  const [testingTelegram, setTestingTelegram] = useState(false);
   const [googleMapsStatus, setGoogleMapsStatus] = useState(null);
   const [asaasStatus, setAsaasStatus] = useState(null);
   const [lisaStatus, setLisaStatus] = useState(null);
   const [whatsappStatus, setWhatsappStatus] = useState(null);
-  const [telegramStatus, setTelegramStatus] = useState(null);
+  
   const [lisaServiceStatus, setLisaServiceStatus] = useState(null);
   const [controllingLisa, setControllingLisa] = useState(false);
 
@@ -67,27 +60,39 @@ const ApiManagement = ({ url, token }) => {
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      console.log('🔍 Iniciando fetchSettings...');
-      console.log('🔍 URL:', `${url}/api/system/api/settings`);
-      console.log('🔍 Token:', token ? 'Token presente' : 'Token ausente');
       
       const response = await axios.get(`${url}/api/system/api/settings`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      console.log('🔍 Resposta recebida:', response.data);
       
       if (response.data.success) {
-        setSettings(response.data.settings);
-        console.log('🔍 Settings atualizadas:', response.data.settings);
+        const incoming = response.data.settings || {};
+        const toBool = (v, fallback) => (typeof v === 'boolean' ? v : !!fallback);
+        const toNumber = (v, fallback) => {
+          const n = typeof v === 'string' ? parseFloat(v) : v;
+          return Number.isFinite(n) ? n : fallback;
+        };
+        const envNormalize = (v) => (['sandbox','production'].includes(v) ? v : 'sandbox');
+        setSettings(prev => ({
+          ...prev,
+          ...incoming,
+          googleMapsEnabled: toBool(incoming.googleMapsEnabled, prev.googleMapsEnabled),
+          asaasEnabled: toBool(incoming.asaasEnabled, prev.asaasEnabled),
+          whatsappEnabled: toBool(incoming.whatsappEnabled, prev.whatsappEnabled),
+          lisaEnabled: toBool(incoming.lisaEnabled, prev.lisaEnabled),
+          shippingEnabled: toBool(incoming.shippingEnabled, prev.shippingEnabled),
+          freeShippingMinValue: toNumber(incoming.freeShippingMinValue, prev.freeShippingMinValue),
+          baseShippingCost: toNumber(incoming.baseShippingCost, prev.baseShippingCost),
+          costPerKm: toNumber(incoming.costPerKm, prev.costPerKm),
+          lisaMaxFileSize: parseInt(incoming.lisaMaxFileSize ?? prev.lisaMaxFileSize, 10) || prev.lisaMaxFileSize,
+          asaasEnvironment: envNormalize(incoming.asaasEnvironment ?? prev.asaasEnvironment),
+          lisaPort: String(incoming.lisaPort ?? prev.lisaPort)
+        }));
       } else {
-        console.error('🔍 Resposta sem sucesso:', response.data);
         toast.error('Erro: Resposta da API sem sucesso');
       }
     } catch (error) {
-      console.error('🔍 Erro detalhado ao buscar configurações:', error);
-      console.error('🔍 Status do erro:', error.response?.status);
-      console.error('🔍 Dados do erro:', error.response?.data);
       toast.error(`Erro ao carregar configurações das APIs: ${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
@@ -129,16 +134,7 @@ const ApiManagement = ({ url, token }) => {
       setLoading(true);
       let response;
       
-      if (apiType === 'Telegram') {
-        // Usar rota específica do Telegram
-        response = await axios.post(`${url}/api/telegram/bot-config`, {
-          token: settings.telegramBotToken,
-          webhookUrl: settings.telegramWebhookUrl,
-          isActive: settings.telegramEnabled
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } else {
+      {
         // Usar rota geral para outras APIs
         response = await axios.put(`${url}/api/system/api/settings`, settings, {
           headers: { Authorization: `Bearer ${token}` }
@@ -251,55 +247,7 @@ const ApiManagement = ({ url, token }) => {
     }
   };
 
-  const testTelegramApi = async () => {
-    if (!settings.telegramBotToken) {
-      toast.error('Insira o Token do Bot do Telegram primeiro');
-      return;
-    }
-
-    try {
-      setTestingTelegram(true);
-      
-      // Primeiro tentar a rota direta
-      try {
-        const directResponse = await axios.post(`${url}/api/telegram-direct/test-telegram-direct`, {
-          telegramBotToken: settings.telegramBotToken
-        });
-        
-        if (directResponse.data.success) {
-          setTelegramStatus({ success: true, message: directResponse.data.message });
-          toast.success('API do Telegram Bot funcionando corretamente!');
-          return;
-        }
-      } catch (directError) {
-        console.log('Rota direta falhou, tentando rota original:', directError.message);
-      }
-      
-      // Fallback para a rota original
-      const response = await axios.post(`${url}/api/system/api/test-telegram`, {
-        botToken: settings.telegramBotToken,
-        webhookUrl: settings.telegramWebhookUrl,
-        allowedUsers: settings.telegramAllowedUsers,
-        adminChatId: settings.telegramAdminChatId
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (response.data.success) {
-        setTelegramStatus({ success: true, message: response.data.message });
-        toast.success('API do Telegram Bot funcionando corretamente!');
-      } else {
-        setTelegramStatus({ success: false, message: response.data.message });
-        toast.error('Erro na API do Telegram: ' + response.data.message);
-      }
-    } catch (error) {
-      console.error('Erro ao testar Telegram:', error);
-      setTelegramStatus({ success: false, message: 'Erro ao conectar com a API' });
-      toast.error('Erro ao testar API do Telegram Bot');
-    } finally {
-      setTestingTelegram(false);
-    }
-  };
+  
 
   const testLisaApi = async () => {
     if (!settings.lisaOpenAiApiKey && !settings.lisaGroqApiKey) {
@@ -435,7 +383,7 @@ const ApiManagement = ({ url, token }) => {
   return (
     <div className="api-management">
       <div className="page-header">
-        <h1>🔧 Gerenciamento de APIs</h1>
+        <h1>Gerenciamento de APIs</h1>
         <p>Configure e gerencie as integrações com APIs externas</p>
       </div>
 
@@ -444,7 +392,7 @@ const ApiManagement = ({ url, token }) => {
         <div className="api-section">
           <div className="section-header">
             <div className="section-title">
-              <h2>🗺️ Google Maps API</h2>
+              <h2>Google Maps API</h2>
               <div className="toggle-switch">
                 <input
                   type="checkbox"
@@ -458,7 +406,7 @@ const ApiManagement = ({ url, token }) => {
             </div>
             {googleMapsStatus && (
               <div className={`status-indicator ${googleMapsStatus.success ? 'success' : 'error'}`}>
-                {googleMapsStatus.success ? '✅' : '❌'} {googleMapsStatus.message}
+                {googleMapsStatus.message}
               </div>
             )}
           </div>
@@ -539,7 +487,7 @@ const ApiManagement = ({ url, token }) => {
               disabled={loading || !settings.googleMapsEnabled}
               className="save-api-button"
             >
-              {loading ? 'Salvando...' : '💾 Salvar Configurações Google Maps'}
+              {loading ? 'Salvando...' : 'Salvar Configurações Google Maps'}
             </button>
           </div>
         </div>
@@ -548,7 +496,7 @@ const ApiManagement = ({ url, token }) => {
         <div className="api-section">
           <div className="section-header">
             <div className="section-title">
-              <h2>💳 Asaas API</h2>
+              <h2>Asaas API</h2>
               <div className="toggle-switch">
                 <input
                   type="checkbox"
@@ -562,7 +510,7 @@ const ApiManagement = ({ url, token }) => {
             </div>
             {asaasStatus && (
               <div className={`status-indicator ${asaasStatus.success ? 'success' : 'error'}`}>
-                {asaasStatus.success ? '✅' : '❌'} {asaasStatus.message}
+                {asaasStatus.message}
               </div>
             )}
           </div>
@@ -614,7 +562,7 @@ const ApiManagement = ({ url, token }) => {
 
             <div className="environment-info">
               <div className={`env-badge ${settings.asaasEnvironment}`}>
-                {settings.asaasEnvironment === 'sandbox' ? '🧪 Modo Teste' : '🚀 Modo Produção'}
+                {settings.asaasEnvironment === 'sandbox' ? 'Modo Teste' : 'Modo Produção'}
               </div>
               <p>
                 {settings.asaasEnvironment === 'sandbox' 
@@ -632,7 +580,7 @@ const ApiManagement = ({ url, token }) => {
               disabled={loading || !settings.asaasEnabled}
               className="save-api-button"
             >
-              {loading ? 'Salvando...' : '💾 Salvar Configurações Asaas'}
+              {loading ? 'Salvando...' : 'Salvar Configurações Asaas'}
             </button>
           </div>
         </div>
@@ -641,7 +589,7 @@ const ApiManagement = ({ url, token }) => {
         <div className="api-section">
           <div className="section-header">
             <div className="section-title">
-              <h2>💬 WhatsApp Business API</h2>
+              <h2>WhatsApp Business API</h2>
               <div className="toggle-switch">
                 <input
                   type="checkbox"
@@ -655,7 +603,7 @@ const ApiManagement = ({ url, token }) => {
             </div>
             {whatsappStatus && (
               <div className={`status-indicator ${whatsappStatus.success ? 'success' : 'error'}`}>
-                {whatsappStatus.success ? '✅' : '❌'} {whatsappStatus.message}
+                {whatsappStatus.message}
               </div>
             )}
           </div>
@@ -735,7 +683,7 @@ const ApiManagement = ({ url, token }) => {
             </div>
 
             <div className="api-info">
-              <h4>ℹ️ Informações Importantes</h4>
+              <h4>Informações Importantes</h4>
               <ul>
                 <li>Configure o webhook URL: <code>{url}/api/whatsapp/webhook</code></li>
                 <li>Certifique-se de que o número está verificado no WhatsApp Business</li>
@@ -752,136 +700,17 @@ const ApiManagement = ({ url, token }) => {
               disabled={loading || !settings.whatsappEnabled}
               className="save-api-button"
             >
-              {loading ? 'Salvando...' : '💾 Salvar Configurações WhatsApp'}
+              {loading ? 'Salvando...' : 'Salvar Configurações WhatsApp'}
             </button>
           </div>
         </div>
 
-        {/* Telegram Bot API */}
-        <div className="api-section">
-          <div className="section-header">
-            <div className="section-title">
-              <h2>🤖 Telegram Bot API</h2>
-              <div className="toggle-switch">
-                <input
-                  type="checkbox"
-                  id="telegramEnabled"
-                  name="telegramEnabled"
-                  checked={settings.telegramEnabled}
-                  onChange={handleInputChange}
-                />
-                <label htmlFor="telegramEnabled">Ativar</label>
-              </div>
-            </div>
-            {telegramStatus && (
-              <div className={`status-indicator ${telegramStatus.success ? 'success' : 'error'}`}>
-                {telegramStatus.success ? '✅' : '❌'} {telegramStatus.message}
-              </div>
-            )}
-          </div>
-
-          <div className="section-content">
-            <div className="form-group">
-              <label>Bot Token</label>
-              <div className="input-with-button">
-                <input
-                  type="password"
-                  name="telegramBotToken"
-                  value={settings.telegramBotToken}
-                  onChange={handleInputChange}
-                  placeholder="Insira o token do seu bot do Telegram"
-                  disabled={!settings.telegramEnabled}
-                />
-                <button
-                  type="button"
-                  onClick={testTelegramApi}
-                  disabled={testingTelegram || !settings.telegramEnabled}
-                  className="test-button"
-                >
-                  {testingTelegram ? 'Testando...' : 'Testar'}
-                </button>
-              </div>
-              <small className="form-help">
-                Token do bot obtido através do @BotFather no Telegram.
-                <a href="https://core.telegram.org/bots#6-botfather" target="_blank" rel="noopener noreferrer">
-                  Como criar um bot no Telegram
-                </a>
-              </small>
-            </div>
-
-            <div className="form-group">
-              <label>Webhook URL</label>
-              <input
-                type="text"
-                name="telegramWebhookUrl"
-                value={settings.telegramWebhookUrl}
-                onChange={handleInputChange}
-                placeholder="https://seudominio.com/api/telegram/webhook"
-                disabled={!settings.telegramEnabled}
-              />
-              <small className="form-help">
-                URL onde o Telegram enviará as atualizações do bot.
-              </small>
-            </div>
-
-            <div className="form-group">
-              <label>Usuários Permitidos</label>
-              <input
-                type="text"
-                name="telegramAllowedUsers"
-                value={settings.telegramAllowedUsers}
-                onChange={handleInputChange}
-                placeholder="@usuario1,@usuario2,123456789"
-                disabled={!settings.telegramEnabled}
-              />
-              <small className="form-help">
-                Lista de usuários ou IDs separados por vírgula que podem usar o bot.
-              </small>
-            </div>
-
-            <div className="form-group">
-              <label>Chat ID do Admin</label>
-              <input
-                type="text"
-                name="telegramAdminChatId"
-                value={settings.telegramAdminChatId}
-                onChange={handleInputChange}
-                placeholder="123456789"
-                disabled={!settings.telegramEnabled}
-              />
-              <small className="form-help">
-                ID do chat do administrador para receber notificações.
-              </small>
-            </div>
-
-            <div className="api-info">
-              <h4>ℹ️ Informações Importantes</h4>
-              <ul>
-                <li>Configure o webhook URL: <code>{url}/api/telegram/webhook</code></li>
-                <li>Use o @BotFather para criar e configurar seu bot</li>
-                <li>O bot pode enviar cardápios e mensagens promocionais</li>
-                <li>Integração com a Lisa AI para atendimento automatizado</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="section-actions">
-            <button
-              type="button"
-              onClick={() => saveSpecificApiSettings('Telegram')}
-              disabled={loading || !settings.telegramEnabled}
-              className="save-api-button"
-            >
-              {loading ? 'Salvando...' : '💾 Salvar Configurações Telegram'}
-            </button>
-          </div>
-        </div>
 
         {/* Configurações de Frete */}
         <div className="api-section">
           <div className="section-header">
             <div className="section-title">
-              <h2>🚚 Configurações de Frete</h2>
+              <h2>Configurações de Frete</h2>
               <div className="toggle-switch">
                 <input
                   type="checkbox"
@@ -946,7 +775,7 @@ const ApiManagement = ({ url, token }) => {
               disabled={loading || !settings.shippingEnabled}
               className="save-api-button"
             >
-              {loading ? 'Salvando...' : '💾 Salvar Configurações de Frete'}
+              {loading ? 'Salvando...' : 'Salvar Configurações de Frete'}
             </button>
           </div>
         </div>
@@ -955,7 +784,7 @@ const ApiManagement = ({ url, token }) => {
         <div className="api-section">
           <div className="section-header">
             <div className="section-title">
-              <h2>🤖 Lisa AI Assistant</h2>
+              <h2>Lisa AI Assistant</h2>
               <div className="toggle-switch">
                 <input
                   type="checkbox"
@@ -969,12 +798,12 @@ const ApiManagement = ({ url, token }) => {
             </div>
             {lisaStatus && (
               <div className={`status-indicator ${lisaStatus.success ? 'success' : 'error'}`}>
-                {lisaStatus.success ? '✅' : '❌'} {lisaStatus.message}
+                {lisaStatus.message}
               </div>
             )}
             {lisaServiceStatus && (
               <div className={`service-status ${lisaServiceStatus.running ? 'running' : 'stopped'}`}>
-                🔄 Serviço: {lisaServiceStatus.running ? 'Executando' : 'Parado'}
+                Serviço: {lisaServiceStatus.running ? 'Executando' : 'Parado'}
                 {lisaServiceStatus.port && ` (Porta: ${lisaServiceStatus.port})`}
               </div>
             )}
@@ -1132,38 +961,38 @@ const ApiManagement = ({ url, token }) => {
                 <div className="control-buttons">
                   <button
                     type="button"
-                    onClick={startLisaService}
+                    onClick={startLisa}
                     disabled={controllingLisa || (lisaServiceStatus && lisaServiceStatus.running)}
                     className="control-button start"
                   >
-                    {controllingLisa ? 'Iniciando...' : '▶️ Iniciar Lisa'}
+                    {controllingLisa ? 'Iniciando...' : 'Iniciar Lisa'}
                   </button>
                   <button
                     type="button"
-                    onClick={stopLisaService}
+                    onClick={stopLisa}
                     disabled={controllingLisa || (lisaServiceStatus && !lisaServiceStatus.running)}
                     className="control-button stop"
                   >
-                    {controllingLisa ? 'Parando...' : '⏹️ Parar Lisa'}
+                    {controllingLisa ? 'Parando...' : 'Parar Lisa'}
                   </button>
                   <button
                     type="button"
-                    onClick={restartLisaService}
+                    onClick={restartLisa}
                     disabled={controllingLisa}
                     className="control-button restart"
                   >
-                    {controllingLisa ? 'Reiniciando...' : '🔄 Reiniciar Lisa'}
+                    {controllingLisa ? 'Reiniciando...' : 'Reiniciar Lisa'}
                   </button>
                 </div>
               </div>
             )}
 
             <div className="api-info">
-              <h4>ℹ️ Informações da Lisa AI</h4>
+              <h4>Informações da Lisa AI</h4>
               <ul>
                 <li>A Lisa é uma assistente de IA especializada em delivery</li>
                 <li>Pode processar pedidos em linguagem natural</li>
-                <li>Integra com WhatsApp e Telegram para atendimento automático</li>
+                <li>Integra com WhatsApp para atendimento automático</li>
                 <li>Suporta múltiplos provedores de IA (OpenAI, Groq)</li>
                 <li>Interface web disponível em: <code>http://localhost:{settings.lisaPort}</code></li>
               </ul>
@@ -1177,46 +1006,43 @@ const ApiManagement = ({ url, token }) => {
               disabled={loading || !settings.lisaEnabled}
               className="save-api-button"
             >
-              {loading ? 'Salvando...' : '💾 Salvar Configurações Lisa AI'}
+              {loading ? 'Salvando...' : 'Salvar Configurações Lisa AI'}
             </button>
           </div>
         </div>
       </div>
 
-      <div className="save-section">
+      <div className="actions">
         <button
           type="button"
           onClick={saveSettings}
           disabled={loading}
           className="save-button"
         >
-          {loading ? 'Salvando...' : '💾 Salvar Configurações'}
+          {loading ? 'Salvando...' : 'Salvar Configurações'}
         </button>
       </div>
 
-      <div className="documentation-section">
-        <h3>📚 Documentação</h3>
+      <div className="api-documentation">
+        <h3>Documentação</h3>
         <div className="doc-links">
           <a href="https://developers.google.com/maps/documentation" target="_blank" rel="noopener noreferrer">
-            📖 Documentação Google Maps API
+            Documentação Google Maps API
           </a>
           <a href="https://docs.asaas.com/" target="_blank" rel="noopener noreferrer">
-            📖 Documentação Asaas API
+            Documentação Asaas API
           </a>
           <a href="https://platform.openai.com/docs" target="_blank" rel="noopener noreferrer">
-            📖 Documentação OpenAI API
+            Documentação OpenAI API
           </a>
           <a href="https://console.groq.com/docs" target="_blank" rel="noopener noreferrer">
-            📖 Documentação Groq API
+            Documentação Groq API
           </a>
           <a href="https://docs.chainlit.io/" target="_blank" rel="noopener noreferrer">
-            📖 Documentação Chainlit
+            Documentação Chainlit
           </a>
           <a href="https://developers.facebook.com/docs/whatsapp/business-management-api" target="_blank" rel="noopener noreferrer">
-            📖 Documentação WhatsApp Business API
-          </a>
-          <a href="https://core.telegram.org/bots/api" target="_blank" rel="noopener noreferrer">
-            📖 Documentação Telegram Bot API
+            Documentação WhatsApp Business API
           </a>
         </div>
       </div>

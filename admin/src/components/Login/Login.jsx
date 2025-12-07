@@ -61,49 +61,52 @@ const Login = ({ url, setToken }) => {
 
   return (
     <div className='login-container'>
-      <div className='login-form'>
-        <h2>Store Admin Login</h2>
-        
-        <form onSubmit={onLogin}>
-          <div className='form-group'>
-            <label>Email:</label>
-            <input
-              name='email'
-              onChange={onChangeHandler}
-              value={data.email}
-              type='email'
-              placeholder='Digite seu email'
-              required
-            />
-          </div>
-          
-          <div className='form-group'>
-            <label>Senha:</label>
-            <div className='password-input-group'>
+      <div className='card login-form'>
+        <div className='card-header'>
+          <h2 className='card-title'>Store Admin Login</h2>
+        </div>
+        <div className='card-body'>
+          <form onSubmit={onLogin}>
+            <div className='form-group'>
+              <label>Email</label>
               <input
-                name='password'
+                name='email'
                 onChange={onChangeHandler}
-                value={data.password}
-                type={showPassword ? 'text' : 'password'}
-                placeholder='Digite sua senha'
+                value={data.email}
+                type='email'
+                placeholder='Digite seu email'
                 required
               />
-              <button 
-                type="button" 
-                className="password-toggle-btn"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
-                title={showPassword ? "Ocultar senha" : "Mostrar senha"}
-              >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
-              </button>
             </div>
-          </div>
-          
-          <button type='submit' disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
+            
+            <div className='form-group'>
+              <label>Senha</label>
+              <div className='password-input-group'>
+                <input
+                  name='password'
+                  onChange={onChangeHandler}
+                  value={data.password}
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder='Digite sua senha'
+                  required
+                />
+                <button 
+                  type="button" 
+                  className="password-toggle-btn"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                  title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showPassword ? <i className='ti ti-eye-off'></i> : <i className='ti ti-eye'></i>}
+                </button>
+              </div>
+            </div>
+            
+            <button className='btn btn-primary w-full' type='submit' disabled={loading}>
+              {loading ? 'Entrando...' : 'Entrar'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import './Analytics.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { BACKEND_URL } from '../../../config/urls';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import ReactApexChart from 'react-apexcharts';
 
 const Analytics = ({ token }) => {
   const [stats, setStats] = useState({
@@ -32,11 +32,21 @@ const Analytics = ({ token }) => {
     try {
       setLoading(true);
       const response = await axios.get(`${BACKEND_URL}/api/system/stats?period=${selectedPeriod}`, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.data.success) {
-        setStats(response.data.data);
+        const data = response.data.data || {};
+        setStats(prev => ({
+          ...prev,
+          ...data,
+          stores: { ...prev.stores, ...(data.stores || {}) },
+          users: { ...prev.users, ...(data.users || {}) },
+          revenue: { ...prev.revenue, ...(data.revenue || {}) },
+          subscriptions: Array.isArray(data.subscriptions) ? data.subscriptions : [],
+          topStores: Array.isArray(data.topStores) ? data.topStores : [],
+          recentActivity: Array.isArray(data.recentActivity) ? data.recentActivity : []
+        }));
       } else {
         toast.error('Erro ao carregar estatísticas');
       }
@@ -51,11 +61,16 @@ const Analytics = ({ token }) => {
   const fetchChartData = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/api/system/chart-data?period=${selectedPeriod}`, {
-        headers: { token }
+        headers: { Authorization: `Bearer ${token}` }
       });
 
       if (response.data.success) {
-        setChartData(response.data.data);
+        const data = response.data.data || {};
+        setChartData(prev => ({
+          revenue: Array.isArray(data.revenue) ? data.revenue : [],
+          stores: Array.isArray(data.stores) ? data.stores : [],
+          users: Array.isArray(data.users) ? data.users : []
+        }));
       }
     } catch (error) {
       console.error('Erro ao buscar dados do gráfico:', error);
@@ -79,9 +94,9 @@ const Analytics = ({ token }) => {
   };
 
   const getGrowthIcon = (growth) => {
-    if (growth > 0) return '📈';
-    if (growth < 0) return '📉';
-    return '➖';
+    if (growth > 0) return <i className="ti ti-trending-up"></i>;
+    if (growth < 0) return <i className="ti ti-trending-down"></i>;
+    return <i className="ti ti-minus"></i>;
   };
 
   const getGrowthClass = (growth) => {
@@ -92,83 +107,27 @@ const Analytics = ({ token }) => {
 
   const renderModernChart = (data, type) => {
     if (!data || data.length === 0) return <div className="no-chart-data">Sem dados</div>;
-    
-    const chartData = data.slice(-7).map(item => ({
-      name: item.label,
-      value: item.value
-    }));
-
-    const getGradientId = (type) => {
-      const gradients = {
-        revenue: 'revenueGradient',
-        stores: 'storesGradient', 
-        users: 'usersGradient'
-      };
-      return gradients[type] || 'defaultGradient';
+    const paletteVars = getComputedStyle(document.documentElement);
+    const colorsMap = {
+      revenue: paletteVars.getPropertyValue('--tblr-blue')?.trim() || '#206bc4',
+      stores: paletteVars.getPropertyValue('--tblr-orange')?.trim() || '#f59f00',
+      users: paletteVars.getPropertyValue('--tblr-green')?.trim() || '#2fb344'
     };
-
-    const getStrokeColor = (type) => {
-      const colors = {
-        revenue: '#667eea',
-        stores: '#f093fb',
-        users: '#4facfe'
-      };
-      return colors[type] || '#667eea';
+    const series = [{ name: type, data: data.slice(-7).map(item => item.value) }];
+    const options = {
+      chart: { type: 'area', toolbar: { show: false } },
+      stroke: { curve: 'smooth', width: 2 },
+      dataLabels: { enabled: false },
+      colors: [colorsMap[type] || '#206bc4'],
+      grid: { strokeDashArray: 3 },
+      xaxis: { categories: data.slice(-7).map(item => item.label) },
+      tooltip: {
+        y: {
+          formatter: (val) => type === 'revenue' ? formatCurrency(val) : formatNumber(val)
+        }
+      }
     };
-    
-    return (
-      <ResponsiveContainer width="100%" height={200}>
-        <AreaChart data={chartData}>
-          <defs>
-            <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#667eea" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#764ba2" stopOpacity={0.1}/>
-            </linearGradient>
-            <linearGradient id="storesGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#f093fb" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#f5576c" stopOpacity={0.1}/>
-            </linearGradient>
-            <linearGradient id="usersGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#4facfe" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#00f2fe" stopOpacity={0.1}/>
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
-          <XAxis 
-            dataKey="name" 
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: getStrokeColor(type), fontSize: 11, fontWeight: 500 }}
-          />
-          <YAxis 
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: getStrokeColor(type), fontSize: 11, fontWeight: 500 }}
-          />
-          <Tooltip 
-            contentStyle={{
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              border: 'none',
-              borderRadius: '12px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-              fontSize: '12px'
-            }}
-            formatter={(value) => [
-              type === 'revenue' ? formatCurrency(value) : formatNumber(value),
-              type === 'revenue' ? 'Receita' : type === 'stores' ? 'Lojas' : 'Usuários'
-            ]}
-          />
-          <Area 
-            type="monotone" 
-            dataKey="value" 
-            stroke={getStrokeColor(type)}
-            strokeWidth={2}
-            fillOpacity={1} 
-            fill={`url(#${getGradientId(type)})`}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-    );
+    return <ReactApexChart options={options} series={series} type="area" height={200} />;
   };
 
   if (loading) {
@@ -186,7 +145,7 @@ const Analytics = ({ token }) => {
     <div className="analytics-container">
       <div className="analytics-header">
         <div className="header-content">
-          <h1>📊 Analytics Avançado</h1>
+          <h1><i className="ti ti-chart-bar"></i> Analytics Avançado</h1>
           <p>Análise completa do ecossistema com métricas em tempo real</p>
         </div>
         <div className="header-controls">
@@ -201,7 +160,7 @@ const Analytics = ({ token }) => {
             <option value="yearly">Últimos 2 anos</option>
           </select>
           <button onClick={fetchSystemStats} className="refresh-btn">
-            🔄 Atualizar
+            <i className="ti ti-refresh"></i>&nbsp;Atualizar
           </button>
         </div>
       </div>
@@ -209,7 +168,7 @@ const Analytics = ({ token }) => {
       {/* KPIs Principais */}
       <div className="kpi-grid">
         <div className="kpi-card revenue">
-          <div className="kpi-icon">💰</div>
+          <div className="kpi-icon"><i className="ti ti-currency-dollar"></i></div>
           <div className="kpi-content">
             <div className="kpi-value">{formatCurrency(stats.revenue.total)}</div>
             <div className="kpi-label">Receita Total</div>
@@ -220,7 +179,7 @@ const Analytics = ({ token }) => {
         </div>
 
         <div className="kpi-card stores">
-          <div className="kpi-icon">🏪</div>
+          <div className="kpi-icon"><i className="ti ti-building-store"></i></div>
           <div className="kpi-content">
             <div className="kpi-value">{stats.stores.total}</div>
             <div className="kpi-label">Total de Lojas</div>
@@ -231,7 +190,7 @@ const Analytics = ({ token }) => {
         </div>
 
         <div className="kpi-card users">
-          <div className="kpi-icon">👥</div>
+          <div className="kpi-icon"><i className="ti ti-users"></i></div>
           <div className="kpi-content">
             <div className="kpi-value">{formatNumber(stats.users.total)}</div>
             <div className="kpi-label">Usuários Ativos</div>
@@ -242,12 +201,12 @@ const Analytics = ({ token }) => {
         </div>
 
         <div className="kpi-card conversion">
-          <div className="kpi-icon">📈</div>
+          <div className="kpi-icon"><i className="ti ti-trending-up"></i></div>
           <div className="kpi-content">
             <div className="kpi-value">{getStoreStatusPercentage('active')}%</div>
             <div className="kpi-label">Taxa de Ativação</div>
             <div className="kpi-growth positive">
-              📊 Lojas Ativas
+              <i className="ti ti-chart-bar"></i>&nbsp;Lojas Ativas
             </div>
           </div>
         </div>
@@ -257,7 +216,7 @@ const Analytics = ({ token }) => {
       <div className="charts-grid">
         <div className="chart-card">
           <div className="chart-header">
-            <h3>💰 Evolução da Receita</h3>
+            <h3><i className="ti ti-currency-dollar"></i>&nbsp;Evolução da Receita</h3>
             <span className="chart-period">{selectedPeriod}</span>
           </div>
           <div className="chart-content">
@@ -267,7 +226,7 @@ const Analytics = ({ token }) => {
 
         <div className="chart-card">
           <div className="chart-header">
-            <h3>🏪 Crescimento de Lojas</h3>
+            <h3><i className="ti ti-building-store"></i>&nbsp;Crescimento de Lojas</h3>
             <span className="chart-period">{selectedPeriod}</span>
           </div>
           <div className="chart-content">
@@ -277,7 +236,7 @@ const Analytics = ({ token }) => {
 
         <div className="chart-card">
           <div className="chart-header">
-            <h3>👥 Crescimento de Usuários</h3>
+            <h3><i className="ti ti-users"></i>&nbsp;Crescimento de Usuários</h3>
             <span className="chart-period">{selectedPeriod}</span>
           </div>
           <div className="chart-content">
@@ -291,7 +250,7 @@ const Analytics = ({ token }) => {
         {/* Status das Lojas */}
         <div className="analytics-card stores-status">
           <div className="card-header">
-            <h3>🏪 Status das Lojas</h3>
+            <h3><i className="ti ti-building-store"></i>&nbsp;Status das Lojas</h3>
             <span className="total-count">{stats.stores.total}</span>
           </div>
           <div className="card-content">
@@ -324,7 +283,7 @@ const Analytics = ({ token }) => {
         {/* Top Lojas */}
         <div className="analytics-card top-stores">
           <div className="card-header">
-            <h3>🏆 Top Lojas por Receita</h3>
+            <h3><i className="ti ti-trophy"></i>&nbsp;Top Lojas por Receita</h3>
           </div>
           <div className="card-content">
             {stats.topStores && stats.topStores.length > 0 ? (
@@ -337,7 +296,7 @@ const Analytics = ({ token }) => {
                       <div className="store-revenue">{formatCurrency(store.revenue)}</div>
                     </div>
                     <div className="store-growth">
-                      {store.growth > 0 ? '📈' : store.growth < 0 ? '📉' : '➖'}
+                      {store.growth > 0 ? <i className="ti ti-trending-up"></i> : store.growth < 0 ? <i className="ti ti-trending-down"></i> : <i className="ti ti-minus"></i>}
                     </div>
                   </div>
                 ))}
@@ -353,7 +312,7 @@ const Analytics = ({ token }) => {
         {/* Planos de Assinatura */}
         <div className="analytics-card subscriptions-detailed">
           <div className="card-header">
-            <h3>📋 Distribuição de Planos</h3>
+            <h3><i className="ti ti-chart-donut"></i>&nbsp;Distribuição de Planos</h3>
           </div>
           <div className="card-content">
             {stats.subscriptions && stats.subscriptions.length > 0 ? (
@@ -379,10 +338,10 @@ const Analytics = ({ token }) => {
 
       {/* Métricas Avançadas */}
       <div className="advanced-metrics">
-        <h3>📊 Métricas Avançadas</h3>
+        <h3><i className="ti ti-gauge"></i>&nbsp;Métricas Avançadas</h3>
         <div className="metrics-grid">
           <div className="metric-item">
-            <div className="metric-icon">💰</div>
+            <div className="metric-icon"><i className="ti ti-currency-dollar"></i></div>
             <div className="metric-content">
               <div className="metric-title">Receita Média por Loja</div>
               <div className="metric-value">
@@ -394,7 +353,7 @@ const Analytics = ({ token }) => {
             </div>
           </div>
           <div className="metric-item">
-            <div className="metric-icon">👥</div>
+            <div className="metric-icon"><i className="ti ti-users"></i></div>
             <div className="metric-content">
               <div className="metric-title">Usuários por Loja</div>
               <div className="metric-value">
@@ -406,7 +365,7 @@ const Analytics = ({ token }) => {
             </div>
           </div>
           <div className="metric-item">
-            <div className="metric-icon">📈</div>
+            <div className="metric-icon"><i className="ti ti-chart-line"></i></div>
             <div className="metric-content">
               <div className="metric-title">Receita Diária Média</div>
               <div className="metric-value">
@@ -415,7 +374,7 @@ const Analytics = ({ token }) => {
             </div>
           </div>
           <div className="metric-item">
-            <div className="metric-icon">⚡</div>
+            <div className="metric-icon"><i className="ti ti-bolt"></i></div>
             <div className="metric-content">
               <div className="metric-title">Taxa de Conversão</div>
               <div className="metric-value">

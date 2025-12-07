@@ -93,12 +93,11 @@ const Analytics = () => {
         }
 
         const csvContent = [
-            ['Nome', 'Telefone', 'WhatsApp', 'Telegram', 'Segmento', 'Total Pedidos', 'Último Pedido'],
+            ['Nome', 'Telefone', 'WhatsApp', 'Segmento', 'Total Pedidos', 'Último Pedido'],
             ...contactableCustomers.map(customer => [
                 customer.name,
                 customer.phone,
                 customer.whatsappNumber || '',
-                customer.telegramUsername || '',
                 customer.customerSegment,
                 customer.totalOrders,
                 customer.lastOrderDate ? new Date(customer.lastOrderDate).toLocaleDateString('pt-BR') : 'Nunca'
@@ -219,7 +218,6 @@ const Analytics = () => {
                                 <p className="segment-orders">Média: {segment.avgOrders?.toFixed(1) || 0} pedidos</p>
                                 <div className="contact-info">
                                     <span className="whatsapp-count">📱 {segment.contactableWhatsapp}</span>
-                                    <span className="telegram-count">✈️ {segment.contactableTelegram}</span>
                                 </div>
                             </div>
                         </div>
@@ -250,7 +248,6 @@ const Analytics = () => {
                             onChange={(e) => setContactMethod(e.target.value)}
                         >
                             <option value="whatsapp">WhatsApp</option>
-                            <option value="telegram">Telegram</option>
                         </select>
                     </div>
                     <button 
@@ -279,7 +276,6 @@ const Analytics = () => {
                                         <th>Nome</th>
                                         <th>Telefone</th>
                                         <th>WhatsApp</th>
-                                        <th>Telegram</th>
                                         <th>Segmento</th>
                                         <th>Pedidos</th>
                                         <th>Último Pedido</th>
@@ -291,7 +287,7 @@ const Analytics = () => {
                                             <td>{customer.name}</td>
                                             <td>{customer.phone}</td>
                                             <td>{customer.whatsappNumber || '-'}</td>
-                                            <td>{customer.telegramUsername || '-'}</td>
+                                        
                                             <td>
                                                 <span 
                                                     className="segment-badge"

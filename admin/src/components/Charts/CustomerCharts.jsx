@@ -7,12 +7,13 @@ const CustomerCharts = ({ data }) => {
     return <div>Carregando dados...</div>;
   }
 
-  const COLORS = ['#667eea', '#764ba2', '#f093fb', '#f5576c'];
+  // Paleta Premium Laranja
+  const COLORS = ['#ff6b35', '#f97316', '#fb923c', '#fdba74'];
   const GRADIENT_COLORS = {
-    primary: ['#667eea', '#764ba2'],
-    secondary: ['#f093fb', '#f5576c'],
-    tertiary: ['#4facfe', '#00f2fe'],
-    quaternary: ['#43e97b', '#38f9d7']
+    primary: ['#ff6b35', '#f97316'], // Laranja Fire
+    secondary: ['#f97316', '#ea580c'], // Laranja Sunset
+    tertiary: ['#ff9a56', '#ff6a00'], // Laranja Warm
+    quaternary: ['#fbb040', '#f7931e'] // Laranja Sunrise
   };
 
   const chartData = [
@@ -32,32 +33,39 @@ const CustomerCharts = ({ data }) => {
 
   return (
     <div className="customer-charts">
-      <h3>Análise de Clientes</h3>
-      
+      <div className="card mb-3">
+        <div className="card-header">
+          <h3 className="card-title">Análise de Clientes</h3>
+        </div>
+      </div>
+
       <div className="charts-grid">
-        <div className="chart-container">
-          <h4>Crescimento de Clientes</h4>
+        <div className="card">
+          <div className="card-header">
+            <h4 className="card-title">Crescimento de Clientes</h4>
+          </div>
+          <div className="card-body">
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorCustomers" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#667eea" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#764ba2" stopOpacity={0.1}/>
+                  <stop offset="5%" stopColor="#ff6b35" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#f97316" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.2)" />
-              <XAxis 
-                dataKey="name" 
+              <XAxis
+                dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#667eea', fontSize: 12, fontWeight: 500 }}
+                tick={{ fill: '#f97316', fontSize: 12, fontWeight: 500 }}
               />
-              <YAxis 
+              <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#667eea', fontSize: 12, fontWeight: 500 }}
+                tick={{ fill: '#f97316', fontSize: 12, fontWeight: 500 }}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
                   border: 'none',
@@ -65,34 +73,38 @@ const CustomerCharts = ({ data }) => {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}
               />
-              <Area 
-                type="monotone" 
-                dataKey="customers" 
-                stroke="#667eea" 
+              <Area
+                type="monotone"
+                dataKey="customers"
+                stroke="#ff6b35"
                 strokeWidth={3}
-                fillOpacity={1} 
-                fill="url(#colorCustomers)" 
+                fillOpacity={1}
+                fill="url(#colorCustomers)"
               />
             </AreaChart>
           </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="chart-container">
-          <h4>Distribuição de Clientes</h4>
+        <div className="card">
+          <div className="card-header">
+            <h4 className="card-title">Distribuição de Clientes</h4>
+          </div>
+          <div className="card-body">
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <defs>
                 <linearGradient id="colorNovos" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#667eea" />
-                  <stop offset="100%" stopColor="#764ba2" />
+                  <stop offset="0%" stopColor="#ff6b35" />
+                  <stop offset="100%" stopColor="#f97316" />
                 </linearGradient>
                 <linearGradient id="colorRecorrentes" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#f093fb" />
-                  <stop offset="100%" stopColor="#f5576c" />
+                  <stop offset="0%" stopColor="#f97316" />
+                  <stop offset="100%" stopColor="#ea580c" />
                 </linearGradient>
                 <linearGradient id="colorInativos" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#4facfe" />
-                  <stop offset="100%" stopColor="#00f2fe" />
+                  <stop offset="0%" stopColor="#fb923c" />
+                  <stop offset="100%" stopColor="#fdba74" />
                 </linearGradient>
               </defs>
               <Pie
@@ -110,7 +122,7 @@ const CustomerCharts = ({ data }) => {
                 <Cell fill="url(#colorRecorrentes)" />
                 <Cell fill="url(#colorInativos)" />
               </Pie>
-              <Tooltip 
+              <Tooltip
                 contentStyle={{
                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
                   border: 'none',
@@ -118,8 +130,9 @@ const CustomerCharts = ({ data }) => {
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}
               />
-            </PieChart>
+              </PieChart>
           </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </div>

@@ -17,7 +17,6 @@ services:
       - OLLAMA_PORT=11434
       - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=postgresql://liza:liza123@postgres:5432/liza_delivery
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - SECRET_KEY=${SECRET_KEY}
     volumes:
       - ./logs:/app/logs
@@ -184,27 +183,7 @@ services:
       - liza-network
     command: ["python", "worker.py"]
 
-  # Telegram Bot
-  telegram-bot:
-    build:
-      context: ..
-      dockerfile: deploy/Dockerfile
-    container_name: liza-telegram-bot
-    restart: unless-stopped
-    environment:
-      - ENVIRONMENT=production
-      - BOT_MODE=true
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - API_URL=http://liza-ai:8000
-      - REDIS_URL=redis://redis:6379/0
-    volumes:
-      - ./logs:/app/logs
-    depends_on:
-      - liza-ai
-      - redis
-    networks:
-      - liza-network
-    command: ["python", "telegram_bot.py"]
+  
 
 volumes:
   ollama_data:

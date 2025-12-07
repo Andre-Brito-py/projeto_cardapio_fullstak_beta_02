@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar/Sidebar'
 import SuperAdminSidebar from './components/SuperAdminSidebar/SuperAdminSidebar'
 import Login from './components/Login/Login'
 import SuperAdminLogin from './components/SuperAdminLogin/SuperAdminLogin'
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Add from './pages/Add/Add';
 import List from './pages/List/List';
 import Orders from './pages/Orders/Orders';
@@ -27,8 +27,6 @@ import Customers from './pages/Customers/Customers';
 
 import AsaasDashboard from './pages/AsaasDashboard/AsaasDashboard';
 import ApiManagement from './pages/SuperAdmin/ApiManagement/ApiManagement';
-import TelegramManagement from './pages/SuperAdmin/TelegramManagement/TelegramManagement';
-import TelegramSettings from './pages/TelegramManagement';
 import SystemLogs from './pages/SuperAdmin/SystemLogs/SystemLogs';
 import StockManagement from './pages/StockManagement/StockManagement';
 import WhatsAppSettings from './pages/WhatsAppSettings/WhatsAppSettings';
@@ -38,23 +36,30 @@ import PaymentStats from './pages/PaymentStats/PaymentStats';
 import CounterAttendants from './pages/CounterAttendants/CounterAttendants';
 import PaymentSettings from './pages/Settings/PaymentSettings';
 import LizaChat from './pages/LizaChat/LizaChat';
-import TelegramContacts from './pages/TelegramContacts/TelegramContacts';
-import TelegramCampaigns from './pages/TelegramCampaigns/TelegramCampaigns';
-import TelegramStats from './pages/TelegramStats/TelegramStats';
-import TelegramMessages from './pages/TelegramMessages/TelegramMessages';
 import Cashback from './pages/Cashback/Cashback';
 import ProductSuggestions from './pages/ProductSuggestions/ProductSuggestions';
 
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { BACKEND_URL } from './config/urls';
 
 const App = () => {
-  const url = 'http://localhost:4001';
+  const url = BACKEND_URL;
   const [token, setToken] = useState('');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [showSuperAdminLogin, setShowSuperAdminLogin] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  const RequireSuperAdmin = ({ children }) => {
+    const role = localStorage.getItem('userRole');
+    const hasSuperToken = !!localStorage.getItem('superAdminToken');
+    if (!token || role !== 'super_admin' || !hasSuperToken) {
+      return <Navigate to='/' replace />;
+    }
+    return children;
+  };
 
   useEffect(() => {
     const savedToken = localStorage.getItem('superAdminToken') || localStorage.getItem('token');
@@ -73,6 +78,38 @@ const App = () => {
     setIsSuperAdmin(false);
     setShowSuperAdminLogin(false);
   };
+
+  class ErrorBoundary extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = { hasError: false, error: null };
+    }
+    static getDerivedStateFromError(error) {
+      return { hasError: true, error };
+    }
+    componentDidCatch(error, info) {
+      console.error('Erro de renderização capturado:', error, info);
+    }
+    render() {
+      if (this.state.hasError) {
+        return (
+          <div className="container-xl" style={{ padding: '2rem' }}>
+            <div className="card">
+              <div className="card-body">
+                <h3>Ocorreu um erro ao carregar esta página</h3>
+                <p>Tente voltar ao painel ou recarregar.</p>
+                <div className="d-flex gap-2">
+                  <a href={isSuperAdmin ? '/super-admin/dashboard' : '/add'} className="btn btn-primary">Ir para o painel</a>
+                  <button className="btn btn-outline" onClick={() => window.location.reload()}>Recarregar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      return this.props.children;
+    }
+  }
 
   if (!token) {
     return (
@@ -130,8 +167,7 @@ const App = () => {
           isSuperAdmin={isSuperAdmin}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
-        <hr/>
-        <div className="app-content">
+        <div className="app-content" data-testid="app-content">
           {isSuperAdmin ? (
             <SuperAdminSidebar 
               isOpen={sidebarOpen}
@@ -143,17 +179,18 @@ const App = () => {
               onClose={() => setSidebarOpen(false)}
             />
           )}
+          <div className="admin-main container-xl" data-testid="admin-main">
+          <ErrorBoundary key={location.pathname}>
           <Routes>
           {/* Rotas do Super Admin */}
-          <Route path='/super-admin/dashboard' element={<SuperAdminDashboard url={url} token={token}/>} />
-          <Route path='/super-admin/stores' element={<StoreManagement url={url} token={token}/>} />
-          <Route path='/super-admin/system-settings' element={<SystemSettings url={url} token={token}/>} />
-          <Route path='/super-admin/api-management' element={<ApiManagement url={url} token={token}/>} />
-          <Route path='/super-admin/telegram-management' element={<TelegramManagement url={url} token={token}/>} />
-          <Route path='/super-admin/analytics' element={<Analytics url={url} token={token}/>} />
-          <Route path='/super-admin/users' element={<UserManagement url={url} token={token}/>} />
-          <Route path='/super-admin/logs' element={<SystemLogs url={url} token={token}/>} />
-          <Route path='/super-admin/asaas' element={<AsaasDashboard url={url} token={token}/>} />
+          <Route path='/super-admin/dashboard' element={<RequireSuperAdmin><SuperAdminDashboard url={url} token={token}/></RequireSuperAdmin>} />
+          <Route path='/super-admin/stores' element={<RequireSuperAdmin><StoreManagement url={url} token={token}/></RequireSuperAdmin>} />
+          <Route path='/super-admin/system-settings' element={<RequireSuperAdmin><SystemSettings url={url} token={token}/></RequireSuperAdmin>} />
+          <Route path='/super-admin/api-management' element={<RequireSuperAdmin><ApiManagement url={url} token={token}/></RequireSuperAdmin>} />
+          <Route path='/super-admin/analytics' element={<RequireSuperAdmin><Analytics url={url} token={token}/></RequireSuperAdmin>} />
+          <Route path='/super-admin/users' element={<RequireSuperAdmin><UserManagement url={url} token={token}/></RequireSuperAdmin>} />
+          <Route path='/super-admin/logs' element={<RequireSuperAdmin><SystemLogs url={url} token={token}/></RequireSuperAdmin>} />
+          <Route path='/super-admin/asaas' element={<RequireSuperAdmin><AsaasDashboard url={url} token={token}/></RequireSuperAdmin>} />
           <Route path='/store-links' element={<StoreLinks token={token}/>} />
           
           {/* Rotas normais do admin */}
@@ -180,17 +217,15 @@ const App = () => {
           <Route path='/stock-management/:id' element={<StockManagement url={url}/>} />
           <Route path='/whatsapp-settings' element={<WhatsAppSettings url={url}/>} />
           <Route path='/whatsapp-messages' element={<WhatsAppMessages url={url}/>} />
-          <Route path='/telegram-contacts' element={<TelegramContacts url={url} token={token}/>} />
-          <Route path='/telegram-campaigns' element={<TelegramCampaigns url={url} token={token}/>} />
-          <Route path='/telegram-stats' element={<TelegramStats url={url} token={token}/>} />
-          <Route path='/telegram-messages' element={<TelegramMessages url={url} token={token}/>} />
-          <Route path='/telegram-settings' element={<TelegramSettings url={url} token={token}/>} />
           <Route path='/counter-attendants' element={<CounterAttendants url={url}/>} />
           <Route path='/liza-chat' element={<LizaChat url={url} token={token}/>} />
           
           {/* Rota padrão */}
           <Route path='/' element={isSuperAdmin ? <StoreManagement url={url} token={token}/> : <Add url={url} />} />
-        </Routes>
+          <Route path='*' element={<Navigate to={isSuperAdmin ? '/super-admin/dashboard' : '/add'} replace />} />
+          </Routes>
+          </ErrorBoundary>
+          </div>
       </div>
     </div>
   </ThemeProvider>

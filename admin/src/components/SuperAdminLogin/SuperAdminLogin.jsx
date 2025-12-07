@@ -52,7 +52,10 @@ const SuperAdminLogin = ({ url, setToken, setSuperAdmin }) => {
   return (
     <div className='super-admin-login-container'>
       <div className='super-admin-login-form'>
-        <h2>{isRegister ? 'Criar Super Admin' : 'Super Admin Login'}</h2>
+        <div className='card-header'>
+          <h2 className='card-title'>{isRegister ? 'Criar Super Admin' : 'Super Admin Login'}</h2>
+        </div>
+        <div className='card-body'>
         <form onSubmit={onSubmit}>
           {isRegister && (
             <div className='form-group'>
@@ -98,17 +101,18 @@ const SuperAdminLogin = ({ url, setToken, setSuperAdmin }) => {
                 disabled={loading}
                 title={showPassword ? "Ocultar senha" : "Mostrar senha"}
               >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
+                {showPassword ? <i className='ti ti-eye-off'></i> : <i className='ti ti-eye'></i>}
               </button>
             </div>
           </div>
           
-          <button type='submit' disabled={loading}>
+          <button className='btn btn-primary w-full' type='submit' disabled={loading}>
             {loading ? 'Processando...' : (isRegister ? 'Criar Super Admin' : 'Entrar')}
           </button>
         </form>
         
-        <div className='toggle-mode'>
+        </div>
+        <div className='card-footer toggle-mode'>
           <button 
             type='button' 
             onClick={() => {

@@ -9,6 +9,8 @@ import {
     requireStoreAdmin,
     addStoreContext
 } from '../middleware/multiTenancy.js'
+import { validate } from '../middleware/validate.js'
+import { createFoodSchema, updateFoodSchema, updateStockSchema } from '../validators/foodValidator.js'
 
 const foodRouter = express.Router();
 
@@ -24,15 +26,15 @@ const storage = multer.diskStorage({
         if (!storeId) {
             return cb(new Error('Store ID não encontrado para upload'), null);
         }
-        
+
         // Criar diretório específico da loja
         const storeDir = path.join('uploads', 'stores', storeId.toString());
-        
+
         // Criar diretório se não existir
         if (!fs.existsSync(storeDir)) {
             fs.mkdirSync(storeDir, { recursive: true });
         }
-        
+
         cb(null, storeDir);
     },
     filename: (req, file, cb) => {
@@ -61,7 +63,7 @@ const upload = multer({
 })
 
 // Rotas públicas (para clientes)
-foodRouter.get('/list',listFood)
+foodRouter.get('/list', listFood)
 foodRouter.get('/with-addon-info', addStoreContext, listFoodWithAddonInfo)
 foodRouter.get('/:foodId/details', addStoreContext, getFoodWithAddonsAndSuggestions)
 
@@ -72,7 +74,7 @@ foodRouter.post('/add', authMultiTenant, requireStoreAdmin, addStoreContext, upl
 foodRouter.post('/remove', authMultiTenant, requireStoreAdmin, addStoreContext, removeFood)
 foodRouter.put('/update', authMultiTenant, requireStoreAdmin, addStoreContext, upload.single('image'), updateFood)
 // Rota para atualizar status de estoque
-foodRouter.put('/stock-status', authMultiTenant, requireStoreAdmin, addStoreContext, updateStockStatus)
+foodRouter.put('/stock-status', authMultiTenant, requireStoreAdmin, addStoreContext, validate(updateStockSchema), updateStockStatus)
 
 // Rota para buscar detalhes de um produto específico
 foodRouter.get('/:id/details', authMultiTenant, requireStoreAdmin, addStoreContext, getFoodDetails)
@@ -80,7 +82,7 @@ foodRouter.get('/:id/details', authMultiTenant, requireStoreAdmin, addStoreConte
 // Test endpoint
 foodRouter.post('/test', authMultiTenant, requireStoreAdmin, addStoreContext, (req, res) => {
     // Test endpoint called
-    res.json({success: true, message: 'Test endpoint working'});
+    res.json({ success: true, message: 'Test endpoint working' });
 });
 
 export default foodRouter;

@@ -270,18 +270,12 @@ const customerSchema = new mongoose.Schema({
             return this.phone; // Default to main phone number
         }
     },
-    telegramUsername: {
-        type: String,
-        trim: true
-    },
+    
     allowWhatsappContact: {
         type: Boolean,
         default: true
     },
-    allowTelegramContact: {
-        type: Boolean,
-        default: false
-    },
+    
     // Customer segmentation for campaigns
     customerSegment: {
         type: String,
@@ -487,15 +481,11 @@ customerSchema.statics.getContactableCustomers = async function(storeId, segment
             query.customerSegment = segment;
         }
         
-        if (contactMethod === 'whatsapp') {
-            query.allowWhatsappContact = true;
-            query.whatsappNumber = { $exists: true, $ne: '' };
-        } else if (contactMethod === 'telegram') {
-            query.allowTelegramContact = true;
-            query.telegramUsername = { $exists: true, $ne: '' };
-        }
+        // Apenas WhatsApp suportado
+        query.allowWhatsappContact = true;
+        query.whatsappNumber = { $exists: true, $ne: '' };
         
-        return await this.find(query).select('name phone whatsappNumber telegramUsername customerSegment totalOrders statistics.totalSpent');
+        return await this.find(query).select('name phone whatsappNumber customerSegment totalOrders statistics.totalSpent');
     } catch (error) {
         throw error;
     }

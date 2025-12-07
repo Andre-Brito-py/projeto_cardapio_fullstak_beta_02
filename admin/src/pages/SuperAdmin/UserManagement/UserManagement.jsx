@@ -74,7 +74,7 @@ const UserManagement = ({ url }) => {
       });
       
       if (response.data.success) {
-        setAuditLogs(response.data.logs);
+        setAuditLogs(Array.isArray(response.data.logs) ? response.data.logs : []);
       }
     } catch (error) {
       console.error('Erro ao buscar logs de auditoria:', error);
@@ -171,7 +171,8 @@ const UserManagement = ({ url }) => {
       });
       
       if (response.data.success) {
-        setUsers(response.data.users);
+        const list = Array.isArray(response.data.users) ? response.data.users : [];
+        setUsers(list);
       } else {
         toast.error('Erro ao carregar usuários');
       }
@@ -191,7 +192,7 @@ const UserManagement = ({ url }) => {
       });
       
       if (response.data.success) {
-        setStores(response.data.stores);
+        setStores(Array.isArray(response.data.stores) ? response.data.stores : []);
       }
     } catch (error) {
       console.error('Erro ao buscar lojas:', error);
@@ -206,7 +207,11 @@ const UserManagement = ({ url }) => {
       });
       
       if (response.data.success) {
-        setStats(response.data.stats.users);
+        const usersStats = response.data.stats?.users || {};
+        setStats(prev => ({
+          ...prev,
+          ...usersStats
+        }));
       }
     } catch (error) {
       console.error('Erro ao buscar estatísticas:', error);
@@ -401,8 +406,10 @@ const UserManagement = ({ url }) => {
 
   // Filter and search logic
   const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const safeName = (user.name || '').toLowerCase();
+    const safeEmail = (user.email || '').toLowerCase();
+    const matchesSearch = safeName.includes(searchTerm.toLowerCase()) ||
+                         safeEmail.includes(searchTerm.toLowerCase()) ||
                          (user.profile?.phone && user.profile.phone.includes(searchTerm)) ||
                          (user.profile?.department && user.profile.department.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesRole = filterRole === 'all' || user.role === filterRole;
@@ -501,35 +508,35 @@ const UserManagement = ({ url }) => {
           </div>
         </div>
         <div className="stat-card customers">
-          <div className="stat-icon">🛒</div>
+          <div className="stat-icon"><i className="ti ti-users"></i></div>
           <div className="stat-content">
             <h3>{stats.customers}</h3>
             <p>Clientes</p>
           </div>
         </div>
         <div className="stat-card superadmins">
-          <div className="stat-icon">⭐</div>
+          <div className="stat-icon"><i className="ti ti-crown"></i></div>
           <div className="stat-content">
             <h3>{stats.superAdmins}</h3>
             <p>Super Admins</p>
           </div>
         </div>
         <div className="stat-card new-users">
-          <div className="stat-icon">📈</div>
+          <div className="stat-icon"><i className="ti ti-user-plus"></i></div>
           <div className="stat-content">
             <h3>{stats.newUsersThisMonth}</h3>
             <p>Novos este Mês</p>
           </div>
         </div>
         <div className="stat-card active-today">
-          <div className="stat-icon">🔥</div>
+          <div className="stat-icon"><i className="ti ti-activity"></i></div>
           <div className="stat-content">
             <h3>{stats.activeUsersToday}</h3>
             <p>Ativos Hoje</p>
           </div>
         </div>
         <div className="stat-card suspended">
-          <div className="stat-icon">⚠️</div>
+          <div className="stat-icon"><i className="ti ti-ban"></i></div>
           <div className="stat-content">
             <h3>{stats.suspendedUsers}</h3>
             <p>Suspensos</p>
@@ -538,12 +545,12 @@ const UserManagement = ({ url }) => {
       </div>
 
       {/* Advanced Filters and Bulk Actions */}
-      <div className="user-controls">
-        <div className="filters-section">
+      <div className="filters">
+        <div className="filters-row">
           <div className="search-box">
             <input
               type="text"
-              placeholder="🔍 Buscar por nome, email, telefone ou departamento..."
+              placeholder="Buscar por nome, email, telefone ou departamento"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -579,37 +586,37 @@ const UserManagement = ({ url }) => {
             </select>
           </div>
         </div>
-        
-        {/* Bulk Actions */}
-        {selectedUsers.length > 0 && (
-          <div className="bulk-actions">
-            <span className="selected-count">{selectedUsers.length} selecionado(s)</span>
-            <select 
-              value={bulkAction} 
-              onChange={(e) => setBulkAction(e.target.value)}
-            >
-              <option value="">Selecionar Ação</option>
-              <option value="activate">Ativar</option>
-              <option value="deactivate">Desativar</option>
-              <option value="delete">Excluir</option>
-              <option value="reset-password">Resetar Senha</option>
-            </select>
-            <button 
-              className="bulk-action-btn"
-              onClick={handleBulkAction}
-              disabled={!bulkAction}
-            >
-              Executar
-            </button>
-            <button 
-              className="clear-selection-btn"
-              onClick={() => setSelectedUsers([])}
-            >
-              Limpar Seleção
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Bulk Actions */}
+      {selectedUsers.length > 0 && (
+        <div className="bulk-actions">
+          <span className="selected-count">{selectedUsers.length} selecionado(s)</span>
+          <select 
+            value={bulkAction} 
+            onChange={(e) => setBulkAction(e.target.value)}
+          >
+            <option value="">Selecionar Ação</option>
+            <option value="activate">Ativar</option>
+            <option value="deactivate">Desativar</option>
+            <option value="delete">Excluir</option>
+            <option value="reset-password">Resetar Senha</option>
+          </select>
+          <button 
+            className="bulk-action-btn"
+            onClick={handleBulkAction}
+            disabled={!bulkAction}
+          >
+            Executar
+          </button>
+          <button 
+            className="clear-selection-btn"
+            onClick={() => setSelectedUsers([])}
+          >
+            Limpar Seleção
+          </button>
+        </div>
+      )}
 
       {/* Enhanced Users Table */}
       <div className="users-table-container">
@@ -709,42 +716,42 @@ const UserManagement = ({ url }) => {
                       onClick={() => handleEdit(user)}
                       title="Editar"
                     >
-                      ✏️
+                      <i className="ti ti-pencil"></i>
                     </button>
                     <button 
                       className="permissions-btn"
                       onClick={() => openPermissionsModal(user)}
                       title="Gerenciar Permissões"
                     >
-                      🔐
+                      <i className="ti ti-lock"></i>
                     </button>
                     <button 
                       className="audit-btn"
                       onClick={() => openAuditModal(user)}
                       title="Ver Auditoria"
                     >
-                      📋
+                      <i className="ti ti-clipboard-text"></i>
                     </button>
                     <button 
                       className={`toggle-btn ${user.isActive ? 'active' : 'inactive'}`}
                       onClick={() => toggleUserStatus(user._id, user.isActive)}
                       title={user.isActive ? 'Desativar' : 'Ativar'}
                     >
-                      {user.isActive ? '🔒' : '🔓'}
+                      {user.isActive ? <i className="ti ti-user-off"></i> : <i className="ti ti-user-check"></i>}
                     </button>
                     <button 
                       className="reset-btn"
                       onClick={() => resetPassword(user._id)}
                       title="Resetar Senha"
                     >
-                      🔑
+                      <i className="ti ti-key"></i>
                     </button>
                     <button 
                       className="delete-btn"
                       onClick={() => handleDelete(user._id)}
                       title="Deletar"
                     >
-                      🗑️
+                      <i className="ti ti-trash"></i>
                     </button>
                   </div>
                 </td>

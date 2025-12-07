@@ -1,27 +1,29 @@
 .system-logs {
-  padding: 2rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 1.5rem;
+  background: var(--tblr-body-bg);
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--tblr-font-sans-serif);
 }
 
 /* Header */
 .logs-header {
-  margin-bottom: 2rem;
-  text-align: center;
+  margin-bottom: 1.25rem;
 }
 
 .logs-header h1 {
-  color: #2c3e50;
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
+  color: var(--tblr-body-color);
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .logs-header p {
-  color: #7f8c8d;
-  font-size: 1.1rem;
-  margin: 0;
+  color: var(--tblr-gray-600);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 
 /* Loading */
@@ -60,15 +62,17 @@
 /* Filters */
 .logs-filters {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: white;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: var(--tblr-white);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--tblr-shadow-sm);
+  border: 1px solid var(--tblr-border-color);
   flex-wrap: wrap;
   align-items: end;
 }
+[data-bs-theme="dark"] .logs-filters { background: var(--tblr-card-bg); }
 
 .filter-group {
   display: flex;
@@ -79,51 +83,57 @@
 
 .filter-group label {
   font-weight: 600;
-  color: #2c3e50;
-  font-size: 0.9rem;
+  color: var(--tblr-gray-700);
+  font-size: 0.85rem;
 }
 
 .filter-group select {
-  padding: 0.75rem;
-  border: 2px solid #ecf0f1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--tblr-border-color);
   border-radius: 8px;
   font-size: 0.9rem;
-  background: white;
-  color: #2c3e50;
+  background: var(--tblr-white);
+  color: var(--tblr-body-color);
   cursor: pointer;
   transition: border-color 0.2s ease;
 }
+[data-bs-theme="dark"] .filter-group select { background: var(--tblr-card-bg); }
 
 .filter-group select:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(32,107,196,0.12);
 }
 
 .refresh-btn {
-  padding: 0.75rem 1.5rem;
-  background: #3498db;
+  padding: 0.5rem 0.9rem;
+  background: var(--primary);
   color: white;
-  border: none;
+  border: 1px solid var(--primary);
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   height: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .refresh-btn:hover {
-  background: #2980b9;
-  transform: translateY(-2px);
+  filter: brightness(0.95);
 }
 
 /* Table */
 .logs-table {
-  background: white;
+  background: var(--tblr-white);
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--tblr-shadow-sm);
   overflow: hidden;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--tblr-border-color);
 }
+[data-bs-theme="dark"] .logs-table { background: var(--tblr-card-bg); }
 
 .logs-table table {
   width: 100%;
@@ -131,20 +141,28 @@
 }
 
 .logs-table th {
-  background: #34495e;
-  color: white;
-  padding: 1rem;
+  background: var(--tblr-white);
+  color: var(--tblr-gray-700);
+  padding: 0.75rem 1rem;
   text-align: left;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--tblr-border-color);
 }
+[data-bs-theme="dark"] .logs-table th { background: var(--tblr-card-bg); color: var(--tblr-gray-600); }
 
 .logs-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #ecf0f1;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--tblr-border-color);
   vertical-align: middle;
+}
+
+.logs-table .no-logs {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--tblr-gray-600);
 }
 
 .logs-table tr:hover {
@@ -158,7 +176,7 @@
 /* Log Time */
 .log-time {
   font-size: 0.9rem;
-  color: #2c3e50;
+  color: var(--tblr-body-color);
   font-weight: 500;
 }
 
@@ -170,13 +188,13 @@
 }
 
 .store-info strong {
-  color: #2c3e50;
+  color: var(--tblr-body-color);
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .store-info small {
-  color: #7f8c8d;
+  color: var(--tblr-gray-600);
   font-size: 0.8rem;
 }
 
@@ -282,13 +300,13 @@
 }
 
 .action-btn.reprocess {
-  background: #e74c3c;
+  background: var(--error-600);
   color: white;
+  border: 1px solid var(--error-600);
 }
 
 .action-btn.reprocess:hover {
-  background: #c0392b;
-  transform: translateY(-1px);
+  filter: brightness(0.95);
 }
 
 /* Code styling */

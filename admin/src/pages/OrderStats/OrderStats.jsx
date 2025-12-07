@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './OrderStats.css';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import ReactApexChart from 'react-apexcharts';
 
 const OrderStats = ({ url, token }) => {
   const [stats, setStats] = useState([]);
@@ -28,8 +29,7 @@ const OrderStats = ({ url, token }) => {
 
       const response = await axios.get(`${url}/api/order-stats/delivery-stats?${params}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'store-slug': 'loja-de-teste-gar-om'
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -58,8 +58,7 @@ const OrderStats = ({ url, token }) => {
 
       const response = await axios.get(`${url}/api/order-stats/orders-by-type?${params}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'store-slug': 'loja-de-teste-gar-om'
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -86,8 +85,7 @@ const OrderStats = ({ url, token }) => {
     try {
       const response = await axios.get(`${url}/api/order-stats/daily-stats?days=7`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'store-slug': 'loja-de-teste-gar-om'
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -145,17 +143,58 @@ const OrderStats = ({ url, token }) => {
   // Get delivery type icon
   const getDeliveryTypeIcon = (type) => {
     const icons = {
-      'delivery': '🚚',
-      'waiter': '👨‍💼',
-      'in_person': '🏪',
-      'counter': '🏬'
+      'delivery': <i className="ti ti-truck"></i>,
+      'waiter': <i className="ti ti-user"></i>,
+      'in_person': <i className="ti ti-building-store"></i>,
+      'counter': <i className="ti ti-building"></i>
     };
-    return icons[type] || '📦';
+    return icons[type] || <i className="ti ti-package"></i>;
   };
 
   // Format date for display
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const paletteVars = getComputedStyle(document.documentElement);
+  const palette = {
+    primary: paletteVars.getPropertyValue('--primary')?.trim() || '#f76707',
+    blue: paletteVars.getPropertyValue('--tblr-blue')?.trim() || '#206bc4',
+    green: paletteVars.getPropertyValue('--tblr-green')?.trim() || '#2fb344',
+    orange: paletteVars.getPropertyValue('--tblr-orange')?.trim() || '#f59f00'
+  };
+
+  const categoriesDays = dailyStats.map(d => formatDate(d._id));
+  const seriesOrders = [{ name: 'Pedidos', data: dailyStats.map(d => d.totalOrders) }];
+  const seriesRevenue = [{ name: 'Faturamento', data: dailyStats.map(d => Number(d.totalRevenue.toFixed(2))) }];
+  const optionsBar = {
+    chart: { type: 'bar', toolbar: { show: false } },
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
+    dataLabels: { enabled: false },
+    colors: [palette.blue],
+    grid: { strokeDashArray: 3 },
+    xaxis: { categories: categoriesDays }
+  };
+  const optionsArea = {
+    chart: { type: 'area', toolbar: { show: false } },
+    stroke: { curve: 'smooth', width: 2 },
+    dataLabels: { enabled: false },
+    colors: [palette.primary],
+    grid: { strokeDashArray: 3 },
+    xaxis: { categories: categoriesDays },
+    yaxis: { labels: { formatter: (v) => `R$ ${v.toFixed(0)}` } }
+  };
+  const aggTypes = ['delivery','waiter','in_person','counter'].map(t => ({
+    type: t,
+    count: dailyStats.reduce((sum, d) => sum + (d.deliveryTypes.find(x => x.type === t)?.count || 0), 0)
+  }));
+  const donutLabels = aggTypes.map(x => getDeliveryTypeLabel(x.type));
+  const donutSeries = aggTypes.map(x => x.count);
+  const donutOptions = {
+    chart: { type: 'donut' },
+    labels: donutLabels,
+    colors: [palette.orange, palette.green, palette.blue, palette.primary],
+    legend: { position: 'bottom' }
   };
 
   if (loading) {
@@ -168,37 +207,23 @@ const OrderStats = ({ url, token }) => {
 
   return (
     <div className="order-stats">
-      <div className="stats-header">
-        <h2>📊 Estatísticas de Saídas de Produtos</h2>
-        
-        {/* Date Range Filter */}
-        <div className="date-filters">
-          <div className="date-input-group">
-            <label>Data Inicial:</label>
-            <input
-              type="date"
-              value={dateRange.startDate}
-              onChange={(e) => handleDateChange('startDate', e.target.value)}
-            />
+      <div className="card">
+        <div className="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <h2 className="m-0">Estatísticas de Saídas</h2>
+          <div className="d-flex align-items-center flex-wrap gap-2">
+            <div className="d-flex flex-column">
+              <label className="form-label m-0">Inicial</label>
+              <input type="date" value={dateRange.startDate} onChange={(e) => handleDateChange('startDate', e.target.value)} className="form-control" />
+            </div>
+            <div className="d-flex flex-column">
+              <label className="form-label m-0">Final</label>
+              <input type="date" value={dateRange.endDate} onChange={(e) => handleDateChange('endDate', e.target.value)} className="form-control" />
+            </div>
+            <button className="btn btn-outline" onClick={() => setDateRange({ startDate: '', endDate: '' })}>Limpar</button>
           </div>
-          <div className="date-input-group">
-            <label>Data Final:</label>
-            <input
-              type="date"
-              value={dateRange.endDate}
-              onChange={(e) => handleDateChange('endDate', e.target.value)}
-            />
-          </div>
-          <button 
-            className="clear-filters-btn"
-            onClick={() => setDateRange({ startDate: '', endDate: '' })}
-          >
-            Limpar Filtros
-          </button>
         </div>
-      </div>
+        <div className="card-body">
 
-      {/* Statistics Cards */}
       <div className="stats-cards">
         <div className="stats-card total">
           <div className="card-icon">📈</div>
@@ -229,7 +254,6 @@ const OrderStats = ({ url, token }) => {
         ))}
       </div>
 
-      {/* Delivery Type Filter */}
       <div className="type-filter">
         <h3>Filtrar por Tipo de Saída</h3>
         <div className="filter-buttons">
@@ -243,43 +267,42 @@ const OrderStats = ({ url, token }) => {
             className={selectedType === 'delivery' ? 'active' : ''}
             onClick={() => setSelectedType('delivery')}
           >
-            🚚 Entrega
+            <i className="ti ti-truck"></i> Entrega
           </button>
           <button 
             className={selectedType === 'waiter' ? 'active' : ''}
             onClick={() => setSelectedType('waiter')}
           >
-            👨‍💼 Garçom
+            <i className="ti ti-user"></i> Garçom
           </button>
           <button 
             className={selectedType === 'in_person' ? 'active' : ''}
             onClick={() => setSelectedType('in_person')}
           >
-            🏪 Presencial
+            <i className="ti ti-building-store"></i> Presencial
           </button>
           <button 
             className={selectedType === 'counter' ? 'active' : ''}
             onClick={() => setSelectedType('counter')}
           >
-            🏬 Balcão
+            <i className="ti ti-building"></i> Balcão
           </button>
         </div>
       </div>
 
-      {/* Filtered Statistics Summary */}
       {(selectedType !== 'all' || dateRange.startDate || dateRange.endDate) && (
         <div className="filtered-summary">
-          <h3>📊 Resumo dos Filtros Aplicados</h3>
+          <h3>Resumo dos Filtros Aplicados</h3>
           <div className="summary-cards">
             <div className="summary-card">
-              <div className="summary-icon">📦</div>
+              <div className="summary-icon"><i className="ti ti-package"></i></div>
               <div className="summary-content">
                 <h4>Pedidos Filtrados</h4>
                 <p className="summary-number">{filteredStats.orders}</p>
               </div>
             </div>
             <div className="summary-card">
-              <div className="summary-icon">💵</div>
+              <div className="summary-icon"><i className="ti ti-currency-real"></i></div>
               <div className="summary-content">
                 <h4>Faturamento Filtrado</h4>
                 <p className="summary-number">R$ {filteredStats.revenue.toFixed(2)}</p>
@@ -298,7 +321,6 @@ const OrderStats = ({ url, token }) => {
         </div>
       )}
 
-      {/* Orders List */}
       <div className="orders-section">
         <h3>Pedidos Recentes</h3>
         <div className="orders-list">
@@ -311,7 +333,7 @@ const OrderStats = ({ url, token }) => {
                   <div className="order-header">
                     <span className="order-id">#{order._id.slice(-6)}</span>
                     <span className={`delivery-type-badge ${order.deliveryType}`}>
-                      {getDeliveryTypeIcon(order.deliveryType)} {getDeliveryTypeLabel(order.deliveryType)}
+                    {getDeliveryTypeIcon(order.deliveryType)} {getDeliveryTypeLabel(order.deliveryType)}
                     </span>
                     <span className="order-date">{formatDate(order.date)}</span>
                   </div>
@@ -326,7 +348,7 @@ const OrderStats = ({ url, token }) => {
                       ).join(', ')}
                     </p>
                     {order.tableNumber && (
-                      <p className="table-info">🍽️ Mesa {order.tableNumber}</p>
+                      <p className="table-info"><i className="ti ti-tools-kitchen-2"></i> Mesa {order.tableNumber}</p>
                     )}
                   </div>
                 </div>
@@ -342,7 +364,6 @@ const OrderStats = ({ url, token }) => {
           )}
         </div>
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination">
             <button 
@@ -366,28 +387,30 @@ const OrderStats = ({ url, token }) => {
         )}
       </div>
 
-      {/* Daily Stats Chart */}
       {dailyStats.length > 0 && (
-        <div className="daily-stats-section">
-          <h3>Estatísticas dos Últimos 7 Dias</h3>
-          <div className="daily-stats-chart">
-            {dailyStats.map((day, index) => (
-              <div key={index} className="daily-stat-item">
-                <div className="day-date">{formatDate(day._id)}</div>
-                <div className="day-orders">{day.totalOrders} pedidos</div>
-                <div className="day-revenue">R$ {day.totalRevenue.toFixed(2)}</div>
-                <div className="day-types">
-                  {day.deliveryTypes.map((type, typeIndex) => (
-                    <span key={typeIndex} className={`type-count ${type.type}`}>
-                      {getDeliveryTypeIcon(type.type)} {type.count}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+        <div className="charts-grid">
+          <div className="card">
+            <div className="card-header"><h3 className="m-0">Pedidos (7 dias)</h3></div>
+            <div className="card-body">
+              <ReactApexChart options={optionsBar} series={seriesOrders} type="bar" height={240} />
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-header"><h3 className="m-0">Faturamento (7 dias)</h3></div>
+            <div className="card-body">
+              <ReactApexChart options={optionsArea} series={seriesRevenue} type="area" height={240} />
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-header"><h3 className="m-0">Distribuição por tipo</h3></div>
+            <div className="card-body">
+              <ReactApexChart options={donutOptions} series={donutSeries} type="donut" height={240} />
+            </div>
           </div>
         </div>
       )}
+        </div>
+      </div>
     </div>
   );
 };
