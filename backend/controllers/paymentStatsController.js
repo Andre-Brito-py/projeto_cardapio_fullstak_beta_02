@@ -3,11 +3,12 @@ import orderModel from '../models/orderModel.js';
 // Buscar estatísticas por método de pagamento
 const getPaymentStats = async (req, res) => {
     try {
-        const { storeId, startDate, endDate } = req.query;
-
         // Construir filtro base
         let matchFilter = {};
+        const { startDate, endDate } = req.query;
         
+        // Filter by store in multi-tenant context
+        const storeId = req.store ? req.store._id : null;
         if (storeId) {
             matchFilter.storeId = storeId;
         }

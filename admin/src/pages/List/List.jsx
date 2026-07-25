@@ -1,56 +1,51 @@
-// eslint-disable-next-line no-unused-vars
-import React, { useEffect, useState } from 'react'
-import './List.css'
-import axios from 'axios'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
-// eslint-disable-next-line react/prop-types
-const List = ({url}) => {
+const List = ({ url }) => {
   const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const fetchList = async () =>{
+  const fetchList = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(`${url}/api/food/admin/list`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
      
-      if(response.data.success){
-        setList(response.data.data)
-      }
-      else{
-        toast.error(response.data.message || "Erro ao carregar produtos")
+      if (response.data.success) {
+        setList(response.data.data);
+      } else {
+        toast.error(response.data.message || "Erro ao carregar produtos");
       }
     } catch (error) {
-      console.error('Erro ao buscar produtos:', error);
       toast.error('Erro ao conectar com o servidor');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const removeFood = async (foodId) =>{
+  const removeFood = async (foodId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(`${url}/api/food/remove`, {id:foodId}, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await axios.post(`${url}/api/food/remove`, { id: foodId }, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      if(response.data.success){
-        toast.success(response.data.message)
+      if (response.data.success) {
+        toast.success(response.data.message);
         await fetchList();
-      }else{
+      } else {
         toast.error(response.data.message || 'Erro ao excluir produto');
       }
     } catch (error) {
-      console.error('Erro ao excluir produto:', error);
       toast.error('Erro ao conectar com o servidor');
     }
-  }
+  };
 
   const toggleStockStatus = async (foodId, currentStatus) => {
     try {
@@ -59,103 +54,152 @@ const List = ({url}) => {
         id: foodId,
         isOutOfStock: !currentStatus
       }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       
-      if(response.data.success){
+      if (response.data.success) {
         toast.success(response.data.message);
         await fetchList();
-      }else{
+      } else {
         toast.error(response.data.message || 'Erro ao atualizar status de estoque');
       }
     } catch (error) {
-      console.error('Erro ao atualizar status de estoque:', error);
       toast.error('Erro ao conectar com o servidor');
     }
-  }
+  };
 
-  const openStockManagement = (item) => {
-    navigate(`/stock-management/${item._id}`);
-  }
-
-  useEffect(()=>{
+  useEffect(() => {
     fetchList();
-  },[])
+  }, []);
+
   return (
-    <div className='list'>
-      <div className="card">
-        <div className="card-header d-flex align-items-center justify-content-between">
-          <h2 className="m-0">Produtos</h2>
-          <div className="d-flex gap-2">
-            <button className="btn btn-primary" onClick={() => navigate('/add')}>Adicionar Produto</button>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Cardápio</h1>
+          <p className="text-sm text-gray-500 mt-1">Gerencie os produtos, preços e disponibilidade do seu catálogo.</p>
         </div>
-        <div className="card-body">
-          <div className="table-responsive">
-            <table className="table table-vcenter">
-              <thead>
+        <button 
+          onClick={() => navigate('/add')}
+          className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+        >
+          <i className="ti ti-plus text-lg"></i> Adicionar Produto
+        </button>
+      </div>
+
+      {/* Main Card */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+      >
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Produto</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoria</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Preço</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {loading ? (
                 <tr>
-                  <th>Imagem</th>
-                  <th>Nome</th>
-                  <th>Categoria</th>
-                  <th>Preço</th>
-                  <th>Status</th>
-                  <th className="text-end">Ações</th>
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4"></div>
+                      Carregando produtos...
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {list.map((item, index) => (
-                  <tr key={index}>
-                    <td>
-                      <img src={`${url}/images/` + item.image} alt={item.name} style={{ width: 40, height: 40, borderRadius: 4, border: '1px solid var(--tblr-border-color)' }} />
+              ) : list.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                    Nenhum produto cadastrado no seu cardápio ainda.
+                  </td>
+                </tr>
+              ) : (
+                list.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={`${url}/images/${item.image}`} 
+                          alt={item.name} 
+                          className="h-12 w-12 rounded-lg object-cover border border-gray-200 shadow-sm"
+                        />
+                        <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                      </div>
                     </td>
-                    <td className="font-weight-medium">{item.name}</td>
-                    <td>{item.category}</td>
-                    <td>₹{item.price}</td>
-                    <td>
-                      <span className={`badge ${item.isOutOfStock ? 'bg-red-lt' : 'bg-green-lt'}`}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {item.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                      R$ {Number(item.price).toFixed(2).replace('.', ',')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                        item.isOutOfStock 
+                          ? 'bg-red-50 text-red-700 border-red-100' 
+                          : 'bg-green-50 text-green-700 border-green-100'
+                      }`}>
                         {item.isOutOfStock ? 'Esgotado' : 'Disponível'}
                       </span>
                     </td>
-                    <td className="text-end">
-                      <div className="d-inline-flex gap-2">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => navigate(`/edit/${item._id}`)}
-                          className="btn btn-outline btn-sm"
+                          className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                          title="Editar Produto"
                         >
-                          Editar
+                          <i className="ti ti-edit text-lg"></i>
                         </button>
                         <button
                           onClick={() => toggleStockStatus(item._id, item.isOutOfStock)}
-                          className={`btn btn-sm ${item.isOutOfStock ? 'btn-success' : 'btn-warning'}`}
+                          className={`p-1.5 rounded-md transition-colors ${
+                            item.isOutOfStock 
+                              ? 'text-green-600 hover:bg-green-50' 
+                              : 'text-amber-500 hover:bg-amber-50'
+                          }`}
+                          title={item.isOutOfStock ? 'Marcar como Disponível' : 'Marcar como Esgotado'}
                         >
-                          {item.isOutOfStock ? 'Repor' : 'Esgotar'}
+                          <i className={`ti ${item.isOutOfStock ? 'ti-check' : 'ti-ban'} text-lg`}></i>
                         </button>
                         <button
-                          onClick={() => openStockManagement(item)}
-                          className="btn btn-secondary btn-sm"
+                          onClick={() => navigate(`/stock-management/${item._id}`)}
+                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                          title="Gerenciar Estoque"
                         >
-                          Gerenciar
+                          <i className="ti ti-box text-lg"></i>
                         </button>
                         <button
-                          onClick={() => removeFood(item._id)}
-                          className="btn btn-danger btn-sm"
+                          onClick={() => {
+                            if(window.confirm('Tem certeza que deseja excluir este produto?')) {
+                              removeFood(item._id)
+                            }
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                          title="Excluir"
                         >
-                          Excluir
+                          <i className="ti ti-trash text-lg"></i>
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-      </div>
+      </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default List
+export default List;

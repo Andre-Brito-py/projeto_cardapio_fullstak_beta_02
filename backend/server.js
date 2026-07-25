@@ -35,6 +35,7 @@ import cashbackRouter from './routes/cashbackRoute.js';
 import analyticsRouter from './routes/analytics.js';
 
 import productSuggestionRouter from './routes/productSuggestionRoute.js';
+import tenantRouter from './routes/tenantRoute.js';
 import asaasRouter from './routes/asaasRoutes.js';
 import apiRouter from './routes/apiRoutes.js';
 import whatsappRouter from './routes/whatsappRoute.js';
@@ -88,6 +89,7 @@ connectDB();
 // Configuração das rotas da API
 // Rotas do sistema multi-tenant
 app.use('/api/system', systemRouter); // Rotas para Super Admin
+app.use('/api/tenant', tenantRouter); // Rotas publicas de tenant (Cadastro SaaS)
 app.use('/api/store', storeRouter); // Rotas para gerenciamento de lojas
 app.use('/api/tables', tableRouter); // Rotas para gerenciamento de mesas
 app.use('/api/coupons', couponRouter); // Rotas para gerenciamento de cupons

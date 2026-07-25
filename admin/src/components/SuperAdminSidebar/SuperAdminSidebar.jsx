@@ -1,66 +1,90 @@
 import React from 'react';
-import './SuperAdminSidebar.css';
 import { NavLink } from 'react-router-dom';
-import { assets } from '../../assets/assets';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const SuperAdminSidebar = ({ isOpen, onClose }) => {
+  const sections = [
+    {
+      title: "Visão Geral",
+      items: [
+        { to: '/super-admin/dashboard', icon: 'ti-layout-dashboard', label: 'Dashboard' },
+        { to: '/super-admin/stores', icon: 'ti-building-store', label: 'Gerenciar Lojas' },
+        { to: '/super-admin/system-settings', icon: 'ti-settings', label: 'Config. Sistema' },
+      ]
+    },
+    {
+      title: "Integrações",
+      items: [
+        { to: '/super-admin/api-management', icon: 'ti-plug', label: 'Gerenciar APIs' },
+        { to: '/super-admin/asaas', icon: 'ti-wallet', label: 'Dashboard Asaas' },
+      ]
+    },
+    {
+      title: "Inteligência",
+      items: [
+        { to: '/super-admin/analytics', icon: 'ti-chart-line', label: 'Analytics Global' },
+      ]
+    },
+    {
+      title: "Usuários & Logs",
+      items: [
+        { to: '/super-admin/users', icon: 'ti-users', label: 'Gerenciar Usuários' },
+        { to: '/super-admin/logs', icon: 'ti-list-details', label: 'Logs do Sistema' },
+      ]
+    }
+  ];
+
   return (
     <>
-      {/* Backdrop para fechar o menu em mobile */}
-      {isOpen && <div className='sidebar-backdrop' onClick={onClose}></div>}
+      {/* Backdrop para mobile */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden"
+          />
+        )}
+      </AnimatePresence>
       
-      <div className={`super-admin-sidebar ${isOpen ? 'open' : ''}`}>
-        <div className='super-admin-sidebar-header'>
-          <span className='card-title'>Administração</span>
-        </div>
-        <div className='super-admin-sidebar-options'>
-          <div className='sidebar-section'>
-            <span className='sidebar-section-title'>Visão Geral</span>
-            <NavLink to='/super-admin/dashboard' className='super-admin-sidebar-option' onClick={onClose}>
-              <i className='ti ti-layout-dashboard'></i>
-              <p>Dashboard</p>
-            </NavLink>
-            <NavLink to='/super-admin/stores' className='super-admin-sidebar-option' onClick={onClose}>
-              <i className='ti ti-building-store'></i>
-              <p>Gerenciar Lojas</p>
-            </NavLink>
-            <NavLink to='/super-admin/system-settings' className='super-admin-sidebar-option' onClick={onClose}>
-              <i className='ti ti-settings'></i>
-              <p>Config. Sistema</p>
-            </NavLink>
+      {/* Sidebar Content (Theme: Escuro para SuperAdmin) */}
+      <div 
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 transform transition-transform duration-300 ease-in-out lg:transform-none overflow-y-auto ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="py-4 px-3 flex flex-col gap-6">
+          <div className="px-3">
+            <span className="text-sm font-bold text-white uppercase tracking-wider">Administração Global</span>
           </div>
 
-          <div className='sidebar-section'>
-            <span className='sidebar-section-title'>Integrações</span>
-            <NavLink to='/super-admin/api-management' className='super-admin-sidebar-option' onClick={onClose}>
-              <i className='ti ti-plug'></i>
-              <p>Gerenciar APIs</p>
-            </NavLink>
-            <NavLink to='/super-admin/asaas' className='super-admin-sidebar-option' onClick={onClose}>
-              <i className='ti ti-wallet'></i>
-              <p>Dashboard Asaas</p>
-            </NavLink>
-          </div>
-
-          <div className='sidebar-section'>
-            <span className='sidebar-section-title'>Inteligência</span>
-            <NavLink to='/super-admin/analytics' className='super-admin-sidebar-option' onClick={onClose}>
-              <i className='ti ti-chart-line'></i>
-              <p>Analytics Global</p>
-            </NavLink>
-          </div>
-
-          <div className='sidebar-section'>
-            <span className='sidebar-section-title'>Usuários & Logs</span>
-            <NavLink to='/super-admin/users' className='super-admin-sidebar-option' onClick={onClose}>
-              <i className='ti ti-users'></i>
-              <p>Gerenciar Usuários</p>
-            </NavLink>
-            <NavLink to='/super-admin/logs' className='super-admin-sidebar-option' onClick={onClose}>
-              <i className='ti ti-list-details'></i>
-              <p>Logs do Sistema</p>
-            </NavLink>
-          </div>
+          {sections.map((section, idx) => (
+            <div key={idx}>
+              <h3 className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                {section.title}
+              </h3>
+              <div className="space-y-1">
+                {section.items.map((item, itemIdx) => (
+                  <NavLink 
+                    key={itemIdx}
+                    to={item.to} 
+                    onClick={onClose}
+                    className={({ isActive }) => `
+                      flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                      ${isActive 
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-900/20' 
+                        : 'text-gray-300 hover:bg-gray-800 hover:text-white'}
+                    `}
+                  >
+                    <i className={`ti ${item.icon} text-lg ${isActive ? 'text-white' : 'text-gray-400'}`}></i>
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>

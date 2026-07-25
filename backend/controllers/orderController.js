@@ -268,9 +268,19 @@ const listOrders = async (req,res) =>{
 // api for updating order status
 const updateStatus = async (req, res) =>{
     try {
-        await orderModel.findByIdAndUpdate(req.body.orderId,{status:req.body.status})
+        const query = req.store ? { _id: req.body.orderId, storeId: req.store._id } : { _id: req.body.orderId };
+        const order = await orderModel.findOne(query);
+        
+        if (!order) {
+            return res.json({success: false, message: "Pedido não encontrado ou sem permissão"});
+        }
+        
+        order.status = req.body.status;
+        await order.save();
+        
         res.json({success:true, message:"Status Updated"})
     } catch (error) {
+        console.error('Erro ao atualizar status do pedido:', error);
         res.json({success:false, message:"Error"})  
     }
 }

@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar/Sidebar'
 import SuperAdminSidebar from './components/SuperAdminSidebar/SuperAdminSidebar'
 import Login from './components/Login/Login'
 import SuperAdminLogin from './components/SuperAdminLogin/SuperAdminLogin'
+import RegisterTenant from './pages/RegisterTenant/RegisterTenant'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Add from './pages/Add/Add';
 import List from './pages/List/List';
@@ -49,6 +50,7 @@ const App = () => {
   const [token, setToken] = useState('');
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [showSuperAdminLogin, setShowSuperAdminLogin] = useState(false);
+  const [showRegisterTenant, setShowRegisterTenant] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -116,19 +118,25 @@ const App = () => {
       <ThemeProvider>
         <div>
           <ToastContainer/>
-          {showSuperAdminLogin ? (
+          {showRegisterTenant ? (
+            <div>
+              <RegisterTenant url={url} />
+              <div style={{textAlign: 'center', marginTop: '20px'}}>
+                <button 
+                  onClick={() => setShowRegisterTenant(false)}
+                  style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  Já tem conta? Fazer Login
+                </button>
+              </div>
+            </div>
+          ) : showSuperAdminLogin ? (
             <div>
               <SuperAdminLogin url={url} setToken={setToken} setSuperAdmin={setIsSuperAdmin} />
               <div style={{textAlign: 'center', marginTop: '20px'}}>
                 <button 
                   onClick={() => setShowSuperAdminLogin(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#667eea',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  }}
+                  style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
                 >
                   Voltar para Login Normal
                 </button>
@@ -137,16 +145,16 @@ const App = () => {
           ) : (
             <div>
               <Login url={url} setToken={setToken} />
-              <div style={{textAlign: 'center', marginTop: '20px'}}>
+              <div style={{textAlign: 'center', marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                <button 
+                  onClick={() => setShowRegisterTenant(true)}
+                  style={{ background: 'none', border: 'none', color: '#10B981', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  Criar minha loja grátis
+                </button>
                 <button 
                   onClick={() => setShowSuperAdminLogin(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#667eea',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  }}
+                  style={{ background: 'none', border: 'none', color: '#667eea', cursor: 'pointer', textDecoration: 'underline' }}
                 >
                   Acesso Super Admin
                 </button>
@@ -160,14 +168,14 @@ const App = () => {
 
   return (
     <ThemeProvider>
-      <div>
+      <div className="h-screen w-full flex flex-col bg-gray-50 overflow-hidden font-sans">
         <ToastContainer/>
         <Navbar 
           logout={logout} 
           isSuperAdmin={isSuperAdmin}
           onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         />
-        <div className="app-content" data-testid="app-content">
+        <div className="flex h-[calc(100vh-64px)] overflow-hidden" data-testid="app-content">
           {isSuperAdmin ? (
             <SuperAdminSidebar 
               isOpen={sidebarOpen}
@@ -179,7 +187,7 @@ const App = () => {
               onClose={() => setSidebarOpen(false)}
             />
           )}
-          <div className="admin-main container-xl" data-testid="admin-main">
+          <div className="flex-1 overflow-y-auto bg-gray-50 p-6" data-testid="admin-main">
           <ErrorBoundary key={location.pathname}>
           <Routes>
           {/* Rotas do Super Admin */}

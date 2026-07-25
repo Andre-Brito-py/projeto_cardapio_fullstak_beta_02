@@ -4,12 +4,17 @@ import {
     getOrdersByDeliveryType,
     getDailyDeliveryStats
 } from '../controllers/orderStatsController.js';
-import authMiddleware from '../middleware/auth.js';
+import {
+    identifyStore,
+    authMultiTenant,
+    requireStoreAdmin,
+    addStoreContext
+} from '../middleware/multiTenancy.js';
 
 const router = express.Router();
 
 // Apply authentication middleware to all routes
-router.use(authMiddleware);
+router.use(identifyStore, authMultiTenant, requireStoreAdmin, addStoreContext);
 
 // Route to get delivery statistics
 router.get('/delivery-stats', getDeliveryStats);
