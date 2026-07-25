@@ -157,8 +157,17 @@ const StoreContextProvider = (props) => {
             ]);
             
             if (storeResponse.data.success) {
+                const newStoreId = storeResponse.data.store._id;
                 setCurrentStore(storeResponse.data.store);
-                setStoreId(storeResponse.data.store._id);
+                
+                setStoreId((prevStoreId) => {
+                    // Se mudou de loja (ignorando ID padrão de dev), limpa o carrinho para não misturar itens
+                    if (prevStoreId && prevStoreId !== newStoreId && prevStoreId !== "68c2de4c7690c6c039b67494") {
+                        setCartItems({});
+                        localStorage.removeItem('cartItems');
+                    }
+                    return newStoreId;
+                });
             }
             
             if (menuResponse.data.success) {
@@ -222,8 +231,24 @@ const StoreContextProvider = (props) => {
     useEffect(() => {
         if (!token && Object.keys(cartItems).length > 0) {
             localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        } else if (!token && Object.keys(cartItems).length === 0) {
+            localStorage.removeItem('cartItems');
         }
     }, [cartItems, token]);
+
+    // Configurar interceptor do Axios para injetar X-Store-ID globalmente
+    useEffect(() => {
+        const reqInterceptor = axios.interceptors.request.use((config) => {
+            if (storeId) {
+                config.headers['X-Store-ID'] = storeId;
+            }
+            return config;
+        });
+
+        return () => {
+            axios.interceptors.request.eject(reqInterceptor);
+        };
+    }, [storeId]);
 
     // Efeito para carregamento inicial
     useEffect(() => {

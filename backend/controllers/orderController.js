@@ -21,7 +21,58 @@ const placeOrder = async (req, res) =>{
         }
 
         // Prepare order data
-        let finalAmount = req.body.amount;
+        // Validar e recalcular preços dos itens de forma segura via backend
+        let subtotalSeguro = 0;
+        let secureItems = [];
+
+        for (const item of req.body.items) {
+            const food = await foodModel.findById(item._id);
+            if (!food) {
+                return res.json({success: false, message: `Produto não encontrado: ${item.name}`});
+            }
+
+            // Validar se o produto pertence à loja do pedido
+            if (food.storeId && storeId && food.storeId.toString() !== storeId.toString()) {
+                return res.json({success: false, message: `Produto ${food.name} não pertence a esta loja.`});
+            }
+
+            let precoItem = food.price;
+            let secureExtras = [];
+
+            // Validar extras
+            if (item.extras && item.extras.length > 0) {
+                for (const extra of item.extras) {
+                    const oldExtra = food.extras?.find(e => e.name === extra.name);
+                    let newExtra = null;
+                    
+                    if (food.categoryAddons) {
+                        for (const cat in food.categoryAddons) {
+                            const found = food.categoryAddons[cat].find(e => e.name === extra.name);
+                            if (found) {
+                                newExtra = found;
+                                break;
+                            }
+                        }
+                    }
+
+                    const actualExtra = oldExtra || newExtra;
+                    if (actualExtra) {
+                        precoItem += actualExtra.price;
+                        secureExtras.push({ name: actualExtra.name, price: actualExtra.price });
+                    }
+                }
+            }
+
+            subtotalSeguro += precoItem * item.quantity;
+            secureItems.push({
+                ...item,
+                price: food.price,
+                extras: secureExtras
+            });
+        }
+
+        const deliveryFee = req.body.deliveryFee || 0;
+        let finalAmount = subtotalSeguro + deliveryFee;
         let discountAmount = 0;
         let couponData = {};
         
@@ -34,7 +85,7 @@ const placeOrder = async (req, res) =>{
             
             if (coupon && coupon.isValid()) {
                 // Verify coupon can be used
-                if (req.body.amount >= coupon.minOrderValue) {
+                if (subtotalSeguro >= coupon.minOrderValue) {
                     // Check user usage limit
                     const userUsageCount = await orderModel.countDocuments({
                         userId: req.body.userId,
@@ -43,15 +94,15 @@ const placeOrder = async (req, res) =>{
                     });
                     
                     if (userUsageCount < coupon.maxUsesPerUser) {
-                        // Calculate discount
-                        discountAmount = coupon.calculateDiscount(req.body.amount);
-                        finalAmount = Math.max(0, req.body.amount - discountAmount);
+                        // Calculate discount based on subtotal securely
+                        discountAmount = coupon.calculateDiscount(subtotalSeguro);
+                        finalAmount = Math.max(0, finalAmount - discountAmount);
                         
                         couponData = {
                             couponCode: coupon.code,
                             couponId: coupon._id,
                             discountAmount: discountAmount,
-                            originalAmount: req.body.amount
+                            originalAmount: finalAmount + discountAmount // Preço original incluindo taxa de entrega
                         };
                     }
                 }
@@ -61,7 +112,7 @@ const placeOrder = async (req, res) =>{
         const orderData = {
             userId: req.body.userId, // Pode ser null para usuários não autenticados
             storeId: storeId,
-            items: req.body.items,
+            items: secureItems,
             amount: finalAmount,
             address: req.body.address,
             orderType: req.body.orderType || req.body.deliveryType || 'delivery',
@@ -104,8 +155,8 @@ const placeOrder = async (req, res) =>{
         
         // Não limpar carrinho aqui - será limpo apenas após confirmação do pagamento
 
-        const line_items = req.body.items.map((item)=>{
-            // Calcular preço total do item incluindo extras
+        const line_items = secureItems.map((item)=>{
+            // Calcular preço total do item incluindo extras revalidados
             let totalPrice = item.price;
             let itemName = item.name;
             

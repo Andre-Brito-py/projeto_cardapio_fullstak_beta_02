@@ -110,6 +110,8 @@
     width: 7.5vw;
     min-width: 80px;
     max-width: 120px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
     cursor: pointer;
     border-radius: 50%;
     transition: var(--transition-base);

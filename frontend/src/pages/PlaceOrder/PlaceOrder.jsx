@@ -8,7 +8,7 @@ import SEO from '../../components/SEO/SEO';
 import useDeliveryCalculation from '../../hooks/useDeliveryCalculation';
 
 const PlaceOrder = ({ setShowLogin }) => {
-  const {getTotalCartAmount, token, food_list, cartItems, url} = useContext(StoreContext);
+  const {getTotalCartAmount, token, food_list, cartItems, url, storeId} = useContext(StoreContext);
   const { deliveryData, calculateDeliveryFee } = useDeliveryCalculation(url);
   const navigate = useNavigate();
 
@@ -239,6 +239,7 @@ const PlaceOrder = ({ setShowLogin }) => {
       const finalAmount = getTotalCartAmount() + deliveryFee - couponDiscount;
       
       let orderData = {
+        storeId: storeId,
         address: data,
         items: orderItems,
         amount: finalAmount,

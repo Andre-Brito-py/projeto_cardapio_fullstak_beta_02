@@ -23,7 +23,8 @@
     width: 80px;
     height: 80px;
     border-radius: 16px;
-    object-fit: cover;
+    object-fit: contain;
+    background-color: white;
     border: 3px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
