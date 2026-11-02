@@ -1,0 +1,224 @@
+// Modelo de dados do Cardápio SaaS.
+// Multi-tenant: quase tudo pertence a um Restaurant (loja). Valores em dinheiro
+// são sempre inteiros em centavos para evitar erros de arredondamento.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  name         String
+  email        String       @unique
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  memberships  Membership[]
+}
+
+enum Role {
+  OWNER
+  STAFF
+}
+
+model Membership {
+  id           String     @id @default(cuid())
+  userId       String
+  restaurantId String
+  role         Role       @default(OWNER)
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, restaurantId])
+}
+
+model Restaurant {
+  id               String  @id @default(cuid())
+  slug             String  @unique
+  name             String
+  description      String?
+  whatsapp         String? // apenas dígitos, com DDI (ex.: 5511999999999)
+  address          String?
+  logoUrl          String?
+  coverUrl         String?
+  primaryColor     String  @default("#ea580c")
+  isOpen           Boolean @default(true)
+  acceptsDelivery  Boolean @default(true)
+  acceptsPickup    Boolean @default(true)
+  minOrderCents    Int     @default(0)
+  deliveryEstimate String? // ex.: "40-60 min"
+  pickupEstimate   String? // ex.: "20-30 min"
+  acceptsCash      Boolean @default(true)
+  acceptsCard      Boolean @default(true) // maquininha na entrega/retirada
+  acceptsPix       Boolean @default(true) // Pix na entrega/retirada (online fica para a fase 2)
+  pixKey           String?
+  orderCounter     Int     @default(0) // usado para numerar pedidos por loja
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  memberships   Membership[]
+  categories    Category[]
+  products      Product[]
+  deliveryZones DeliveryZone[]
+  customers     Customer[]
+  orders        Order[]
+}
+
+model Category {
+  id           String     @id @default(cuid())
+  restaurantId String
+  name         String
+  position     Int        @default(0)
+  active       Boolean    @default(true)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  products     Product[]
+
+  @@index([restaurantId, position])
+}
+
+model Product {
+  id           String        @id @default(cuid())
+  restaurantId String
+  categoryId   String
+  name         String
+  description  String?
+  priceCents   Int
+  imageUrl     String?
+  active       Boolean       @default(true)
+  position     Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  category     Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  optionGroups OptionGroup[]
+  orderItems   OrderItem[]
+
+  @@index([restaurantId, categoryId, position])
+}
+
+// Grupo de complementos de um produto. Ex.: "Tamanho" (mín 1, máx 1),
+// "Adicionais" (mín 0, máx 3).
+model OptionGroup {
+  id        String   @id @default(cuid())
+  productId String
+  name      String
+  minSelect Int      @default(0)
+  maxSelect Int      @default(1)
+  position  Int      @default(0)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options   Option[]
+
+  @@index([productId, position])
+}
+
+model Option {
+  id         String      @id @default(cuid())
+  groupId    String
+  name       String
+  priceCents Int         @default(0)
+  active     Boolean     @default(true)
+  position   Int         @default(0)
+  group      OptionGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, position])
+}
+
+// Bairro/região atendida com sua taxa de entrega.
+model DeliveryZone {
+  id           String     @id @default(cuid())
+  restaurantId String
+  name         String
+  feeCents     Int
+  active       Boolean    @default(true)
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
+}
+
+// Cliente final de uma loja, identificado pelo telefone. Base para CRM/fidelidade.
+model Customer {
+  id           String     @id @default(cuid())
+  restaurantId String
+  name         String
+  phone        String
+  createdAt    DateTime   @default(now())
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orders       Order[]
+
+  @@unique([restaurantId, phone])
+}
+
+enum OrderType {
+  DELIVERY
+  PICKUP
+}
+
+enum OrderStatus {
+  PENDING // recebido, aguardando a loja aceitar
+  PREPARING // em preparo
+  READY // pronto (aguardando retirada ou entregador)
+  OUT_FOR_DELIVERY // saiu para entrega
+  COMPLETED // entregue/retirado
+  CANCELED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  PIX
+}
+
+model Order {
+  // UUID v4 aleatório: o id aparece no link de acompanhamento do cliente,
+  // então não pode ser adivinhável.
+  id               String        @id @default(uuid())
+  restaurantId     String
+  number           Int
+  customerId       String?
+  customerName     String
+  customerPhone    String
+  type             OrderType
+  status           OrderStatus   @default(PENDING)
+  paymentMethod    PaymentMethod
+  changeForCents   Int? // troco para (pagamento em dinheiro)
+  addressStreet    String?
+  addressNumber    String?
+  addressComplement String?
+  addressReference String?
+  zoneName         String?
+  notes            String?
+  subtotalCents    Int
+  deliveryFeeCents Int           @default(0)
+  totalCents       Int
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  restaurant       Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  customer         Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items            OrderItem[]
+
+  @@unique([restaurantId, number])
+  @@index([restaurantId, status, createdAt])
+}
+
+// Itens guardam um "retrato" do nome/preço no momento da compra, para que
+// mudanças futuras no cardápio não alterem pedidos antigos.
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  productId      String?
+  name           String
+  quantity       Int
+  unitPriceCents Int // preço base + complementos, por unidade
+  totalCents     Int
+  notes          String?
+  options        Json // [{ group, name, priceCents }]
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+}
